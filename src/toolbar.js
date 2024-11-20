@@ -204,7 +204,9 @@ function setupButtonClickBehavior(buttonSelector) {
     
     buttons.forEach(button => {
         button.addEventListener('click', () => {
-            button.classList.toggle('clicked'); // Toggle the "clicked" class
+            
+            buttons.forEach(btn => btn.classList.remove('clicked'));
+            button.classList.add('clicked');
         });
     });
 }
