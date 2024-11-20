@@ -18,3 +18,4 @@ module.exports = {
     },
     mode: 'production', // Minify the output
 };
+
