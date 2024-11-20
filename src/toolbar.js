@@ -69,6 +69,8 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'read-aloud-btn', text: 'Read Aloud' },
         { id: 'remove-images-btn', text: 'Remove Images' },
         { id: 'remove-audio-btn', text: 'Remove Audio' },
+        { id: 'increase-text-btn', text: 'Increase Text' },
+        { id: 'decrease-text-btn', text: 'Decrease Text' },
     ];
 
     buttons.forEach(({ id, text }) => {
