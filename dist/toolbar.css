@@ -43,6 +43,7 @@
     visibility: hidden;
     opacity: 0;
     transition: all 0.3s ease;
+    z-index: 999;
 }
 
 /* Visible State for Toolbox */
@@ -69,7 +70,7 @@
 /* Toolbox Body */
 .toolbox-body {
     display: grid;
-    grid-template-columns: 1fr; 
+    grid-template-columns: 2fr; 
     gap: 15px;
     width: 100%;
     justify-items: center;
@@ -96,6 +97,12 @@
 
 .toolbox-button:hover {
     background-color: rgba(255, 255, 255, 0.5); 
+    transform: scale(1.05);
+    color: #000;
+}
+
+.toolbox-button:active {
+    background-color: rgba(52, 88, 185, 0.5); 
     transform: scale(1.05);
     color: #000;
 }
