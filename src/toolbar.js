@@ -198,15 +198,14 @@ MicAccessTool.prototype.readAloud = function () {
 //Button Click Color change
 
 function setupButtonClickBehavior(buttonSelector) {
-    
+    // Select all buttons matching the provided selector
     const buttons = document.querySelectorAll(buttonSelector);
 
-    
+    // Add click event listeners to all buttons
     buttons.forEach(button => {
         button.addEventListener('click', () => {
-            
-            buttons.forEach(btn => btn.classList.remove('clicked'));
-            button.classList.add('clicked');
+            // Toggle the 'clicked' class on the button
+            button.classList.toggle('clicked');
         });
     });
 }

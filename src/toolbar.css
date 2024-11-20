@@ -102,11 +102,11 @@
 }
 
 .toolbox-button.clicked {
-    background-color: rgba(52, 88, 185, 1); 
-    color: white;
-    transform: scale(1); 
+    background-color: rgba(52, 88, 185, 1); /* Solid blue background */
+    color: white; /* White text color */
+    transform: scale(1); /* Reset scale */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
 }
-
 /* Toolbox Image */
 .toolbox-image-container {
     margin-bottom: 20px;
