@@ -76,36 +76,55 @@
 }
 
 /* Buttons in Toolbox */
+/* Style the toolbox buttons */
 .toolbox-button {
-    background-color: rgba(255, 255, 255, 0.3);
-    color: #333;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 50px;
-    padding: 10px 20px;
-    font-size: 1rem;
+    display: flex; /* Use flex for alignment */
+    flex-direction: column; /* Stack icon on top of text */
+    align-items: center; /* Center align icon and text */
+    justify-content: center; /* Center the content */
+    gap: 5px; /* Space between icon and text */
+    background-color: rgba(255, 255, 255, 0.3); 
+    color: #333; 
+    border: 2px solid rgba(255, 255, 255, 0.5); 
+    border-radius: 50px; 
+    padding: 15px;
+    font-size: 0.9rem; /* Adjust text font size */
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
     width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 70px; /* Adjust height to fit stacked content */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Change background and text color on hover */
 .toolbox-button:hover {
-    background-color: rgba(52, 88, 185, 0.8); /* Hover effect */
+    background-color: rgba(52, 88, 185, 1); 
     transform: scale(1.05);
-    color: white; /* Change text color */
+    color: white; /* Text and icon turn white */
 }
 
-/* Active button state */
+/* Active button styling */
 .toolbox-button.active {
-    background-color: rgba(52, 88, 185, 1); /* Distinct active color */
-    color: white; /* Ensure text is visible */
-    transform: scale(1);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    background-color: rgba(52, 88, 185, 1); 
+    color: white; 
+    transform: scale(1); 
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); 
+}
+
+/* Style the icons */
+.toolbox-button i {
+    font-size: 1.5rem; /* Larger size for icons */
+    color: inherit; /* Inherit color from button */
+}
+
+/* Optional: Reduce gap for small buttons */
+.toolbox-button span {
+    display: flex;
+    flex-direction: column; /* Ensure stacked layout */
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
 }
 
 /* Toolbox Image */

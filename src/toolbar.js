@@ -14,6 +14,17 @@ function MicAccessTool(init) {
     this.initReadAloud();
 }
 
+// Load FontAwesome
+function loadFontAwesome() {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css';
+    link.type = 'text/css';
+
+    // Append the <link> to the <head>
+    document.head.appendChild(link);
+}
+
 // Generic Element Creator
 function createElement(tag, attributes = {}, innerText = '') {
     const element = document.createElement(tag);
@@ -30,9 +41,25 @@ function createElement(tag, attributes = {}, innerText = '') {
 }
 
 // Specific Element Creators
-function createButton(id, text) {
-    return createElement('button', { class: 'toolbox-button', id: id }, text);
+function createButton(id, text, iconHtml = '') {
+    // Create the button element
+    const button = createElement('button', { class: 'toolbox-button', id: id },);
+
+    // Add icon (if iconHtml is provided)
+    if (iconHtml) {
+        const iconWrapper = document.createElement('span'); // Wrapper for the icon
+        iconWrapper.innerHTML = iconHtml; // Parse the HTML string into a DOM element
+        button.appendChild(iconWrapper); // Append the icon to the button
+    }
+
+    // Add the button text
+    const textNode = document.createTextNode(text);
+    button.appendChild(textNode);
+
+    return button;
 }
+
+
 
 function createDiv(className, id = '') {
     const attributes = { class: className };
@@ -58,27 +85,28 @@ MicAccessTool.prototype.createToolbox = function () {
         'toolbox-image'
     );
     imageContainer.appendChild(image);
+    toolbox.appendChild(imageContainer);
 
     const header = createDiv('toolbox-header');
     const title = createHeading(2, 'Accessibility Toolbox', 'toolbox-title');
     header.appendChild(title);
 
-    const body = createDiv('toolbox-body');
     const buttons = [
-        { id: 'blue-filter-btn', text: 'Blue Filter' },
-        { id: 'read-aloud-btn', text: 'Read Aloud' },
-        { id: 'remove-images-btn', text: 'Remove Images' },
-        { id: 'remove-audio-btn', text: 'Remove Audio' },
-        { id: 'increase-text-btn', text: 'Increase Text' },
-        { id: 'decrease-text-btn', text: 'Decrease Text' },
+        { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: '<i class="fas fa-adjust"></i>' },
+        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: '<i class="fas fa-volume-up"></i>' },
+        { id: 'remove-images-btn', text: 'Remove Images', iconClass: '<i class="fa-regular fa-image"></i>' },
+        { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
+        { id: 'increase-text-btn', text: 'Increase Text', iconClass: '<i class="fas fa-text-height"></i>' },
+        { id: 'decrease-text-btn', text: 'Decrease Text', iconClass: '<i class="fas fa-text-width"></i>' },
     ];
+    
+    
+    const body = createDiv('toolbox-body');
 
-    buttons.forEach(({ id, text }) => {
-        const button = createButton(id, text);
+    buttons.forEach(({ id, text, iconClass }) => {
+        const button = createButton(id, text, iconClass);
         body.appendChild(button);
     });
-
-    toolbox.appendChild(imageContainer);
     toolbox.appendChild(header);
     toolbox.appendChild(body);
 
@@ -217,4 +245,5 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize on Page Load
 document.addEventListener('DOMContentLoaded', () => {
     new MicAccessTool();
+    loadFontAwesome()
 });
