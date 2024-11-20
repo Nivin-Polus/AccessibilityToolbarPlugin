@@ -101,10 +101,10 @@
     color: #000;
 }
 
-.toolbox-button:active {
-    background-color: rgba(52, 88, 185, 0.5); 
-    transform: scale(1.05);
-    color: #000;
+.toolbox-button.clicked {
+    background-color: rgba(52, 88, 185, 1); 
+    color: white;
+    transform: scale(1); 
 }
 
 /* Toolbox Image */

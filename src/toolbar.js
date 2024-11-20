@@ -195,6 +195,20 @@ MicAccessTool.prototype.readAloud = function () {
     });
 };
 
+//Button Click Color change
+
+function setupButtonClickBehavior(buttonSelector) {
+    
+    const buttons = document.querySelectorAll(buttonSelector);
+
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            button.classList.toggle('clicked'); // Toggle the "clicked" class
+        });
+    });
+}
+
 // Initialize on Page Load
 document.addEventListener('DOMContentLoaded', () => {
     new MicAccessTool();
