@@ -96,7 +96,7 @@
 }
 
 .toolbox-button:hover {
-    background-color: rgba(255, 255, 255, 0.5); 
+    background-color: rgba(52, 88, 185, 1); 
     transform: scale(1.05);
     color: #000;
 }

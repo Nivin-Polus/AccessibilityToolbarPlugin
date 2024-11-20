@@ -197,21 +197,20 @@ MicAccessTool.prototype.readAloud = function () {
 
 //Button Click Color change
 
-// Button Click Color Change
 document.addEventListener('DOMContentLoaded', () => {
-    // Select all buttons with the 'toolbox-button' class
+   
     const buttons = document.querySelectorAll('.toolbox-button');
 
     buttons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove 'active' class from all buttons
-            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            buttons.forEach(btn => (btn.style.backgroundColor = "rgba(255, 255, 255, 0.3)"));
 
-            // Add 'active' class to the clicked button
-            button.classList.add('active');
+            button.style.backgroundColor = "rgba(52, 88, 185, 1)";
         });
     });
 });
+
 
 // Initialize on Page Load
 document.addEventListener('DOMContentLoaded', () => {
