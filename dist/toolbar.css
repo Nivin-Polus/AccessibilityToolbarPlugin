@@ -71,7 +71,7 @@
 .toolbox-body {
     display: grid;
     grid-template-columns: 2fr; 
-    gap: 15px;
+    gap: 10px;
     width: 100%;
     justify-items: center;
 }
