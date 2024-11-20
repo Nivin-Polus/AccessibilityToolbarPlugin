@@ -101,11 +101,11 @@
     color: #000;
 }
 
-.toolbox-button.clicked {
-    background-color: rgba(52, 88, 185, 1); /* Solid blue background */
-    color: white; /* White text color */
-    transform: scale(1); /* Reset scale */
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+.toolbox-button.active {
+    background-color: rgba(52, 88, 185, 1); /* Distinct active color */
+    color: rgb(27, 26, 26); /* Text color */
+    transform: scale(1); 
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 /* Toolbox Image */
 .toolbox-image-container {
