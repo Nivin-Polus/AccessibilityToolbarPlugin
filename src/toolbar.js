@@ -85,7 +85,6 @@ MicAccessTool.prototype.createToolbox = function () {
         'toolbox-image'
     );
     imageContainer.appendChild(image);
-    toolbox.appendChild(imageContainer);
 
     const header = createDiv('toolbox-header');
     const title = createHeading(2, 'Accessibility Toolbox', 'toolbox-title');
