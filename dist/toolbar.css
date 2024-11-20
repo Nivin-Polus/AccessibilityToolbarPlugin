@@ -103,8 +103,9 @@
 
 .toolbox-button.clicked {
     background-color: rgba(52, 88, 185, 1); 
-    color: white;
+    color: white; 
     transform: scale(1); 
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
 
