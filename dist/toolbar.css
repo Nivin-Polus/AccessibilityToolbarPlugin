@@ -1,0 +1,166 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+
+/* Button to Open Toolbox */
+.open-toolbox-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.open-toolbox-button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+/* Toolbox Window */
+.toolbox {
+    background: rgba(255, 255, 255, 0.2); 
+    border-radius: 25px; 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); 
+    backdrop-filter: blur(10px); 
+    border: 1px solid rgba(255, 255, 255, 0.3); 
+    width: 250px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    right: 20px;
+    top: 20px;
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+/* Visible State for Toolbox */
+.toolbox.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Toolbox Header */
+.toolbox-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3); 
+    padding-bottom: 20px;
+    margin-bottom: 15px;
+    text-align: center;
+    width: 100%;
+}
+
+.toolbox-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: black; 
+}
+
+/* Toolbox Body */
+.toolbox-body {
+    display: grid;
+    grid-template-columns: 1fr; 
+    gap: 15px;
+    width: 100%;
+    justify-items: center;
+}
+
+/* Buttons in Toolbox */
+.toolbox-button {
+    background-color: rgba(255, 255, 255, 0.3); 
+    color: #333; 
+    border: 2px solid rgba(255, 255, 255, 0.5); 
+    border-radius: 50px; 
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); 
+}
+
+.toolbox-button:hover {
+    background-color: rgba(255, 255, 255, 0.5); 
+    transform: scale(1.05);
+    color: #000;
+}
+
+/* Toolbox Image */
+.toolbox-image-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.toolbox-image {
+    width: 70px;
+    height: auto; 
+    border-radius: 50%; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+/* Side Button Styling */
+.side-button {
+    background-color: transparent;
+    border: none;
+    position: fixed;
+    right : 20px; 
+    bottom: 0%; 
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.side-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.side-button:hover {
+    transform: translateY(-50%) scale(1.1); 
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Blue Filter */
+
+.blue-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(255, 192, 120, 0.2); 
+	z-index: 1000;
+	pointer-events: none; 
+	transition: opacity 0.3s ease; 
+  }
+  
+  .blue-overlay.active {
+	display: block;
+	opacity: 1;
+  }
+  
