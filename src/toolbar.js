@@ -119,7 +119,7 @@ MicAccessTool.prototype.createSideButton = function () {
     const buttonImage = createImage(
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmaznO2w-h9n4bz-pEGtsiqy0J1JGh-wlMCw&s',
         'Open Toolbox',
-        ''
+        'side-button-image'
     );
     sideButton.appendChild(buttonImage);
 
@@ -134,8 +134,21 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
     const toolbox = document.getElementById('toolbox');
     const sideButton = document.getElementById('openToolboxButton');
 
-    sideButton.addEventListener('click', () => {
+    // Open/close toolbox on side button click
+    sideButton.addEventListener('click', (event) => {
+        event.stopPropagation(); 
         toolbox.classList.toggle('visible');
+    });
+
+    // Close toolbox if clicking outside
+    document.addEventListener('click', (event) => {
+       
+        if (
+            !toolbox.contains(event.target) && 
+            !sideButton.contains(event.target)
+        ) {
+            toolbox.classList.remove('visible');
+        }
     });
 };
 
@@ -170,7 +183,7 @@ MicAccessTool.prototype.toggleImages = function () {
         });
         this.removedImages = [];
     } else {
-        const images = document.querySelectorAll('img');
+        const images = document.querySelectorAll('img:not(.toolbox-image):not(.side-button-image)');
         images.forEach(img => {
             this.removedImages.push({
                 img: img,
