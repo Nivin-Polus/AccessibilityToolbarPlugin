@@ -257,38 +257,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Font Size
 
+// Initialize font size adjustment limits
 MicAccessTool.prototype.initFontSizeAdjustment = function () {
     const increaseTextButton = document.getElementById('increase-text-btn');
     const decreaseTextButton = document.getElementById('decrease-text-btn');
 
     // Add event listeners to buttons
     if (increaseTextButton) {
-        increaseTextButton.addEventListener('click', this.increaseFontSize.bind(this));
+        increaseTextButton.addEventListener('click', this.adjustFontSize.bind(this, 'increase'));
     }
     if (decreaseTextButton) {
-        decreaseTextButton.addEventListener('click', this.decreaseFontSize.bind(this));
+        decreaseTextButton.addEventListener('click', this.adjustFontSize.bind(this, 'decrease'));
     }
 };
 
-// Method to increase font size
-MicAccessTool.prototype.increaseFontSize = function () {
+// Adjust font size with limits
+MicAccessTool.prototype.adjustFontSize = function (action) {
+    const minFontSize = 12; // Minimum font size in pixels
+    const maxFontSize = 36; // Maximum font size in pixels
+
+    // Select all elements on the page, excluding the toolbox
     const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+
     allElements.forEach(element => {
-        const currentFontSize = window.getComputedStyle(element).fontSize;
-        const newFontSize = parseFloat(currentFontSize) * 1.1; // Increase font size by 10%
+        const computedStyle = window.getComputedStyle(element);
+        const currentFontSize = parseFloat(computedStyle.fontSize);
+
+        let newFontSize;
+        if (action === 'increase') {
+            newFontSize = Math.min(currentFontSize + 2, maxFontSize); // Increase by 2px, up to the max
+        } else if (action === 'decrease') {
+            newFontSize = Math.max(currentFontSize - 2, minFontSize); // Decrease by 2px, down to the min
+        }
+
+        // Apply the new font size
         element.style.fontSize = `${newFontSize}px`;
     });
 };
 
-// Method to decrease font size
-MicAccessTool.prototype.decreaseFontSize = function () {
-    const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
-    allElements.forEach(element => {
-        const currentFontSize = window.getComputedStyle(element).fontSize;
-        const newFontSize = parseFloat(currentFontSize) * 0.9; // Decrease font size by 10%
-        element.style.fontSize = `${newFontSize}px`;
-    });
-};
 
 
 // Initialize on Page Load
