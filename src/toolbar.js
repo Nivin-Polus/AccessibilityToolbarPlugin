@@ -12,6 +12,7 @@ function MicAccessTool(init) {
     this.initRemoveImages();
     this.initAudioRemoval();
     this.initReadAloud();
+     this.initFontSizeAdjustment();
 }
 
 // Load FontAwesome
@@ -253,6 +254,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// Font Size
+
+MicAccessTool.prototype.initFontSizeAdjustment = function () {
+    const increaseTextButton = document.getElementById('increase-text-btn');
+    const decreaseTextButton = document.getElementById('decrease-text-btn');
+
+    // Add event listeners to buttons
+    if (increaseTextButton) {
+        increaseTextButton.addEventListener('click', this.increaseFontSize.bind(this));
+    }
+    if (decreaseTextButton) {
+        decreaseTextButton.addEventListener('click', this.decreaseFontSize.bind(this));
+    }
+};
+
+// Method to increase font size
+MicAccessTool.prototype.increaseFontSize = function () {
+    const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+    allElements.forEach(element => {
+        const currentFontSize = window.getComputedStyle(element).fontSize;
+        const newFontSize = parseFloat(currentFontSize) * 1.1; // Increase font size by 10%
+        element.style.fontSize = `${newFontSize}px`;
+    });
+};
+
+// Method to decrease font size
+MicAccessTool.prototype.decreaseFontSize = function () {
+    const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+    allElements.forEach(element => {
+        const currentFontSize = window.getComputedStyle(element).fontSize;
+        const newFontSize = parseFloat(currentFontSize) * 0.9; // Decrease font size by 10%
+        element.style.fontSize = `${newFontSize}px`;
+    });
+};
 
 
 // Initialize on Page Load

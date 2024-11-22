@@ -31,7 +31,7 @@
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 300px; /* Adjusted for more content */
+    width: 300px; 
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -72,7 +72,7 @@
 /* Toolbox Body */
 .toolbox-body {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    grid-template-columns: 1fr 1fr; 
     gap: 15px;
     width: 100%;
     justify-items: center;
@@ -81,22 +81,22 @@
 /* Buttons in Toolbox */
 /* Style the toolbox buttons */
 .toolbox-button {
-    display: flex; /* Use flex for alignment */
-    flex-direction: column; /* Stack icon on top of text */
-    align-items: center; /* Center align icon and text */
-    justify-content: center; /* Center the content */
-    gap: 5px; /* Space between icon and text */
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    gap: 5px; 
     background-color: rgba(255, 255, 255, 0.3); 
     color: #333; 
     border: 2px solid rgba(255, 255, 255, 0.5); 
     border-radius: 50px; 
     padding: 15px;
-    font-size: 0.9rem; /* Adjust text font size */
+    font-size: 0.9rem; 
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
     width: 100%;
-    height: 70px; /* Adjust height to fit stacked content */
+    height: 70px; 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -104,7 +104,7 @@
 .toolbox-button:hover {
     background-color: rgba(52, 88, 185, 1); 
     transform: scale(1.05);
-    color: white; /* Text and icon turn white */
+    color: white;
 }
 
 /* Active button styling */
@@ -117,14 +117,14 @@
 
 /* Style the icons */
 .toolbox-button i {
-    font-size: 1.5rem; /* Larger size for icons */
-    color: inherit; /* Inherit color from button */
+    font-size: 1.5rem; 
+    color: inherit; /
 }
 
 /* Optional: Reduce gap for small buttons */
 .toolbox-button span {
     display: flex;
-    flex-direction: column; /* Ensure stacked layout */
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
     gap: 4px;
