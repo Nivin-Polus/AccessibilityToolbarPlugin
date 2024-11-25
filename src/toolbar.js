@@ -15,6 +15,8 @@ function MicAccessTool(init) {
     this.initFontSizeAdjustment();
     this.initHighlightButtons();
     this.initStopAnimationsButton();
+    this.initZoomToggleFeature();
+
 }
 
 // Load FontAwesome
@@ -104,6 +106,7 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
         { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
+        { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
 
     ];
     
@@ -666,6 +669,73 @@ MicAccessTool.prototype.initialApp = function () {
     this.restoreAnimationState(); // Restore animation state
     console.log('Accessibility toolbox initialized.');
 };
+
+// Zoom Toggle Functionality
+MicAccessTool.prototype.initZoomToggleFeature = function () {
+    this.zoomStates = [1, 1.25, 1.5]; // Define zoom levels (include 1 to reset)
+    this.zoomIndex = 0; // Start with no zoom
+
+    // Add event listener for Zoom Toggle button
+    const zoomToggleButton = document.getElementById('zoom-toggle-btn');
+    if (zoomToggleButton) {
+        zoomToggleButton.addEventListener('click', this.toggleZoom.bind(this));
+    }
+};
+
+// Toggle Zoom Function
+MicAccessTool.prototype.toggleZoom = function () {
+    this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; // Cycle through zoom states
+
+    // Apply the zoom state
+    const zoomLevel = this.zoomStates[this.zoomIndex];
+    this.applyZoom(zoomLevel);
+};
+
+// Apply Zoom Function
+MicAccessTool.prototype.applyZoom = function (zoomLevel) {
+    // Select all elements except the toolbox and side button
+    const elementsToZoom = document.querySelectorAll('body > *:not(#toolbox):not(#openToolboxButton)');
+
+    elementsToZoom.forEach(element => {
+        element.style.transform = `scale(${zoomLevel})`;
+        element.style.transformOrigin = '0 0'; // Scale from the top-left corner
+        element.style.width = `${100 / zoomLevel}%`; // Adjust width to prevent horizontal scroll
+    });
+
+    console.log(`Zoom level applied: ${zoomLevel}`);
+};
+
+// Restore Zoom State on Load (Optional)
+MicAccessTool.prototype.restoreZoomState = function () {
+    const savedZoomLevel = parseFloat(localStorage.getItem('zoomLevel')) || 1; // Default to 1 (no zoom)
+    this.applyZoom(savedZoomLevel);
+
+    // Set the current zoomIndex based on the saved zoom level
+    this.zoomIndex = this.zoomStates.indexOf(savedZoomLevel);
+    if (this.zoomIndex === -1) this.zoomIndex = 0; // Default to the first zoom level if not found
+};
+
+// Save Zoom State on Change (Optional)
+MicAccessTool.prototype.saveZoomState = function (zoomLevel) {
+    localStorage.setItem('zoomLevel', zoomLevel);
+    console.log(`Zoom level saved: ${zoomLevel}`);
+};
+
+// Update Apply Zoom to Save State (Optional)
+MicAccessTool.prototype.applyZoom = function (zoomLevel) {
+    // Select all elements except the toolbox and side button
+    const elementsToZoom = document.querySelectorAll('body > *:not(#toolbox):not(#openToolboxButton):not(img)');
+
+    elementsToZoom.forEach(element => {
+        element.style.transform = `scale(${zoomLevel})`;
+        element.style.transformOrigin = '0 0'; // Scale from the top-left corner
+        element.style.width = `${100 / zoomLevel}%`; 
+    });
+
+    this.saveZoomState(zoomLevel); 
+    console.log(`Zoom level applied: ${zoomLevel}`);
+};
+
 
 
 // Initialize on Page Load
