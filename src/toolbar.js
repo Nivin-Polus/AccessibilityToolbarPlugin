@@ -165,7 +165,7 @@ MicAccessTool.prototype.initBlueFilter = function () {
         });
     }
 };
-
+// Remove images
 MicAccessTool.prototype.initRemoveImages = function () {
     const removeImageButton = document.getElementById('remove-images-btn');
     if (removeImageButton) {
@@ -198,6 +198,8 @@ MicAccessTool.prototype.toggleImages = function () {
     this.imagesHidden = !this.imagesHidden;
 };
 
+// Audio Removal
+
 MicAccessTool.prototype.initAudioRemoval = function () {
     const audioRemovalButton = document.getElementById('remove-audio-btn');
     if (audioRemovalButton) {
@@ -213,31 +215,288 @@ MicAccessTool.prototype.audioRemoval = function () {
     });
 };
 
+// Read Aloud
+
+// Initialize Read Aloud Feature
 MicAccessTool.prototype.initReadAloud = function () {
     const readAloudBtn = document.getElementById('read-aloud-btn');
     if (readAloudBtn) {
-        readAloudBtn.addEventListener('click', this.readAloud.bind(this));
+        let isActive = false; // Toggle state for Read Aloud
+        readAloudBtn.addEventListener('click', () => {
+            if (isActive) {
+                this.disableDefaultClickToRead();
+                isActive = false;
+                this.stopReadAloud(); // Stop any active reading
+            } else {
+                const existingToolbar = document.getElementById('read-aloud-toolbar');
+                if (!existingToolbar) {
+                    this.createReadAloudToolbar();
+                }
+                this.enableDefaultClickToRead();
+                isActive = true;
+            }
+        });
     }
 };
 
-MicAccessTool.prototype.readAloud = function () {
-    const msg = new SpeechSynthesisUtterance();
-    const tags = document.querySelectorAll('h1, h2, h3, p, a, button');
+// Create the Read Aloud Toolbar
+MicAccessTool.prototype.createReadAloudToolbar = function () {
+    const toolbar = createDiv('read-aloud-toolbar', 'read-aloud-toolbar');
 
-    tags.forEach(tag => {
-        tag.addEventListener('click', () => {
-            msg.text = tag.innerText || tag.value || '';
-            if (msg.text) {
-                tags.forEach(t => (t.style.backgroundColor = ''));
-                tag.style.backgroundColor = 'yellow';
+    // Toolbar Header
+    const header = createDiv('toolbar-header');
+    const title = createHeading(2, 'Read Aloud Settings', 'toolbar-title');
+    const closeButton = createButton('close-toolbar', '✖');
+    closeButton.addEventListener('click', () => {
+        toolbar.remove();
+        this.disableDefaultClickToRead();
+    });
+    header.appendChild(title);
+    header.appendChild(closeButton);
+    toolbar.appendChild(header);
+
+    // Toolbar Controls
+    const controls = createDiv('toolbar-controls');
+
+    // Cursor Read Aloud Button
+    const cursorButton = createButton('cursor-read-btn', 'Cursor Read Aloud');
+    cursorButton.innerHTML = `<i class="fas fa-mouse-pointer"></i> Cursor Read Aloud`;
+    cursorButton.addEventListener('click', this.enableCursorReadAloud.bind(this));
+
+    // Previous Line Button
+     const previousButton = createButton('previous-line-btn', 'Previous Line');
+     previousButton.innerHTML = `<i class="fas fa-arrow-left"></i> `;
+     previousButton.addEventListener('click', this.readPreviousLine.bind(this));
+
+    // Play Button
+    const playButton = createButton('play-read-btn', '▶');
+    playButton.innerHTML = `<i class="fas fa-play"></i>`;
+    playButton.addEventListener('click', this.playReadAloud.bind(this));
+
+    // Stop Button
+    const stopButton = createButton('stop-read-btn', '⏹');
+    stopButton.innerHTML = `<i class="fas fa-stop"></i>`;
+    stopButton.addEventListener('click', this.stopReadAloud.bind(this));
+ 
+     // Next Line Button
+     const nextButton = createButton('next-line-btn', 'Next Line');
+     nextButton.innerHTML = `<i class="fas fa-arrow-right"></i> `;
+     nextButton.addEventListener('click', this.readNextLine.bind(this));
+// Create Volume and Speed Container
+const slidersContainer = document.createElement('div');
+slidersContainer.className = 'sliders-container';
+
+// Create Volume Slider
+const volumeWrapper = document.createElement('div');
+volumeWrapper.className = 'slider-wrapper';
+
+const volumeLabel = document.createElement('label');
+volumeLabel.setAttribute('for', 'volume-slider');
+volumeLabel.textContent = 'Volume:';
+volumeWrapper.appendChild(volumeLabel);
+
+const volumeSlider = document.createElement('input');
+volumeSlider.type = 'range';
+volumeSlider.id = 'volume-slider';
+volumeSlider.min = '0';
+volumeSlider.max = '1';
+volumeSlider.step = '0.1';
+volumeSlider.value = this.currentVolume || 1;
+
+volumeSlider.addEventListener('input', (e) => {
+    this.currentVolume = parseFloat(e.target.value);
+    console.log(`Volume updated to: ${this.currentVolume}`);
+});
+volumeWrapper.appendChild(volumeSlider);
+
+// Create Speed Slider
+const speedWrapper = document.createElement('div');
+speedWrapper.className = 'slider-wrapper';
+
+const speedLabel = document.createElement('label');
+speedLabel.setAttribute('for', 'speed-slider');
+speedLabel.textContent = 'Speed:';
+speedWrapper.appendChild(speedLabel);
+
+const speedSlider = document.createElement('input');
+speedSlider.type = 'range';
+speedSlider.id = 'speed-slider';
+speedSlider.min = '0.5';
+speedSlider.max = '2';
+speedSlider.step = '0.1';
+speedSlider.value = this.currentSpeed || 1;
+
+speedSlider.addEventListener('input', (e) => {
+    this.currentSpeed = parseFloat(e.target.value);
+    console.log(`Speed updated to: ${this.currentSpeed}`);
+});
+speedWrapper.appendChild(speedSlider);
+
+// Add sliders to sliders container
+slidersContainer.appendChild(volumeWrapper);
+slidersContainer.appendChild(speedWrapper);
+
+speedWrapper.appendChild(speedSlider);
+    // Append Buttons and Controls
+    controls.appendChild(cursorButton);
+    controls.appendChild(previousButton);
+    controls.appendChild(playButton);
+    controls.appendChild(stopButton);
+    controls.appendChild(nextButton);
+    controls.appendChild(slidersContainer);
+    toolbar.appendChild(controls);
+
+    // Add Toolbar to Document Body
+    document.body.appendChild(toolbar);
+};
+
+// Helper Function to Highlight Text
+MicAccessTool.prototype.highlightText = function (element, start, length) {
+    const originalText = element.textContent;
+    const wordText = originalText.slice(start, start + length);
+
+    // Highlight only the word being read
+    element.textContent = '';
+    const highlightSpan = document.createElement('span');
+    highlightSpan.textContent = wordText;
+    highlightSpan.style.backgroundColor = 'yellow';
+    element.appendChild(highlightSpan);
+
+    // Restore original text after a delay
+    setTimeout(() => {
+        element.textContent = originalText;
+    }, 500); // Adjust the delay to match word reading duration
+};
+
+// Enable Default Click-to-Read
+MicAccessTool.prototype.enableDefaultClickToRead = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, p, a, button');
+    elements.forEach(element => {
+        element.addEventListener('click', this.readElementContent.bind(this));
+    });
+};
+
+// Disable Default Click-to-Read
+MicAccessTool.prototype.disableDefaultClickToRead = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, p, a, button');
+    elements.forEach(element => {
+        element.removeEventListener('click', this.readElementContent.bind(this));
+    });
+};
+
+// Read Element Content with Highlighting
+MicAccessTool.prototype.readElementContent = function (event) {
+    const element = event.target;
+    const text = element.innerText || element.value || '';
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.volume = this.currentVolume || 1;
+    msg.rate = this.currentSpeed || 1;
+
+    const words = text.split(' ');
+    let wordIndex = 0;
+
+    msg.onboundary = (boundaryEvent) => {
+        if (boundaryEvent.name === 'word') {
+            const wordStart = boundaryEvent.charIndex;
+            const wordLength = words[wordIndex].length;
+            this.highlightText(element, wordStart, wordLength); // Highlight word
+            wordIndex++;
+        }
+    };
+
+    msg.onend = () => {
+        element.innerHTML = text; // Restore original text after reading
+    };
+
+    speechSynthesis.speak(msg);
+};
+
+// Play Entire Page Read Aloud with Highlighting
+MicAccessTool.prototype.playReadAloud = function () {
+    const bodyText = document.body.innerText;
+    const msg = new SpeechSynthesisUtterance(bodyText);
+    msg.volume = this.currentVolume || 1;
+    msg.rate = this.currentSpeed || 1;
+
+    const words = bodyText.split(' ');
+    let wordIndex = 0;
+
+    msg.onboundary = (boundaryEvent) => {
+        if (boundaryEvent.name === 'word') {
+            const wordStart = boundaryEvent.charIndex;
+            const wordLength = words[wordIndex].length;
+            this.highlightText(document.body, wordStart, wordLength); // Highlight word
+            wordIndex++;
+        }
+    };
+
+    msg.onend = () => {
+        document.body.textContent = bodyText; // Restore original text after reading
+    };
+
+    speechSynthesis.speak(msg);
+};
+
+// Enable Cursor Read Aloud
+MicAccessTool.prototype.enableCursorReadAloud = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, p, a, button');
+    elements.forEach(element => {
+        let timeoutId;
+        element.addEventListener('mouseenter', () => {
+            timeoutId = setTimeout(() => {
+                const msg = new SpeechSynthesisUtterance(element.innerText || element.value || '');
+                msg.volume = this.currentVolume || 1;
+                msg.rate = this.currentSpeed || 1;
+                this.highlightText(element, 0, element.innerText.length); // Highlight element text
                 speechSynthesis.speak(msg);
-                msg.onend = () => {
-                    tag.style.backgroundColor = '';
-                };
-            }
+            }, 1000);
+        });
+        element.addEventListener('mouseleave', () => {
+            clearTimeout(timeoutId);
+            speechSynthesis.cancel();
         });
     });
 };
+
+MicAccessTool.prototype.readPreviousLine = function () {
+    if (!this.currentParagraphIndex || this.currentParagraphIndex <= 0) {
+        this.currentParagraphIndex = 0; // Start at the first paragraph
+        return;
+    }
+
+    this.currentParagraphIndex--;
+    const paragraphs = document.querySelectorAll('p');
+    if (paragraphs[this.currentParagraphIndex]) {
+        this.speakText(paragraphs[this.currentParagraphIndex].innerText);
+    }
+};
+
+MicAccessTool.prototype.readNextLine = function () {
+    const paragraphs = document.querySelectorAll('p');
+    if (!this.currentParagraphIndex) this.currentParagraphIndex = 0;
+
+    if (this.currentParagraphIndex < paragraphs.length - 1) {
+        this.currentParagraphIndex++;
+        if (paragraphs[this.currentParagraphIndex]) {
+            this.speakText(paragraphs[this.currentParagraphIndex].innerText);
+        }
+    }
+};
+
+MicAccessTool.prototype.speakText = function (text) {
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.volume = this.currentVolume || 1;
+    msg.rate = this.currentSpeed || 1;
+
+    speechSynthesis.cancel(); // Stop any ongoing speech
+    speechSynthesis.speak(msg);
+};
+
+// Stop Read Aloud
+MicAccessTool.prototype.stopReadAloud = function () {
+    speechSynthesis.cancel();
+};
+
 
 //Button Click Color change
 
