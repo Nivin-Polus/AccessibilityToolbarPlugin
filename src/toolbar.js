@@ -17,7 +17,8 @@ function MicAccessTool(init) {
     this.initStopAnimationsButton();
     this.initZoomToggleFeature();
     this.initNightModeFeature();
-    // this.initTextSpacingFeature();
+    this.initTextSpacingFeature();
+    this.initLineHeightFeature();
 
 }
 
@@ -111,7 +112,7 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
         { id: 'night-mode-btn', text: 'Night Mode', iconClass: '<i class="fas fa-moon"></i>' },
         // { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
-
+        // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },
     ];
     
     
@@ -781,6 +782,30 @@ MicAccessTool.prototype.toggleTextSpacing = function () {
         element.style.letterSpacing = spacingLevel;
     });
 
+};
+
+// Line Height Feature
+MicAccessTool.prototype.initLineHeightFeature = function () {
+    const lineHeightButton = document.getElementById('line-height-btn');
+    if (lineHeightButton) {
+        lineHeightButton.addEventListener('click', this.toggleLineHeight.bind(this));
+    }
+};
+
+// Toggle Line Height
+MicAccessTool.prototype.toggleLineHeight = function () {
+    const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+    const lineHeightStates = ['normal', '1.5', '2', '2.5']; // Predefined line heights
+    if (!this.currentLineHeightIndex) this.currentLineHeightIndex = 0;
+
+    this.currentLineHeightIndex = (this.currentLineHeightIndex + 1) % lineHeightStates.length;
+    const lineHeightLevel = lineHeightStates[this.currentLineHeightIndex];
+
+    elementsToAdjust.forEach(element => {
+        element.style.lineHeight = lineHeightLevel;
+    });
+
+    console.log(`Line height set to: ${lineHeightLevel}`);
 };
 
 
