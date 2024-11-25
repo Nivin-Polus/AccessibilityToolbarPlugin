@@ -474,4 +474,41 @@ button:active {
 }
 
 
+/* Styles for Night Mode */
+.night-mode {
+    background-color: #121212 !important;
+    color: #e0e0e0 !important;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.night-mode a {
+    color: #bb86fc !important;
+    text-decoration: underline;
+}
+
+.night-mode img {
+    filter: brightness(0.8);
+}
+
+.night-mode .toolbox {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #444444;
+}
+
+.night-mode .toolbox-button {
+    background-color: #2e2e2e;
+    border: 1px solid #444444;
+    color: #ffffff;
+}
+
+.night-mode .toolbox-title {
+    color: #ffffff !important; /* Ensure title text is white */
+}
+
+.night-mode .toolbox-button:hover {
+    background-color: #3e3e3e;
+}
+
+
 

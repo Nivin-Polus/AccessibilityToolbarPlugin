@@ -16,6 +16,8 @@ function MicAccessTool(init) {
     this.initHighlightButtons();
     this.initStopAnimationsButton();
     this.initZoomToggleFeature();
+    this.initNightModeFeature();
+    // this.initTextSpacingFeature();
 
 }
 
@@ -107,6 +109,8 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
         { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
+        { id: 'night-mode-btn', text: 'Night Mode', iconClass: '<i class="fas fa-moon"></i>' },
+        // { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
 
     ];
     
@@ -728,13 +732,57 @@ MicAccessTool.prototype.applyZoom = function (zoomLevel) {
 
     elementsToZoom.forEach(element => {
         element.style.transform = `scale(${zoomLevel})`;
-        element.style.transformOrigin = '0 0'; // Scale from the top-left corner
+        element.style.transformOrigin = '0 0'; 
         element.style.width = `${100 / zoomLevel}%`; 
     });
 
     this.saveZoomState(zoomLevel); 
     console.log(`Zoom level applied: ${zoomLevel}`);
 };
+
+// Night Mode Feature
+MicAccessTool.prototype.initNightModeFeature = function () {
+    const nightModeButton = document.getElementById('night-mode-btn');
+    if (nightModeButton) {
+        nightModeButton.addEventListener('click', this.toggleNightMode.bind(this));
+    }
+
+    const isNightModeEnabled = localStorage.getItem('nightMode') === 'true';
+    if (isNightModeEnabled) {
+        document.body.classList.add('night-mode');
+        console.log('Night Mode enabled on page load.');
+    }
+};
+
+MicAccessTool.prototype.toggleNightMode = function () {
+    const isNightModeEnabled = document.body.classList.toggle('night-mode');
+    localStorage.setItem('nightMode', isNightModeEnabled);
+    console.log(`Night Mode ${isNightModeEnabled ? 'enabled' : 'disabled'}.`);
+};
+
+// Text Spacing Feature
+MicAccessTool.prototype.initTextSpacingFeature = function () {
+    const textSpacingButton = document.getElementById('text-spacing-btn');
+    if (textSpacingButton) {
+        textSpacingButton.addEventListener('click', this.toggleTextSpacing.bind(this));
+    }
+};
+
+// Toggle Text Spacing
+MicAccessTool.prototype.toggleTextSpacing = function () {
+    const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+    const spacingStates = ['normal', '0.1em', '0.2em', '0.3em']; 
+    if (!this.currentTextSpacingIndex) this.currentTextSpacingIndex = 0;
+
+    this.currentTextSpacingIndex = (this.currentTextSpacingIndex + 1) % spacingStates.length;
+    const spacingLevel = spacingStates[this.currentTextSpacingIndex];
+
+    elementsToAdjust.forEach(element => {
+        element.style.letterSpacing = spacingLevel;
+    });
+
+};
+
 
 
 
