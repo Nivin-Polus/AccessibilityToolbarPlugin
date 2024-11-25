@@ -440,4 +440,38 @@ button:active {
     }
 }
 
+/* Highlight Functions */
+
+/* Highlight Links */
+.highlight-links {
+    background-color: rgba(255, 230, 0, 0.5);
+    border: 2px solid orange;
+    padding: 2px;
+    border-radius: 5px;
+}
+
+/* Highlight Headers */
+.highlight-headers {
+    background-color: rgba(0, 153, 255, 0.2);
+    border: 2px solid blue;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+/* Stop Animation */
+
+/* Disable animations and transitions globally */
+.disable-animations * {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Disable animations on pseudo-elements */
+.disable-animations *::before,
+.disable-animations *::after {
+    animation: none !important;
+    transition: none !important;
+}
+
+
 

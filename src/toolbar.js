@@ -12,7 +12,9 @@ function MicAccessTool(init) {
     this.initRemoveImages();
     this.initAudioRemoval();
     this.initReadAloud();
-     this.initFontSizeAdjustment();
+    this.initFontSizeAdjustment();
+    this.initHighlightButtons();
+    this.initStopAnimationsButton();
 }
 
 // Load FontAwesome
@@ -48,9 +50,9 @@ function createButton(id, text, iconHtml = '') {
 
     // Add icon (if iconHtml is provided)
     if (iconHtml) {
-        const iconWrapper = document.createElement('span'); // Wrapper for the icon
-        iconWrapper.innerHTML = iconHtml; // Parse the HTML string into a DOM element
-        button.appendChild(iconWrapper); // Append the icon to the button
+        const iconWrapper = document.createElement('span'); 
+        iconWrapper.innerHTML = iconHtml; 
+        button.appendChild(iconWrapper); 
     }
 
     // Add the button text
@@ -99,6 +101,10 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
         { id: 'increase-text-btn', text: 'Increase Text', iconClass: '<i class="fas fa-text-height"></i>' },
         { id: 'decrease-text-btn', text: 'Decrease Text', iconClass: '<i class="fas fa-text-width"></i>' },
+        { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
+        { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
+        { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
+
     ];
     
     
@@ -554,6 +560,112 @@ MicAccessTool.prototype.adjustFontSize = function (action) {
     });
 };
 
+// HightLight Functions
+MicAccessTool.prototype.initHighlightButtons = function() {
+    const highlightLinksButton = document.getElementById('highlight-links-btn');
+    if (highlightLinksButton) {
+        highlightLinksButton.addEventListener('click', () => this.highlightContent('links'));
+    }
+
+    const highlightHeadersButton = document.getElementById('highlight-headers-btn');
+    if (highlightHeadersButton) {
+        highlightHeadersButton.addEventListener('click', () => this.highlightContent('headers'));
+    }
+
+    const highlightImagesButton = document.getElementById('highlight-images-btn');
+    if (highlightImagesButton) {
+        highlightImagesButton.addEventListener('click', () => this.highlightContent('images'));
+    }
+};
+
+MicAccessTool.prototype.highlightContent = function(type) {
+    const highlightClass = `highlight-${type}`;
+
+    // Determine the selector based on the type
+    let selector;
+    if (type === 'links') {
+        selector = 'a';
+    } else if (type === 'headers') {
+        selector = 'h1, h2, h3, h4, h5, h6';
+    } else if (type === 'images') {
+        selector = 'img';
+    } else {
+        console.warn('Invalid type for highlightContent');
+        return;
+    }
+
+    // Select all elements of the given type
+    const elements = document.querySelectorAll(selector);
+    if (elements.length === 0) {
+        console.warn(`No ${type} found to highlight.`);
+        return;
+    }
+
+    elements.forEach(element => {
+        if (type === 'images') {
+            // Handle image-specific highlighting (adding titles)
+            const wrapperExists = element.parentNode.classList.contains(highlightClass);
+            if (!wrapperExists) {
+                const wrapper = document.createElement('div');
+                wrapper.className = highlightClass;
+                element.parentNode.insertBefore(wrapper, element);
+                wrapper.appendChild(element);
+
+                const altText = element.alt || 'No title available';
+                const titleSpan = document.createElement('span');
+                titleSpan.textContent = altText;
+                wrapper.appendChild(titleSpan);
+            } else {
+                const wrapper = element.parentNode;
+                wrapper.replaceWith(...wrapper.childNodes);
+            }
+        } else {
+            // Toggle the highlight class for links and headers
+            element.classList.toggle(highlightClass);
+        }
+    });
+
+    console.log(`${elements.length} ${type} elements toggled for highlighting.`);
+};
+
+// Stop Animation
+
+// Stop Animation Functionality
+MicAccessTool.prototype.stopAnimations = function () {
+    const isDisabled = document.body.classList.toggle('disable-animations'); // Toggle the class on the body
+
+    // Persist the state in localStorage
+    localStorage.setItem('animationsDisabled', isDisabled);
+
+    if (isDisabled) {
+        console.log('Animations and transitions disabled.');
+    } else {
+        console.log('Animations and transitions re-enabled.');
+    }
+};
+
+// Restore Animation State on Load
+MicAccessTool.prototype.restoreAnimationState = function () {
+    const isDisabled = localStorage.getItem('animationsDisabled') === 'true';
+    if (isDisabled) {
+        document.body.classList.add('disable-animations');
+        console.log('Restored: Animations are disabled.');
+    }
+};
+
+// Add Stop Animations Button Listener
+MicAccessTool.prototype.initStopAnimationsButton = function () {
+    const stopAnimationsButton = document.getElementById('stop-animations-btn');
+    if (stopAnimationsButton) {
+        stopAnimationsButton.addEventListener('click', this.stopAnimations.bind(this));
+    }
+};
+
+// Initialize the app and restore state
+MicAccessTool.prototype.initialApp = function () {
+    this.restoreAnimationState(); // Restore animation state
+    console.log('Accessibility toolbox initialized.');
+};
 
 
 // Initialize on Page Load
