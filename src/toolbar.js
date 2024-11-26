@@ -19,7 +19,7 @@ function MicAccessTool(init) {
     this.initNightModeFeature();
     this.initTextSpacingFeature();
     this.initLineHeightFeature();
-
+    this.initCursorSizeAdjustment();
 }
 
 // Load FontAwesome
@@ -113,6 +113,7 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'night-mode-btn', text: 'Night Mode', iconClass: '<i class="fas fa-moon"></i>' },
         // { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
         // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },
+        { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
     ];
     
     
@@ -808,6 +809,46 @@ MicAccessTool.prototype.toggleLineHeight = function () {
     console.log(`Line height set to: ${lineHeightLevel}`);
 };
 
+// Cursor Size
+
+// Initialize Cursor Size Adjustment
+MicAccessTool.prototype.initCursorSizeAdjustment = function () {
+    const cursorSizeButton = document.getElementById('cursor-size-btn');
+    if (cursorSizeButton) {
+        cursorSizeButton.addEventListener('click', this.toggleCursorSize.bind(this));
+    }
+};
+
+// Toggle Cursor Size
+MicAccessTool.prototype.toggleCursorSize = function () {
+    const cursorSizes = [
+        {
+            size: 'normal',
+            cursor: 'auto', // Default cursor
+        },
+        {
+            size: 'medium',
+            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="40" width="25" viewBox="0 0 320 512"><path fill="%23ffffff" d="M302.2 329.1H196.1l55.8 136c3.9 9.4-.6 20-9.4 24l-49.2 21.4c-9.2 4-19.4-.6-23.3-9.7l-53.1-129.1-86.7 89.1C18.7 472.7 0 463.6 0 448V18.3C0 1.9 19.9-6.1 30.3 5.4l284.4 292.5c11.5 11.2 3 31.1-12.5 31.1z"/></svg>') 20 20, auto`,
+        },
+        {
+            size: 'large',
+            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="60" width="37.5" viewBox="0 0 320 512"><path fill="%23ffffff" d="M302.2 329.1H196.1l55.8 136c3.9 9.4-.6 20-9.4 24l-49.2 21.4c-9.2 4-19.4-.6-23.3-9.7l-53.1-129.1-86.7 89.1C18.7 472.7 0 463.6 0 448V18.3C0 1.9 19.9-6.1 30.3 5.4l284.4 292.5c11.5 11.2 3 31.1-12.5 31.1z"/></svg>') 30 30, auto`,
+        },
+    ];
+
+    if (!document.documentElement.dataset.cursorSizeIndex) {
+        document.documentElement.dataset.cursorSizeIndex = 0;
+    }
+
+    let currentIndex = parseInt(document.documentElement.dataset.cursorSizeIndex, 10);
+    currentIndex = (currentIndex + 1) % cursorSizes.length;
+    document.documentElement.dataset.cursorSizeIndex = currentIndex;
+
+    const selectedCursor = cursorSizes[currentIndex];
+    document.documentElement.style.cursor = selectedCursor.cursor;
+
+    console.log(`Cursor size set to: ${selectedCursor.size}`);
+};
 
 
 
