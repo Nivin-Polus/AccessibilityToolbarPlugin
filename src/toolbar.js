@@ -20,6 +20,7 @@ function MicAccessTool(init) {
     this.initTextSpacingFeature();
     this.initLineHeightFeature();
     this.initCursorSizeAdjustment();
+    this.initKeyboardNavigation();
 }
 
 // Load FontAwesome
@@ -114,6 +115,7 @@ MicAccessTool.prototype.createToolbox = function () {
         // { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
         // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },
         { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
+        // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
     ];
     
     
@@ -177,6 +179,7 @@ MicAccessTool.prototype.initBlueFilter = function () {
     if (blueFilterButton) {
         blueFilterButton.addEventListener('click', () => {
             blueOverlay.classList.toggle('active');
+            // this.setActiveButton('blue-filter-btn');
         });
     }
 };
@@ -185,6 +188,7 @@ MicAccessTool.prototype.initRemoveImages = function () {
     const removeImageButton = document.getElementById('remove-images-btn');
     if (removeImageButton) {
         removeImageButton.addEventListener('click', this.toggleImages.bind(this));
+        
     }
 };
 
@@ -815,24 +819,44 @@ MicAccessTool.prototype.toggleLineHeight = function () {
 MicAccessTool.prototype.initCursorSizeAdjustment = function () {
     const cursorSizeButton = document.getElementById('cursor-size-btn');
     if (cursorSizeButton) {
-        cursorSizeButton.addEventListener('click', this.toggleCursorSize.bind(this));
+        cursorSizeButton.addEventListener('click', () => {
+            this.toggleCursorSize(cursorSizeButton);
+        });
     }
 };
 
-// Toggle Cursor Size
-MicAccessTool.prototype.toggleCursorSize = function () {
+// Toggle Cursor Size with Button Indicator
+MicAccessTool.prototype.toggleCursorSize = function (button) {
     const cursorSizes = [
         {
             size: 'normal',
             cursor: 'auto', // Default cursor
+            label: 'Normal',
+            icon: '<i class="fas fa-mouse-pointer"></i>',
         },
         {
             size: 'medium',
-            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="40" width="25" viewBox="0 0 320 512"><path fill="%23ffffff" d="M302.2 329.1H196.1l55.8 136c3.9 9.4-.6 20-9.4 24l-49.2 21.4c-9.2 4-19.4-.6-23.3-9.7l-53.1-129.1-86.7 89.1C18.7 472.7 0 463.6 0 448V18.3C0 1.9 19.9-6.1 30.3 5.4l284.4 292.5c11.5 11.2 3 31.1-12.5 31.1z"/></svg>') 20 20, auto`,
+            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="40" width="27.5" viewBox="0 0 320 512"><path fill="%23e0e0e0" d="M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"/></svg>') 40 40, auto`,
+            label: 'Medium',
+            icon: '<i class="fas fa-expand-alt"></i>',
         },
         {
             size: 'large',
-            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="60" width="37.5" viewBox="0 0 320 512"><path fill="%23ffffff" d="M302.2 329.1H196.1l55.8 136c3.9 9.4-.6 20-9.4 24l-49.2 21.4c-9.2 4-19.4-.6-23.3-9.7l-53.1-129.1-86.7 89.1C18.7 472.7 0 463.6 0 448V18.3C0 1.9 19.9-6.1 30.3 5.4l284.4 292.5c11.5 11.2 3 31.1-12.5 31.1z"/></svg>') 30 30, auto`,
+            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="60" width="37.5" viewBox="0 0 320 512"><path fill="%23e0e0e0" d="M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"/></svg>') 70 70, auto`,
+            label: 'Large',
+            icon: '<i class="fas fa-expand"></i>',
+        },
+        {
+            size: 'medium',
+            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="40" width="27.5" viewBox="0 0 320 512"><path fill="%23000000" d="M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"/></svg>') 20 20, auto`,
+            label: 'Medium Black',
+            icon: '<i class="fas fa-circle"></i>',
+        },
+        {
+            size: 'large',
+            cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" height="60" width="37.5" viewBox="0 0 320 512"><path fill="%23000000" d="M0 55.2L0 426c0 12.2 9.9 22 22 22c6.3 0 12.4-2.7 16.6-7.5L121.2 346l58.1 116.3c7.9 15.8 27.1 22.2 42.9 14.3s22.2-27.1 14.3-42.9L179.8 320l118.1 0c12.2 0 22.1-9.9 22.1-22.1c0-6.3-2.7-12.3-7.4-16.5L38.6 37.9C34.3 34.1 28.9 32 23.2 32C10.4 32 0 42.4 0 55.2z"/></svg>') 30 30, auto`,
+            label: 'Large Black',
+            icon: '<i class="fas fa-circle-notch"></i>',
         },
     ];
 
@@ -847,7 +871,178 @@ MicAccessTool.prototype.toggleCursorSize = function () {
     const selectedCursor = cursorSizes[currentIndex];
     document.documentElement.style.cursor = selectedCursor.cursor;
 
+    // Update button text and icon
+    if (button) {
+        button.innerHTML = `${selectedCursor.icon} Cursor Size: ${selectedCursor.label}`;
+    }
+
     console.log(`Cursor size set to: ${selectedCursor.size}`);
+};
+
+// Keyboard Navigation
+
+// Keyboard Navigation Initialization
+MicAccessTool.prototype.initKeyboardNavigation = function () {
+    const keyboardNavButton = document.getElementById('keyboard-navigation-btn');
+    if (keyboardNavButton) {
+        keyboardNavButton.addEventListener('click', () => {
+            this.keyboardNavigationActive = !this.keyboardNavigationActive; // Toggle state
+            this.setActiveButton('keyboard-navigation-btn'); // Highlight button
+
+            if (this.keyboardNavigationActive) {
+                this.enableKeyboardNavigation();
+                this.showKeyboardNavigationPopup();
+            } else {
+                this.disableKeyboardNavigation();
+                this.hideKeyboardNavigationPopup();
+            }
+        });
+    }
+};
+
+// Enable Keyboard Navigation
+MicAccessTool.prototype.enableKeyboardNavigation = function () {
+    console.log('Keyboard Navigation Enabled');
+
+    // Add keydown event listener for navigation and functionality
+    document.addEventListener('keydown', this.handleKeyboardNavigation.bind(this));
+};
+
+// Disable Keyboard Navigation
+MicAccessTool.prototype.disableKeyboardNavigation = function () {
+    console.log('Keyboard Navigation Disabled');
+
+    // Remove keydown event listener
+    document.removeEventListener('keydown', this.handleKeyboardNavigation.bind(this));
+};
+
+// Handle Keyboard Navigation and Functionality
+MicAccessTool.prototype.handleKeyboardNavigation = function (event) {
+    const focusableSelectors = 'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
+    const focusableElements = Array.from(document.querySelectorAll(focusableSelectors)).filter(
+        (el) => !el.disabled && el.offsetParent !== null
+    );
+
+    let currentIndex = focusableElements.indexOf(document.activeElement);
+
+    const keyFunctionMap = {
+        ArrowDown: () => {
+            event.preventDefault();
+            currentIndex = (currentIndex + 1) % focusableElements.length;
+            focusableElements[currentIndex].focus();
+        },
+        ArrowUp: () => {
+            event.preventDefault();
+            currentIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+            focusableElements[currentIndex].focus();
+        },
+        Enter: () => {
+            if (document.activeElement) {
+                document.activeElement.click();
+            }
+        },
+        Escape: () => {
+            this.disableKeyboardNavigation();
+            this.hideKeyboardNavigationPopup();
+            this.setActiveButton(null);
+        },
+        KeyB: () => document.getElementById('blue-filter-btn').click(),
+        KeyI: () => document.getElementById('remove-images-btn').click(),
+        KeyA: () => document.getElementById('remove-audio-btn').click(),
+        KeyR: () => document.getElementById('read-aloud-btn').click(),
+        KeyP: () => document.getElementById('increase-text-btn').click(),
+        KeyM: () => document.getElementById('decrease-text-btn').click(),
+        KeyH: () => document.getElementById('highlight-links-btn').click(),
+        KeyS: () => document.getElementById('stop-animations-btn').click(),
+        KeyZ: () => document.getElementById('zoom-toggle-btn').click(),
+        KeyN: () => document.getElementById('night-mode-btn').click(),
+        KeyT: () => document.getElementById('text-spacing-btn').click(),
+        KeyL: () => document.getElementById('line-height-btn').click(),
+        KeyC: () => document.getElementById('cursor-size-btn').click(),
+    };
+
+    if (keyFunctionMap[event.code]) {
+        keyFunctionMap[event.code](); // Trigger the function mapped to the key
+    }
+};
+
+// Show Popup for Keyboard Shortcuts
+MicAccessTool.prototype.showKeyboardNavigationPopup = function () {
+    const existingPopup = document.getElementById('keyboard-navigation-popup');
+    if (existingPopup) return; // Prevent duplicate popups
+
+    const popup = createDiv('keyboard-popup', 'keyboard-navigation-popup'); 
+    const header = createDiv('popup-header');
+    const title = createHeading(3, 'Keyboard Shortcuts', 'popup-title');
+    const closeButton = createElement('button', { class: 'close-popup-btn' }, '✖');
+    closeButton.addEventListener('click', this.hideKeyboardNavigationPopup.bind(this));
+    header.appendChild(title);
+    header.appendChild(closeButton);
+
+    const keyFunctionMap = [
+        { key: 'ArrowDown', text: 'Navigate to next element' },
+        { key: 'ArrowUp', text: 'Navigate to previous element' },
+        { key: 'Enter', text: 'Activate selected element' },
+        { key: 'B', text: 'Blue Filter' },
+        { key: 'I', text: 'Remove Images' },
+        { key: 'A', text: 'Remove Audio' },
+        { key: 'R', text: 'Read Aloud' },
+        { key: 'P', text: 'Increase Text Size' },
+        { key: 'M', text: 'Decrease Text Size' },
+        { key: 'H', text: 'Highlight Links' },
+        { key: 'S', text: 'Stop Animations' },
+        { key: 'Z', text: 'Zoom' },
+        { key: 'N', text: 'Night Mode' },
+        { key: 'T', text: 'Adjust Text Spacing' },
+        { key: 'L', text: 'Adjust Line Height' },
+        { key: 'C', text: 'Change Cursor Size' },
+    ];
+
+    const body = createDiv('popup-body');
+    const list = createElement('ul', { class: 'shortcut-list' });
+
+    keyFunctionMap.forEach(({ key, text }) => {
+        const listItem = createElement('li', { class: 'shortcut-item' });
+        listItem.innerHTML = `<strong>${key}</strong>: ${text}`;
+        list.appendChild(listItem);
+    });
+
+    body.appendChild(list);
+    popup.appendChild(header);
+    popup.appendChild(body);
+
+    document.body.appendChild(popup);
+};
+
+// Hide Popup
+MicAccessTool.prototype.hideKeyboardNavigationPopup = function () {
+    const popup = document.getElementById('keyboard-navigation-popup');
+    if (popup) {
+        popup.remove();
+    }
+};
+
+
+
+// Button Active
+
+MicAccessTool.prototype.setActiveButton = function (activeButtonId) {
+    const buttons = document.querySelectorAll('.toolbox-button'); // Select all buttons in the toolbox
+
+    buttons.forEach((button) => {
+        if (button.id === activeButtonId) {
+            if (button.style.backgroundColor === 'rgba(52, 88, 185, 1)') {
+                // If already active, deactivate it
+                button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
+            } else {
+                // Activate and highlight
+                button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
+            }
+        } else {
+            // Ensure all other buttons are in default state
+            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+        }
+    });
 };
 
 
