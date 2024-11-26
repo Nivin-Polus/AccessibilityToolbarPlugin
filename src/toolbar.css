@@ -649,5 +649,13 @@ button:active {
     }
 }
 
+/* Accessible Font */
+
+@import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400&display=swap');
+
+.accessible-font {
+    font-family: 'OpenDyslexic', Arial, sans-serif;
+}
+
 
 

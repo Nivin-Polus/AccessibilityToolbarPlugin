@@ -21,6 +21,7 @@ function MicAccessTool(init) {
     this.initLineHeightFeature();
     this.initCursorSizeAdjustment();
     this.initKeyboardNavigation();
+    this.initAccessibleFontToggle();
 }
 
 // Load FontAwesome
@@ -112,10 +113,11 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
         { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
         { id: 'night-mode-btn', text: 'Night Mode', iconClass: '<i class="fas fa-moon"></i>' },
-        // { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
-        // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },
         { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
+        // { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
+        // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
+        // { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
     ];
     
     
@@ -129,6 +131,7 @@ MicAccessTool.prototype.createToolbox = function () {
     toolbox.appendChild(body);
 
     document.body.appendChild(toolbox);
+    this.resetButtonStates();
 };
 
 // Create Side Button
@@ -158,7 +161,6 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
         toolbox.classList.toggle('visible');
     });
 
-    // Close toolbox if clicking outside
     document.addEventListener('click', (event) => {
        
         if (
@@ -179,7 +181,7 @@ MicAccessTool.prototype.initBlueFilter = function () {
     if (blueFilterButton) {
         blueFilterButton.addEventListener('click', () => {
             blueOverlay.classList.toggle('active');
-            // this.setActiveButton('blue-filter-btn');
+            this.setActiveButton('blue-filter-btn');
         });
     }
 };
@@ -188,7 +190,7 @@ MicAccessTool.prototype.initRemoveImages = function () {
     const removeImageButton = document.getElementById('remove-images-btn');
     if (removeImageButton) {
         removeImageButton.addEventListener('click', this.toggleImages.bind(this));
-        
+        // this.setActiveButton('remove-images-btn');
     }
 };
 
@@ -211,6 +213,7 @@ MicAccessTool.prototype.toggleImages = function () {
                 nextSibling: img.nextSibling,
             });
             img.parentNode.removeChild(img);
+            
         });
     }
 
@@ -223,6 +226,7 @@ MicAccessTool.prototype.initAudioRemoval = function () {
     const audioRemovalButton = document.getElementById('remove-audio-btn');
     if (audioRemovalButton) {
         audioRemovalButton.addEventListener('click', this.audioRemoval.bind(this));
+    //     this.setActiveButton('remove-audio-btn');
     }
 };
 
@@ -240,12 +244,12 @@ MicAccessTool.prototype.audioRemoval = function () {
 MicAccessTool.prototype.initReadAloud = function () {
     const readAloudBtn = document.getElementById('read-aloud-btn');
     if (readAloudBtn) {
-        let isActive = false; // Toggle state for Read Aloud
+        let isActive = false; 
         readAloudBtn.addEventListener('click', () => {
             if (isActive) {
                 this.disableDefaultClickToRead();
                 isActive = false;
-                this.stopReadAloud(); // Stop any active reading
+                this.stopReadAloud(); 
             } else {
                 const existingToolbar = document.getElementById('read-aloud-toolbar');
                 if (!existingToolbar) {
@@ -384,7 +388,7 @@ MicAccessTool.prototype.highlightText = function (element, start, length) {
     // Restore original text after a delay
     setTimeout(() => {
         element.textContent = originalText;
-    }, 500); // Adjust the delay to match word reading duration
+    }, 500); 
 };
 
 // Enable Default Click-to-Read
@@ -418,13 +422,13 @@ MicAccessTool.prototype.readElementContent = function (event) {
         if (boundaryEvent.name === 'word') {
             const wordStart = boundaryEvent.charIndex;
             const wordLength = words[wordIndex].length;
-            this.highlightText(element, wordStart, wordLength); // Highlight word
+            this.highlightText(element, wordStart, wordLength); 
             wordIndex++;
         }
     };
 
     msg.onend = () => {
-        element.innerHTML = text; // Restore original text after reading
+        element.innerHTML = text; 
     };
 
     speechSynthesis.speak(msg);
@@ -444,13 +448,13 @@ MicAccessTool.prototype.playReadAloud = function () {
         if (boundaryEvent.name === 'word') {
             const wordStart = boundaryEvent.charIndex;
             const wordLength = words[wordIndex].length;
-            this.highlightText(document.body, wordStart, wordLength); // Highlight word
+            this.highlightText(document.body, wordStart, wordLength); 
             wordIndex++;
         }
     };
 
     msg.onend = () => {
-        document.body.textContent = bodyText; // Restore original text after reading
+        document.body.textContent = bodyText; 
     };
 
     speechSynthesis.speak(msg);
@@ -466,7 +470,7 @@ MicAccessTool.prototype.enableCursorReadAloud = function () {
                 const msg = new SpeechSynthesisUtterance(element.innerText || element.value || '');
                 msg.volume = this.currentVolume || 1;
                 msg.rate = this.currentSpeed || 1;
-                this.highlightText(element, 0, element.innerText.length); // Highlight element text
+                this.highlightText(element, 0, element.innerText.length); 
                 speechSynthesis.speak(msg);
             }, 1000);
         });
@@ -479,7 +483,7 @@ MicAccessTool.prototype.enableCursorReadAloud = function () {
 
 MicAccessTool.prototype.readPreviousLine = function () {
     if (!this.currentParagraphIndex || this.currentParagraphIndex <= 0) {
-        this.currentParagraphIndex = 0; // Start at the first paragraph
+        this.currentParagraphIndex = 0; 
         return;
     }
 
@@ -507,7 +511,7 @@ MicAccessTool.prototype.speakText = function (text) {
     msg.volume = this.currentVolume || 1;
     msg.rate = this.currentSpeed || 1;
 
-    speechSynthesis.cancel(); // Stop any ongoing speech
+    speechSynthesis.cancel();
     speechSynthesis.speak(msg);
 };
 
@@ -551,9 +555,8 @@ MicAccessTool.prototype.initFontSizeAdjustment = function () {
 
 // Adjust font size with limits
 MicAccessTool.prototype.adjustFontSize = function (action) {
-    const minFontSize = 12; // Minimum font size in pixels
-    const maxFontSize = 36; // Maximum font size in pixels
-
+    const minFontSize = 12; 
+    const maxFontSize = 36; 
     // Select all elements on the page, excluding the toolbox
     const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
 
@@ -645,7 +648,7 @@ MicAccessTool.prototype.highlightContent = function(type) {
 
 // Stop Animation Functionality
 MicAccessTool.prototype.stopAnimations = function () {
-    const isDisabled = document.body.classList.toggle('disable-animations'); // Toggle the class on the body
+    const isDisabled = document.body.classList.toggle('disable-animations'); 
 
     // Persist the state in localStorage
     localStorage.setItem('animationsDisabled', isDisabled);
@@ -751,6 +754,7 @@ MicAccessTool.prototype.initNightModeFeature = function () {
     const nightModeButton = document.getElementById('night-mode-btn');
     if (nightModeButton) {
         nightModeButton.addEventListener('click', this.toggleNightMode.bind(this));
+        
     }
 
     const isNightModeEnabled = localStorage.getItem('nightMode') === 'true';
@@ -800,7 +804,7 @@ MicAccessTool.prototype.initLineHeightFeature = function () {
 // Toggle Line Height
 MicAccessTool.prototype.toggleLineHeight = function () {
     const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
-    const lineHeightStates = ['normal', '1.5', '2', '2.5']; // Predefined line heights
+    const lineHeightStates = ['normal', '1.5', '2', '2.5']; 
     if (!this.currentLineHeightIndex) this.currentLineHeightIndex = 0;
 
     this.currentLineHeightIndex = (this.currentLineHeightIndex + 1) % lineHeightStates.length;
@@ -830,7 +834,7 @@ MicAccessTool.prototype.toggleCursorSize = function (button) {
     const cursorSizes = [
         {
             size: 'normal',
-            cursor: 'auto', // Default cursor
+            cursor: 'auto', 
             label: 'Normal',
             icon: '<i class="fas fa-mouse-pointer"></i>',
         },
@@ -1031,19 +1035,47 @@ MicAccessTool.prototype.setActiveButton = function (activeButtonId) {
 
     buttons.forEach((button) => {
         if (button.id === activeButtonId) {
-            if (button.style.backgroundColor === 'rgba(52, 88, 185, 1)') {
-                // If already active, deactivate it
+            // Toggle the background color to activate/deactivate the button
+            if (button.dataset.active === 'true') {
                 button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
+                button.dataset.active = 'false'; // Mark as inactive
             } else {
-                // Activate and highlight
                 button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
+                button.dataset.active = 'true'; // Mark as active
             }
         } else {
             // Ensure all other buttons are in default state
             button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+            button.dataset.active = 'false'; // Reset active state for other buttons
         }
     });
 };
+
+MicAccessTool.prototype.resetButtonStates = function () {
+    const buttons = document.querySelectorAll('.toolbox-button');
+    buttons.forEach((button) => {
+        button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
+        button.dataset.active = 'false'; // Ensure all buttons are inactive
+    });
+}
+
+// Accessible Function
+
+MicAccessTool.prototype.initAccessibleFontToggle = function () {
+    const fontToggleButton = document.getElementById('accessible-font-btn');
+    if (fontToggleButton) {
+        fontToggleButton.addEventListener('click', () => {
+            this.toggleAccessibleFont();
+            this.setActiveButton('accessible-font-btn'); // Highlight button
+        });
+    }
+};
+
+MicAccessTool.prototype.toggleAccessibleFont = function () {
+    const isFontApplied = document.body.classList.toggle('accessible-font');
+    console.log(`Accessible font ${isFontApplied ? 'enabled' : 'disabled'}`);
+};
+
 
 
 
