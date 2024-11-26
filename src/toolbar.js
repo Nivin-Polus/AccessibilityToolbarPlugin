@@ -22,6 +22,7 @@ function MicAccessTool(init) {
     this.initCursorSizeAdjustment();
     this.initKeyboardNavigation();
     this.initAccessibleFontToggle();
+    
 }
 
 // Load FontAwesome
@@ -100,6 +101,7 @@ MicAccessTool.prototype.createToolbox = function () {
     const header = createDiv('toolbox-header');
     const title = createHeading(2, 'Accessibility Toolbox', 'toolbox-title');
     header.appendChild(title);
+    
 
     const buttons = [
         { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: '<i class="fas fa-adjust"></i>' },
@@ -118,6 +120,8 @@ MicAccessTool.prototype.createToolbox = function () {
         // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         // { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
+        
+
     ];
     
     
@@ -1109,24 +1113,20 @@ MicAccessTool.prototype.hideKeyboardNavigationPopup = function () {
 // Button Active
 
 MicAccessTool.prototype.setActiveButton = function (activeButtonId) {
-    const buttons = document.querySelectorAll('.toolbox-button'); // Select all buttons in the toolbox
+    const button = document.getElementById(activeButtonId);
 
-    buttons.forEach((button) => {
-        if (button.id === activeButtonId) {
-            // Toggle the background color to activate/deactivate the button
-            if (button.dataset.active === 'true') {
-                button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
-                button.dataset.active = 'false'; // Mark as inactive
-            } else {
-                button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
-                button.dataset.active = 'true'; // Mark as active
-            }
+    if (button) {
+        // Check the current state and toggle it
+        if (button.dataset.active === 'true') {
+            // Deactivate the button
+            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
+            button.dataset.active = 'false'; // Mark as inactive
         } else {
-            // Ensure all other buttons are in default state
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
-            button.dataset.active = 'false'; // Reset active state for other buttons
+            // Activate the button
+            button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
+            button.dataset.active = 'true'; // Mark as active
         }
-    });
+    }
 };
 
 MicAccessTool.prototype.resetButtonStates = function () {
@@ -1135,7 +1135,8 @@ MicAccessTool.prototype.resetButtonStates = function () {
         button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
         button.dataset.active = 'false'; // Ensure all buttons are inactive
     });
-}
+};
+
 
 // Accessible Function
 
@@ -1153,6 +1154,7 @@ MicAccessTool.prototype.toggleAccessibleFont = function () {
     const isFontApplied = document.body.classList.toggle('accessible-font');
     console.log(`Accessible font ${isFontApplied ? 'enabled' : 'disabled'}`);
 };
+
 
 
 
