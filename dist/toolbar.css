@@ -651,11 +651,12 @@ button:active {
 
 /* Accessible Font */
 
-@import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400&display=swap');
-
 .accessible-font {
-    font-family: 'OpenDyslexic', Arial, sans-serif;
+    font-family: 'Arial', sans-serif; 
+    line-height: 1.6; 
+    letter-spacing: 0.05em; 
 }
+
 
 
 
