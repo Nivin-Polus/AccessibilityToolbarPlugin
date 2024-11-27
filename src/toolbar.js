@@ -22,6 +22,7 @@ function MicAccessTool(init) {
     this.initCursorSizeAdjustment();
     this.initKeyboardNavigation();
     this.initAccessibleFontToggle();
+    this.initResetFeature();
     
 }
 
@@ -120,7 +121,7 @@ MicAccessTool.prototype.createToolbox = function () {
         // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         // { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
-        
+        // { id: 'reset-btn', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
 
     ];
     
@@ -176,7 +177,7 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
     });
 };
 
-// Feature Initializers
+// Blue Filter
 MicAccessTool.prototype.initBlueFilter = function () {
     const blueOverlay = createDiv('blue-overlay');
     document.body.appendChild(blueOverlay);
@@ -254,23 +255,44 @@ MicAccessTool.prototype.audioRemoval = function () {
 MicAccessTool.prototype.initReadAloud = function () {
     const readAloudBtn = document.getElementById('read-aloud-btn');
     if (readAloudBtn) {
-        let isActive = false; 
         readAloudBtn.addEventListener('click', () => {
-            if (isActive) {
-                this.disableDefaultClickToRead();
-                isActive = false;
-                this.stopReadAloud(); 
-            } else {
-                const existingToolbar = document.getElementById('read-aloud-toolbar');
-                if (!existingToolbar) {
-                    this.createReadAloudToolbar();
-                }
-                this.enableDefaultClickToRead();
-                isActive = true;
-            }
+            this.toggleReadAloud('read-aloud-btn');
         });
     }
+
+    // Check if Read Aloud was previously active (e.g., stored state)
+    const isReadAloudActive = localStorage.getItem('readAloudActive') === 'true';
+    if (isReadAloudActive) {
+        this.enableDefaultClickToRead();
+        this.createReadAloudToolbar(); // Restore toolbar if previously active
+        this.setActiveButton('read-aloud-btn', true);
+    }
 };
+
+MicAccessTool.prototype.toggleReadAloud = function (buttonId) {
+    const toolbar = document.getElementById('read-aloud-toolbar');
+    const isActive = toolbar && !toolbar.classList.contains('hidden'); // Determine if currently active
+
+    if (isActive) {
+        this.disableDefaultClickToRead();
+        this.stopReadAloud();
+        toolbar.classList.add('hidden'); // Hide toolbar
+        this.setActiveButton(buttonId, false); // Deactivate button
+        localStorage.setItem('readAloudActive', false);
+    } else {
+        if (!toolbar) {
+            this.createReadAloudToolbar(); // Create the toolbar if not exists
+        } else {
+            toolbar.classList.remove('hidden'); // Show toolbar if exists
+        }
+        this.enableDefaultClickToRead();
+        this.setActiveButton(buttonId, true); // Activate button
+        localStorage.setItem('readAloudActive', true);
+    }
+
+    console.log(`Read Aloud ${isActive ? 'disabled' : 'enabled'}.`);
+};
+
 
 // Create the Read Aloud Toolbar
 MicAccessTool.prototype.createReadAloudToolbar = function () {
@@ -558,39 +580,50 @@ MicAccessTool.prototype.initFontSizeAdjustment = function () {
     if (increaseTextButton) {
         increaseTextButton.addEventListener('click', () => {
             this.adjustFontSize('increase'); // Adjust font size
-            this.setActiveButton('increase-text-btn'); // Set button as active
         });
     }
     if (decreaseTextButton) {
         decreaseTextButton.addEventListener('click', () => {
             this.adjustFontSize('decrease'); // Adjust font size
-            this.setActiveButton('decrease-text-btn'); // Set button as active
         });
     }
 };
 
+
 // Adjust font size with limits
 MicAccessTool.prototype.adjustFontSize = function (action) {
-    const minFontSize = 12;
-    const maxFontSize = 36;
-    // Select all elements on the page, excluding the toolbox
+    const minFontSize = 12; // Minimum font size limit
+    const maxFontSize = 36; // Maximum font size limit
     const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+
+    let canIncrease = false;
+    let canDecrease = false;
 
     allElements.forEach(element => {
         const computedStyle = window.getComputedStyle(element);
         const currentFontSize = parseFloat(computedStyle.fontSize);
 
-        let newFontSize;
-        if (action === 'increase') {
-            newFontSize = Math.min(currentFontSize + 2, maxFontSize); // Increase by 2px, up to the max
-        } else if (action === 'decrease') {
-            newFontSize = Math.max(currentFontSize - 2, minFontSize); // Decrease by 2px, down to the min
+        let newFontSize = currentFontSize;
+
+        if (action === 'increase' && currentFontSize < maxFontSize) {
+            newFontSize = Math.min(currentFontSize + 2, maxFontSize); // Increase by 2px
+            canIncrease = newFontSize < maxFontSize; // Check if further increase is possible
+        } else if (action === 'decrease' && currentFontSize > minFontSize) {
+            newFontSize = Math.max(currentFontSize - 2, minFontSize); // Decrease by 2px
+            canDecrease = newFontSize > minFontSize; // Check if further decrease is possible
         }
 
         // Apply the new font size
         element.style.fontSize = `${newFontSize}px`;
     });
+
+    // Update button states based on limits
+    this.setActiveButton('increase-text-btn', canIncrease);
+    this.setActiveButton('decrease-text-btn', canDecrease);
+
+    console.log(`Font size ${action}d. Active buttons: Increase (${canIncrease}), Decrease (${canDecrease}).`);
 };
+
 
 
 // HightLight Functions
@@ -717,65 +750,73 @@ MicAccessTool.prototype.initialApp = function () {
 
 // Zoom Toggle Functionality
 MicAccessTool.prototype.initZoomToggleFeature = function () {
-    this.zoomStates = [1, 1.25, 1.5]; 
-    this.zoomIndex = 0; 
+    this.zoomStates = [1, 1.25, 1.5, 1.75]; // Define zoom levels
+    this.zoomIndex = 0; // Default to the first zoom level
 
-    // Add event listener for Zoom Toggle button
+    // Add event listener for the Zoom Toggle button
     const zoomToggleButton = document.getElementById('zoom-toggle-btn');
     if (zoomToggleButton) {
         zoomToggleButton.addEventListener('click', this.toggleZoom.bind(this));
     }
+
+    // Restore saved zoom state on initialization
+    this.restoreZoomState();
 };
+
 
 // Toggle Zoom Function
 MicAccessTool.prototype.toggleZoom = function () {
-    this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; 
-
-    // Apply the zoom state
+    this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; // Cycle through zoom states
     const zoomLevel = this.zoomStates[this.zoomIndex];
+
+    // Apply the selected zoom level
     this.applyZoom(zoomLevel);
 
-    // Set the active button state
-    if (zoomLevel === 1) {
-        this.setActiveButton(null); 
-    } else {
-        this.setActiveButton('zoom-toggle-btn'); 
-    }
+    // Set the active button state explicitly
+    const isActive = zoomLevel !== 1; // Active for zoom levels other than default (1)
+    this.setActiveButton('zoom-toggle-btn', isActive);
+
+    console.log(`Zoom level toggled to: ${zoomLevel}`);
 };
+
 
 // Apply Zoom Function
 MicAccessTool.prototype.applyZoom = function (zoomLevel) {
-  
     const elementsToZoom = document.querySelectorAll('body > *:not(#toolbox):not(#openToolboxButton):not(img)');
 
     elementsToZoom.forEach(element => {
         element.style.transform = `scale(${zoomLevel})`;
-        element.style.transformOrigin = '0 0'; 
-        element.style.width = `${100 / zoomLevel}%`; 
+        element.style.transformOrigin = '0 0'; // Keep scaling from the top-left corner
+        element.style.width = `${100 / zoomLevel}%`; // Adjust width to maintain layout
     });
 
-    this.saveZoomState(zoomLevel); 
+    // Save the zoom level to localStorage
+    this.saveZoomState(zoomLevel);
+
     console.log(`Zoom level applied: ${zoomLevel}`);
 };
+
 
 MicAccessTool.prototype.restoreZoomState = function () {
     const savedZoomLevel = parseFloat(localStorage.getItem('zoomLevel')) || 1; // Default to 1 (no zoom)
     this.applyZoom(savedZoomLevel);
 
-   
+    // Find the corresponding zoom index
     this.zoomIndex = this.zoomStates.indexOf(savedZoomLevel);
-    if (this.zoomIndex === -1) this.zoomIndex = 0; 
-    // Set the active button state if zoom is not default
-    if (savedZoomLevel !== 1) {
-        this.setActiveButton('zoom-toggle-btn');
-    }
+    if (this.zoomIndex === -1) this.zoomIndex = 0; // Reset if saved level is invalid
+
+    // Set the button state based on the saved zoom level
+    const isActive = savedZoomLevel !== 1; // Active for levels other than default (1)
+    this.setActiveButton('zoom-toggle-btn', isActive);
 };
+
 
 // Save Zoom State on Change
 MicAccessTool.prototype.saveZoomState = function (zoomLevel) {
     localStorage.setItem('zoomLevel', zoomLevel);
     console.log(`Zoom level saved: ${zoomLevel}`);
 };
+
 
 // Night Mode Feature
 MicAccessTool.prototype.initNightModeFeature = function () {
@@ -788,27 +829,20 @@ MicAccessTool.prototype.initNightModeFeature = function () {
 
     // Check stored night mode state and apply it
     const isNightModeEnabled = localStorage.getItem('nightMode') === 'true';
-    if (isNightModeEnabled) {
-        document.body.classList.add('night-mode');
-        this.setActiveButton('night-mode-btn');
-    } else {
-        this.setActiveButton(null); 
-    }
+    document.body.classList.toggle('night-mode', isNightModeEnabled);
+    this.setActiveButton('night-mode-btn', isNightModeEnabled); // Set the button state explicitly
 };
 
 MicAccessTool.prototype.toggleNightMode = function () {
     const isNightModeEnabled = document.body.classList.toggle('night-mode'); 
-    localStorage.setItem('nightMode', isNightModeEnabled); 
+    localStorage.setItem('nightMode', isNightModeEnabled);
 
-    // Update button state based on the current mode
-    if (isNightModeEnabled) {
-        this.setActiveButton('night-mode-btn'); 
-    } else {
-        this.setActiveButton(null); 
-    }
+    // Update button state explicitly based on the current mode
+    this.setActiveButton('night-mode-btn', isNightModeEnabled);
 
     console.log(`Night Mode ${isNightModeEnabled ? 'enabled' : 'disabled'}.`);
 };
+
 
 
 // Text Spacing Feature
@@ -840,15 +874,13 @@ MicAccessTool.prototype.toggleTextSpacing = function (buttonId) {
         element.style.letterSpacing = spacingLevel;
     });
 
-    // Manage button active state
-    if (spacingLevel === 'normal') {
-        this.setActiveButton(null); 
-    } else {
-        this.setActiveButton(buttonId); 
-    }
+    // Explicitly set the button's active state based on whether the spacing is `normal`
+    const isActive = spacingLevel !== 'normal';
+    this.setActiveButton(buttonId, isActive); // Explicitly set active or inactive
 
     console.log(`Text spacing set to: ${spacingLevel}`);
 };
+
 
 // Line Height Feature
 MicAccessTool.prototype.initLineHeightFeature = function () {
@@ -879,11 +911,11 @@ MicAccessTool.prototype.toggleLineHeight = function (buttonId) {
         element.style.lineHeight = lineHeightLevel;
     });
 
-    // Manage button active state
+    // Manage button active state explicitly
     if (lineHeightLevel === 'normal') {
-        this.setActiveButton(null); // Deactivate button when line height returns to normal
+        this.setActiveButton(buttonId, false); // Deactivate button when line height returns to normal
     } else {
-        this.setActiveButton(buttonId); // Activate button for other line height states
+        this.setActiveButton(buttonId, true); // Activate button for other line height states
     }
 
     console.log(`Line height set to: ${lineHeightLevel}`);
@@ -936,10 +968,9 @@ MicAccessTool.prototype.toggleCursorSize = function (buttonId) {
             icon: '<i class="fas fa-circle-notch"></i>',
         },
     ];
-    
 
     // Initialize cursor size index if not set
-    if (!this.currentCursorSizeIndex) this.currentCursorSizeIndex = 0;
+    if (this.currentCursorSizeIndex === undefined) this.currentCursorSizeIndex = 0;
 
     // Cycle through the cursor sizes
     this.currentCursorSizeIndex = (this.currentCursorSizeIndex + 1) % cursorSizes.length;
@@ -954,12 +985,9 @@ MicAccessTool.prototype.toggleCursorSize = function (buttonId) {
         button.innerHTML = `${selectedCursor.icon} Cursor Size: ${selectedCursor.label}`;
     }
 
-    // Manage active state
-    if (selectedCursor.size === 'normal') {
-        this.setActiveButton(null); // Deactivate the button for normal size
-    } else {
-        this.setActiveButton(buttonId); // Activate the button for other sizes
-    }
+    // Manage active state explicitly
+    const isActive = selectedCursor.size !== 'normal';
+    this.setActiveButton(buttonId, isActive); // Set active state based on whether size is "normal"
 
     console.log(`Cursor size set to: ${selectedCursor.size}`);
 };
@@ -1112,22 +1140,26 @@ MicAccessTool.prototype.hideKeyboardNavigationPopup = function () {
 
 // Button Active
 
-MicAccessTool.prototype.setActiveButton = function (activeButtonId) {
+MicAccessTool.prototype.setActiveButton = function (activeButtonId, isActive = null) {
     const button = document.getElementById(activeButtonId);
 
     if (button) {
-        // Check the current state and toggle it
-        if (button.dataset.active === 'true') {
-            // Deactivate the button
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
-            button.dataset.active = 'false'; // Mark as inactive
-        } else {
+        // Determine the new state based on the `isActive` parameter or toggle the current state
+        const newState = isActive !== null ? isActive : button.dataset.active !== 'true';
+
+        if (newState) {
             // Activate the button
             button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
             button.dataset.active = 'true'; // Mark as active
+        } else {
+            // Deactivate the button
+            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
+            button.dataset.active = 'false'; // Mark as inactive
         }
     }
 };
+
+
 
 MicAccessTool.prototype.resetButtonStates = function () {
     const buttons = document.querySelectorAll('.toolbox-button');
@@ -1153,6 +1185,81 @@ MicAccessTool.prototype.initAccessibleFontToggle = function () {
 MicAccessTool.prototype.toggleAccessibleFont = function () {
     const isFontApplied = document.body.classList.toggle('accessible-font');
     console.log(`Accessible font ${isFontApplied ? 'enabled' : 'disabled'}`);
+};
+
+// Reset Function
+
+MicAccessTool.prototype.initResetFeature = function () {
+    const resetButton = document.getElementById('reset-btn');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            this.resetToolbox(); // Call the reset function
+        });
+    }
+};
+
+
+MicAccessTool.prototype.resetToolbox = function () {
+    // Remove highlights
+    document.querySelectorAll('.highlight-links, .highlight-headers, .highlight-images').forEach(el => {
+        el.classList.remove('highlight-links', 'highlight-headers', 'highlight-images');
+    });
+
+    // Restore original font size and spacing for elements modified by the toolbox
+    document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)').forEach(el => {
+        if (el.style.fontSize) el.style.fontSize = ''; // Reset only toolbox-applied font size
+        if (el.style.letterSpacing) el.style.letterSpacing = ''; // Reset only toolbox-applied spacing
+        if (el.style.lineHeight) el.style.lineHeight = ''; // Reset only toolbox-applied line height
+        if (el.style.transform) el.style.transform = ''; // Reset only toolbox-applied zoom
+        if (el.style.transformOrigin) el.style.transformOrigin = ''; // Reset toolbox-applied transform origin
+        if (el.style.width && el.style.transform) el.style.width = ''; // Reset width only if it was adjusted by zoom
+    });
+
+    // Remove blue filter
+    const blueOverlay = document.querySelector('.blue-overlay');
+    if (blueOverlay) blueOverlay.classList.remove('active');
+
+    // Restore images
+    if (this.imagesHidden) {
+        // Only restore images removed by the toolbox, preserving website styles
+        this.removedImages.forEach(({ img, parent, nextSibling }) => {
+            if (nextSibling) {
+                parent.insertBefore(img, nextSibling);
+            } else {
+                parent.appendChild(img);
+            }
+        });
+        this.removedImages = []; // Clear stored removed images
+        this.imagesHidden = false;
+    }
+
+    // Restore audio
+    const soundElements = document.querySelectorAll('audio, video');
+    soundElements.forEach(el => {
+        if (el.muted) el.muted = false; // Unmute only if muted by the toolbox
+    });
+
+    // Disable night mode
+    document.body.classList.remove('night-mode');
+
+    // Reset cursor size
+    document.documentElement.style.cursor = 'auto';
+
+    // Reset accessible font
+    document.body.classList.remove('accessible-font');
+
+    // Re-enable animations
+    document.body.classList.remove('disable-animations');
+
+    // Clear only toolbox-specific local storage settings
+    localStorage.removeItem('animationsDisabled');
+    localStorage.removeItem('nightMode');
+    localStorage.removeItem('zoomLevel');
+
+    // Reset button states
+    this.resetButtonStates();
+
+    console.log('Toolbox reset to the original state.');
 };
 
 
