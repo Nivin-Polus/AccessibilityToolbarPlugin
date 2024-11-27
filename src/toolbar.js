@@ -250,7 +250,6 @@ MicAccessTool.prototype.audioRemoval = function () {
 };
 
 // Read Aloud
-
 // Initialize Read Aloud Feature
 MicAccessTool.prototype.initReadAloud = function () {
     const readAloudBtn = document.getElementById('read-aloud-btn');
@@ -271,26 +270,30 @@ MicAccessTool.prototype.initReadAloud = function () {
 
 MicAccessTool.prototype.toggleReadAloud = function (buttonId) {
     const toolbar = document.getElementById('read-aloud-toolbar');
-    const isActive = toolbar && !toolbar.classList.contains('hidden'); // Determine if currently active
+    const isActive = this.isReadAloudActive || false; // Check current active state
 
     if (isActive) {
+        // Deactivate Read Aloud
         this.disableDefaultClickToRead();
         this.stopReadAloud();
-        toolbar.classList.add('hidden'); // Hide toolbar
+        if (toolbar) toolbar.classList.add('hidden'); // Hide toolbar
         this.setActiveButton(buttonId, false); // Deactivate button
+        this.isReadAloudActive = false; // Update state
         localStorage.setItem('readAloudActive', false);
+        console.log('Read Aloud deactivated.');
     } else {
+        // Activate Read Aloud
         if (!toolbar) {
-            this.createReadAloudToolbar(); // Create the toolbar if not exists
+            this.createReadAloudToolbar(); // Create toolbar if it doesn't exist
         } else {
-            toolbar.classList.remove('hidden'); // Show toolbar if exists
+            toolbar.classList.remove('hidden'); // Show toolbar
         }
         this.enableDefaultClickToRead();
         this.setActiveButton(buttonId, true); // Activate button
+        this.isReadAloudActive = true; // Update state
         localStorage.setItem('readAloudActive', true);
+        console.log('Read Aloud activated.');
     }
-
-    console.log(`Read Aloud ${isActive ? 'disabled' : 'enabled'}.`);
 };
 
 
@@ -472,6 +475,11 @@ MicAccessTool.prototype.clearHighlight = function (element) {
 
 // Play Entire Page Read Aloud with Highlighting
 MicAccessTool.prototype.playReadAloud = function () {
+    if (!this.isReadAloudActive) {
+        console.log('Read Aloud is not active. Please enable it first.');
+        return;
+    }
+
     const paragraphs = document.querySelectorAll('p');
 
     if (!paragraphs.length) {
@@ -483,6 +491,7 @@ MicAccessTool.prototype.playReadAloud = function () {
     this.currentParagraphIndex = 0;
     this.readCurrentLine();
 };
+
 
 
 
@@ -594,6 +603,7 @@ MicAccessTool.prototype.stopReadAloud = function () {
 
     console.log('Read Aloud stopped, and all highlights cleared.');
 };
+
 
 
 
