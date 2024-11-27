@@ -640,7 +640,7 @@ MicAccessTool.prototype.initFontSizeAdjustment = function () {
     }
     if (decreaseTextButton) {
         decreaseTextButton.addEventListener('click', () => {
-            this.adjustFontSize('decrease'); // Adjust font size
+            this.adjustFontSize('decrease'); 
         });
     }
 };
@@ -771,10 +771,10 @@ MicAccessTool.prototype.stopAnimations = function () {
 
     if (isDisabled) {
         console.log('Animations and transitions disabled.');
-        this.setActiveButton('stop-animations-btn'); // Set button to active
+        this.setActiveButton('stop-animations-btn'); 
     } else {
         console.log('Animations and transitions re-enabled.');
-        this.setActiveButton(null); // Deactivate button
+        this.setActiveButton(null); 
     }
 };
 
@@ -784,9 +784,9 @@ MicAccessTool.prototype.restoreAnimationState = function () {
     if (isDisabled) {
         document.body.classList.add('disable-animations');
         console.log('Restored: Animations are disabled.');
-        this.setActiveButton('stop-animations-btn'); // Ensure button is active on load
+        this.setActiveButton('stop-animations-btn'); 
     } else {
-        this.setActiveButton(null); // Reset button state if animations are enabled
+        this.setActiveButton(null);
     }
 };
 
@@ -800,14 +800,14 @@ MicAccessTool.prototype.initStopAnimationsButton = function () {
 
 // Initialize the app and restore state
 MicAccessTool.prototype.initialApp = function () {
-    this.restoreAnimationState(); // Restore animation state
+    this.restoreAnimationState();
     console.log('Accessibility toolbox initialized.');
 };
 
 // Zoom Toggle Functionality
 MicAccessTool.prototype.initZoomToggleFeature = function () {
-    this.zoomStates = [1, 1.25, 1.5, 1.75]; // Define zoom levels
-    this.zoomIndex = 0; // Default to the first zoom level
+    this.zoomStates = [1, 1.25, 1.5, 1.75]; 
+    this.zoomIndex = 0; 
 
     // Add event listener for the Zoom Toggle button
     const zoomToggleButton = document.getElementById('zoom-toggle-btn');
@@ -822,14 +822,14 @@ MicAccessTool.prototype.initZoomToggleFeature = function () {
 
 // Toggle Zoom Function
 MicAccessTool.prototype.toggleZoom = function () {
-    this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; // Cycle through zoom states
+    this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; 
     const zoomLevel = this.zoomStates[this.zoomIndex];
 
     // Apply the selected zoom level
     this.applyZoom(zoomLevel);
 
     // Set the active button state explicitly
-    const isActive = zoomLevel !== 1; // Active for zoom levels other than default (1)
+    const isActive = zoomLevel !== 1; 
     this.setActiveButton('zoom-toggle-btn', isActive);
 
     console.log(`Zoom level toggled to: ${zoomLevel}`);
@@ -842,8 +842,8 @@ MicAccessTool.prototype.applyZoom = function (zoomLevel) {
 
     elementsToZoom.forEach(element => {
         element.style.transform = `scale(${zoomLevel})`;
-        element.style.transformOrigin = '0 0'; // Keep scaling from the top-left corner
-        element.style.width = `${100 / zoomLevel}%`; // Adjust width to maintain layout
+        element.style.transformOrigin = '0 0'; 
+        element.style.width = `${100 / zoomLevel}%`; 
     });
 
     // Save the zoom level to localStorage
@@ -854,15 +854,15 @@ MicAccessTool.prototype.applyZoom = function (zoomLevel) {
 
 
 MicAccessTool.prototype.restoreZoomState = function () {
-    const savedZoomLevel = parseFloat(localStorage.getItem('zoomLevel')) || 1; // Default to 1 (no zoom)
+    const savedZoomLevel = parseFloat(localStorage.getItem('zoomLevel')) || 1; 
     this.applyZoom(savedZoomLevel);
 
     // Find the corresponding zoom index
     this.zoomIndex = this.zoomStates.indexOf(savedZoomLevel);
-    if (this.zoomIndex === -1) this.zoomIndex = 0; // Reset if saved level is invalid
+    if (this.zoomIndex === -1) this.zoomIndex = 0; 
 
     // Set the button state based on the saved zoom level
-    const isActive = savedZoomLevel !== 1; // Active for levels other than default (1)
+    const isActive = savedZoomLevel !== 1; 
     this.setActiveButton('zoom-toggle-btn', isActive);
 };
 
@@ -886,7 +886,7 @@ MicAccessTool.prototype.initNightModeFeature = function () {
     // Check stored night mode state and apply it
     const isNightModeEnabled = localStorage.getItem('nightMode') === 'true';
     document.body.classList.toggle('night-mode', isNightModeEnabled);
-    this.setActiveButton('night-mode-btn', isNightModeEnabled); // Set the button state explicitly
+    this.setActiveButton('night-mode-btn', isNightModeEnabled);
 };
 
 MicAccessTool.prototype.toggleNightMode = function () {
@@ -969,9 +969,9 @@ MicAccessTool.prototype.toggleLineHeight = function (buttonId) {
 
     // Manage button active state explicitly
     if (lineHeightLevel === 'normal') {
-        this.setActiveButton(buttonId, false); // Deactivate button when line height returns to normal
+        this.setActiveButton(buttonId, false); 
     } else {
-        this.setActiveButton(buttonId, true); // Activate button for other line height states
+        this.setActiveButton(buttonId, true); 
     }
 
     console.log(`Line height set to: ${lineHeightLevel}`);
@@ -1043,7 +1043,7 @@ MicAccessTool.prototype.toggleCursorSize = function (buttonId) {
 
     // Manage active state explicitly
     const isActive = selectedCursor.size !== 'normal';
-    this.setActiveButton(buttonId, isActive); // Set active state based on whether size is "normal"
+    this.setActiveButton(buttonId, isActive); 
 
     console.log(`Cursor size set to: ${selectedCursor.size}`);
 };
@@ -1056,8 +1056,8 @@ MicAccessTool.prototype.initKeyboardNavigation = function () {
     const keyboardNavButton = document.getElementById('keyboard-navigation-btn');
     if (keyboardNavButton) {
         keyboardNavButton.addEventListener('click', () => {
-            this.keyboardNavigationActive = !this.keyboardNavigationActive; // Toggle state
-            this.setActiveButton('keyboard-navigation-btn'); // Highlight button
+            this.keyboardNavigationActive = !this.keyboardNavigationActive; 
+            this.setActiveButton('keyboard-navigation-btn'); 
 
             if (this.keyboardNavigationActive) {
                 this.enableKeyboardNavigation();
@@ -1132,14 +1132,14 @@ MicAccessTool.prototype.handleKeyboardNavigation = function (event) {
     };
 
     if (keyFunctionMap[event.code]) {
-        keyFunctionMap[event.code](); // Trigger the function mapped to the key
+        keyFunctionMap[event.code](); 
     }
 };
 
 // Show Popup for Keyboard Shortcuts
 MicAccessTool.prototype.showKeyboardNavigationPopup = function () {
     const existingPopup = document.getElementById('keyboard-navigation-popup');
-    if (existingPopup) return; // Prevent duplicate popups
+    if (existingPopup) return; 
 
     const popup = createDiv('keyboard-popup', 'keyboard-navigation-popup'); 
     const header = createDiv('popup-header');
@@ -1200,17 +1200,17 @@ MicAccessTool.prototype.setActiveButton = function (activeButtonId, isActive = n
     const button = document.getElementById(activeButtonId);
 
     if (button) {
-        // Determine the new state based on the `isActive` parameter or toggle the current state
+        
         const newState = isActive !== null ? isActive : button.dataset.active !== 'true';
 
         if (newState) {
             // Activate the button
             button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
-            button.dataset.active = 'true'; // Mark as active
+            button.dataset.active = 'true'; 
         } else {
             // Deactivate the button
             button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
-            button.dataset.active = 'false'; // Mark as inactive
+            button.dataset.active = 'false'; 
         }
     }
 };
@@ -1220,8 +1220,8 @@ MicAccessTool.prototype.setActiveButton = function (activeButtonId, isActive = n
 MicAccessTool.prototype.resetButtonStates = function () {
     const buttons = document.querySelectorAll('.toolbox-button');
     buttons.forEach((button) => {
-        button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
-        button.dataset.active = 'false'; // Ensure all buttons are inactive
+        button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; 
+        button.dataset.active = 'false'; 
     });
 };
 
@@ -1269,12 +1269,12 @@ MicAccessTool.prototype.resetToolbox = function () {
 
     // Restore original font size and spacing for elements modified by the toolbox
     document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)').forEach(el => {
-        if (el.style.fontSize) el.style.fontSize = ''; // Reset only toolbox-applied font size
-        if (el.style.letterSpacing) el.style.letterSpacing = ''; // Reset only toolbox-applied spacing
-        if (el.style.lineHeight) el.style.lineHeight = ''; // Reset only toolbox-applied line height
-        if (el.style.transform) el.style.transform = ''; // Reset only toolbox-applied zoom
-        if (el.style.transformOrigin) el.style.transformOrigin = ''; // Reset toolbox-applied transform origin
-        if (el.style.width && el.style.transform) el.style.width = ''; // Reset width only if it was adjusted by zoom
+        if (el.style.fontSize) el.style.fontSize = ''; 
+        if (el.style.letterSpacing) el.style.letterSpacing = '';
+        if (el.style.lineHeight) el.style.lineHeight = ''; 
+        if (el.style.transform) el.style.transform = ''; 
+        if (el.style.transformOrigin) el.style.transformOrigin = ''; 
+        if (el.style.width && el.style.transform) el.style.width = ''; 
     });
 
     // Remove blue filter
