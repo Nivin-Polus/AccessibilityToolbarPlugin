@@ -120,7 +120,7 @@ MicAccessTool.prototype.createToolbox = function () {
         // { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
         // { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
-        // { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
+        { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
         // { id: 'reset-btn', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
 
     ];
@@ -407,21 +407,17 @@ speedWrapper.appendChild(speedSlider);
 
 // Helper Function to Highlight Text
 MicAccessTool.prototype.highlightText = function (element, start, length) {
-    const originalText = element.textContent;
-    const wordText = originalText.slice(start, start + length);
+    const text = element.dataset.originalText || element.innerText || '';
+    const before = text.slice(0, start);
+    const highlight = text.slice(start, start + length);
+    const after = text.slice(start + length);
 
-    // Highlight only the word being read
-    element.textContent = '';
-    const highlightSpan = document.createElement('span');
-    highlightSpan.textContent = wordText;
-    highlightSpan.style.backgroundColor = 'yellow';
-    element.appendChild(highlightSpan);
-
-    // Restore original text after a delay
-    setTimeout(() => {
-        element.textContent = originalText;
-    }, 500); 
+    element.innerHTML = `${before}<span style="background-color: yellow;">${highlight}</span>${after}`;
 };
+
+
+
+
 
 // Enable Default Click-to-Read
 MicAccessTool.prototype.enableDefaultClickToRead = function () {
@@ -453,44 +449,42 @@ MicAccessTool.prototype.readElementContent = function (event) {
     msg.onboundary = (boundaryEvent) => {
         if (boundaryEvent.name === 'word') {
             const wordStart = boundaryEvent.charIndex;
-            const wordLength = words[wordIndex].length;
-            this.highlightText(element, wordStart, wordLength); 
+            const wordLength = words[wordIndex]?.length || 0;
+            this.highlightText(element, wordStart, wordLength);
             wordIndex++;
         }
     };
 
     msg.onend = () => {
-        element.innerHTML = text; 
+        this.clearHighlight(element); // Clear highlight after reading ends
     };
 
     speechSynthesis.speak(msg);
 };
+
+MicAccessTool.prototype.clearHighlight = function (element) {
+    if (element.dataset.originalText) {
+        element.innerHTML = element.dataset.originalText;
+    }
+};
+
+
 
 // Play Entire Page Read Aloud with Highlighting
 MicAccessTool.prototype.playReadAloud = function () {
-    const bodyText = document.body.innerText;
-    const msg = new SpeechSynthesisUtterance(bodyText);
-    msg.volume = this.currentVolume || 1;
-    msg.rate = this.currentSpeed || 1;
+    const paragraphs = document.querySelectorAll('p');
 
-    const words = bodyText.split(' ');
-    let wordIndex = 0;
+    if (!paragraphs.length) {
+        console.log('No paragraphs found to read.');
+        return;
+    }
 
-    msg.onboundary = (boundaryEvent) => {
-        if (boundaryEvent.name === 'word') {
-            const wordStart = boundaryEvent.charIndex;
-            const wordLength = words[wordIndex].length;
-            this.highlightText(document.body, wordStart, wordLength); 
-            wordIndex++;
-        }
-    };
-
-    msg.onend = () => {
-        document.body.textContent = bodyText; 
-    };
-
-    speechSynthesis.speak(msg);
+    // Initialize paragraph index and start reading
+    this.currentParagraphIndex = 0;
+    this.readCurrentLine();
 };
+
+
 
 // Enable Cursor Read Aloud
 MicAccessTool.prototype.enableCursorReadAloud = function () {
@@ -514,43 +508,95 @@ MicAccessTool.prototype.enableCursorReadAloud = function () {
 };
 
 MicAccessTool.prototype.readPreviousLine = function () {
-    if (!this.currentParagraphIndex || this.currentParagraphIndex <= 0) {
-        this.currentParagraphIndex = 0; 
-        return;
-    }
-
-    this.currentParagraphIndex--;
-    const paragraphs = document.querySelectorAll('p');
-    if (paragraphs[this.currentParagraphIndex]) {
-        this.speakText(paragraphs[this.currentParagraphIndex].innerText);
+    if (this.currentParagraphIndex > 0) {
+        this.currentParagraphIndex--;
+        this.readCurrentLine();
+    } else {
+        console.log('Already at the first paragraph.');
     }
 };
+
+
 
 MicAccessTool.prototype.readNextLine = function () {
     const paragraphs = document.querySelectorAll('p');
-    if (!this.currentParagraphIndex) this.currentParagraphIndex = 0;
+
+    if (this.currentParagraphIndex === undefined) this.currentParagraphIndex = 0;
 
     if (this.currentParagraphIndex < paragraphs.length - 1) {
         this.currentParagraphIndex++;
-        if (paragraphs[this.currentParagraphIndex]) {
-            this.speakText(paragraphs[this.currentParagraphIndex].innerText);
-        }
+        this.readCurrentLine();
+    } else {
+        console.log('No more paragraphs to read.');
     }
 };
 
-MicAccessTool.prototype.speakText = function (text) {
+
+
+MicAccessTool.prototype.speakText = function (element) {
+    const text = element.innerText || '';
     const msg = new SpeechSynthesisUtterance(text);
     msg.volume = this.currentVolume || 1;
     msg.rate = this.currentSpeed || 1;
 
+    // Save original text for restoration
+    if (!element.dataset.originalText) {
+        element.dataset.originalText = text;
+    }
+
+    // Highlight words as they are spoken
+    const words = text.split(' ');
+    let wordIndex = 0;
+
+    msg.onboundary = (event) => {
+        if (event.name === 'word') {
+            const wordStart = event.charIndex;
+            const wordLength = words[wordIndex]?.length || 0;
+            this.highlightText(element, wordStart, wordLength);
+            wordIndex++;
+        }
+    };
+
+    msg.onend = () => {
+        this.clearHighlight(element); // Clear highlights after speech
+    };
+
+    // Cancel ongoing speech and start speaking
     speechSynthesis.cancel();
     speechSynthesis.speak(msg);
 };
 
+
+
+MicAccessTool.prototype.readCurrentLine = function () {
+    const paragraphs = document.querySelectorAll('p');
+
+    if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= paragraphs.length) {
+        console.log('No more paragraphs to read.');
+        return;
+    }
+
+    const currentParagraph = paragraphs[this.currentParagraphIndex];
+    this.speakText(currentParagraph);
+};
+
+
+
 // Stop Read Aloud
 MicAccessTool.prototype.stopReadAloud = function () {
-    speechSynthesis.cancel();
+    speechSynthesis.cancel(); // Stop all ongoing speech
+    this.currentParagraphIndex = undefined; // Reset paragraph index
+
+    // Clear highlights for all paragraphs
+    document.querySelectorAll('[data-original-text]').forEach((element) => {
+        this.clearHighlight(element);
+    });
+
+    console.log('Read Aloud stopped, and all highlights cleared.');
 };
+
+
+
 
 
 //Button Click Color change
