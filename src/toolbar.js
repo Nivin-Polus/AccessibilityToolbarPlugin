@@ -1232,16 +1232,22 @@ MicAccessTool.prototype.initAccessibleFontToggle = function () {
     const fontToggleButton = document.getElementById('accessible-font-btn');
     if (fontToggleButton) {
         fontToggleButton.addEventListener('click', () => {
-            this.toggleAccessibleFont();
-            this.setActiveButton('accessible-font-btn'); // Highlight button
+            this.toggleAccessibleFont('accessible-font-btn'); // Toggle font
         });
     }
 };
 
-MicAccessTool.prototype.toggleAccessibleFont = function () {
+MicAccessTool.prototype.toggleAccessibleFont = function (buttonId) {
+    // Toggle the class on the body element
     const isFontApplied = document.body.classList.toggle('accessible-font');
+
+    // Set the active state for the button
+    this.setActiveButton(buttonId, isFontApplied);
+
+    // Log the status for debugging
     console.log(`Accessible font ${isFontApplied ? 'enabled' : 'disabled'}`);
 };
+
 
 // Reset Function
 
