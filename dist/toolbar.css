@@ -651,11 +651,17 @@ button:active {
 
 /* Accessible Font */
 
+/* Import Open Sans from Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap');
+
+/* Accessible Font Class */
 .accessible-font {
-    font-family: 'Arial', sans-serif; 
+    font-family: 'Open Sans', Arial, sans-serif !important;
     line-height: 1.6; 
     letter-spacing: 0.05em; 
+    font-size: 18px;
 }
+
 
 
 
