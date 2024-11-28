@@ -120,7 +120,7 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
         { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
         { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
-        // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
+        { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
         { id: 'contrast-btn', text: 'Contrast Modes', iconClass: '<i class="fas fa-adjust"></i>' },
         { id: 'reset-btn', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
@@ -1572,6 +1572,37 @@ MicAccessTool.prototype.applyCustomColors = function (bgColor, textColor) {
     }
 
     console.log(`Custom colors applied: Background (${bgColor || 'unchanged'}), Text (${textColor || 'unchanged'})`);
+};
+
+// Toggle Contrast Modes
+MicAccessTool.prototype.toggleContrastMode = function (mode, button) {
+    const bodyClassList = document.body.classList;
+
+    // Check if the mode is currently active
+    const isActive = bodyClassList.contains(mode);
+
+    // Remove all other contrast modes
+    bodyClassList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
+
+    // If the clicked mode was not active, activate it
+    if (!isActive) {
+        bodyClassList.add(mode);
+        console.log(`${mode} mode activated.`);
+    } else {
+        console.log(`${mode} mode deactivated.`);
+    }
+
+    // Update the button states
+    this.updateContrastButtonStates(button, isActive);
+};
+
+// Reset Contrast
+MicAccessTool.prototype.resetContrast = function () {
+    document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
+    document.body.style.backgroundColor = '';
+    document.body.style.color = '';
+
+    console.log('Contrast settings reset to original.');
 };
 
 // Reset Contrast

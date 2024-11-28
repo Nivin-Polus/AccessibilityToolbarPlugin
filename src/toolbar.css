@@ -128,7 +128,7 @@
 .toolbox-button:hover {
     background-color: rgba(52, 88, 185, 1); 
     transform: scale(1.05);
-    color: black;
+    color: rgb(71, 146, 216);
 }
 
 /* Active button styling */
@@ -828,7 +828,11 @@ button:active {
     border-radius: 4px;
 }
 
+/* Contrast */
 
+.grayscale {
+    filter: grayscale(1);
+}
 
 
 
