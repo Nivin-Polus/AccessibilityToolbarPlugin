@@ -11,7 +11,7 @@ function MicAccessTool(init) {
     this.initBlueFilter();
     this.initRemoveImages();
     this.initAudioRemoval();
-    this.initReadAloud();
+    // this.initReadAloud();
     this.initFontSizeAdjustment();
     this.initHighlightButtons();
     this.initStopAnimationsButton();
@@ -1343,28 +1343,28 @@ MicAccessTool.prototype.initResetFeature = function () {
 
 
 MicAccessTool.prototype.resetToolbox = function () {
-    // Remove highlights
+    // Remove highlights added by the toolbox
     document.querySelectorAll('.highlight-links, .highlight-headers, .highlight-images').forEach(el => {
         el.classList.remove('highlight-links', 'highlight-headers', 'highlight-images');
     });
 
-    // Restore original font size and spacing for elements modified by the toolbox
-    document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)').forEach(el => {
-        if (el.style.fontSize) el.style.fontSize = ''; 
-        if (el.style.letterSpacing) el.style.letterSpacing = '';
-        if (el.style.lineHeight) el.style.lineHeight = ''; 
-        if (el.style.transform) el.style.transform = ''; 
-        if (el.style.transformOrigin) el.style.transformOrigin = ''; 
-        if (el.style.width && el.style.transform) el.style.width = ''; 
+    // Restore only toolbox-specific font size, spacing, and transforms
+    document.querySelectorAll('[data-toolbox-modified]').forEach(el => {
+        el.style.fontSize = ''; 
+        el.style.letterSpacing = '';
+        el.style.lineHeight = ''; 
+        el.style.transform = ''; 
+        el.style.transformOrigin = ''; 
+        el.style.width = '';
+        el.removeAttribute('data-toolbox-modified'); // Remove the marker attribute
     });
 
-    // Remove blue filter
+    // Remove blue filter if applied by the toolbox
     const blueOverlay = document.querySelector('.blue-overlay');
     if (blueOverlay) blueOverlay.classList.remove('active');
 
-    // Restore images
+    // Restore images hidden by the toolbox
     if (this.imagesHidden) {
-        // Only restore images removed by the toolbox, preserving website styles
         this.removedImages.forEach(({ img, parent, nextSibling }) => {
             if (nextSibling) {
                 parent.insertBefore(img, nextSibling);
@@ -1372,43 +1372,43 @@ MicAccessTool.prototype.resetToolbox = function () {
                 parent.appendChild(img);
             }
         });
-        this.removedImages = []; // Clear stored removed images
+        this.removedImages = [];
         this.imagesHidden = false;
     }
 
-    // Restore audio
-    const soundElements = document.querySelectorAll('audio, video');
+    // Unmute audio/video elements muted by the toolbox
+    const soundElements = document.querySelectorAll('[data-toolbox-muted]');
     soundElements.forEach(el => {
-        if (el.muted) el.muted = false; 
+        el.muted = false; 
+        el.removeAttribute('data-toolbox-muted');
     });
 
-    // Disable night mode
+    // Disable night mode introduced by the toolbox
     document.body.classList.remove('night-mode');
 
-    // Reset cursor size
+    // Reset cursor size to default
     document.documentElement.style.cursor = 'auto';
 
-    // Reset accessible font
+    // Reset accessible font settings
     document.body.classList.remove('accessible-font');
 
-    // Re-enable animations
+    // Re-enable animations if disabled by the toolbox
     document.body.classList.remove('disable-animations');
 
-    // Reset contrast settings
-    document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
-    document.body.style.backgroundColor = ''; 
-    document.body.style.color = ''; 
+    // Trigger resetContrast function to handle contrast settings
+    this.resetContrast();
 
-    // Clear only toolbox-specific local storage settings
+    // Clear toolbox-specific local storage settings
     localStorage.removeItem('animationsDisabled');
     localStorage.removeItem('nightMode');
     localStorage.removeItem('zoomLevel');
 
-    // Reset button states
+    // Reset button states controlled by the toolbox
     this.resetButtonStates();
 
     console.log('Toolbox reset to the original state.');
 };
+
 
 // Contrast Mode
 
@@ -1459,8 +1459,6 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
 
     // Preset Modes
     const modes = [
-        { id: 'bright-contrast', text: 'Bright Contrast' },
-        { id: 'reverse-contrast', text: 'Reverse Contrast' },
         { id: 'grayscale', text: 'Uncolored Display' },
     ];
 
@@ -1503,33 +1501,32 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     customColorsSection.appendChild(bgLabel);
     customColorsSection.appendChild(bgColorContainer);
 
-    // Text Color Section
-    const textLabel = document.createElement('label');
-    textLabel.textContent = 'Text Color:';
+// Text Color Section
+const textLabel = document.createElement('label');
+textLabel.textContent = 'Text Color:';
 
-    const textColorContainer = document.createElement('div');
-    textColorContainer.className = 'color-picker-container';
+const textColorContainer = document.createElement('div');
+textColorContainer.className = 'color-picker-container';
 
-    predefinedColors.forEach((color) => {
-        const colorButton = document.createElement('button');
-        colorButton.className = 'color-button';
-        colorButton.style.backgroundColor = color;
-        colorButton.addEventListener('click', () => this.applyCustomColors(null, color));
-        textColorContainer.appendChild(colorButton);
-    });
+predefinedColors.forEach((color) => {
+    const colorButton = document.createElement('button');
+    colorButton.className = 'color-button';
+    colorButton.style.backgroundColor = color;
+    colorButton.addEventListener('click', () => this.applyCustomTextColor(color));
+    textColorContainer.appendChild(colorButton);
+});
 
-    const textColorPicker = document.createElement('input');
-    textColorPicker.type = 'color';
-    textColorPicker.id = 'text-color-picker';
-    textColorPicker.addEventListener('input', () => this.applyCustomColors(null, textColorPicker.value));
-    textColorContainer.appendChild(textColorPicker);
+const textColorPicker = document.createElement('input');
+textColorPicker.type = 'color';
+textColorPicker.id = 'text-color-picker';
+textColorPicker.addEventListener('input', () => this.applyCustomTextColor(textColorPicker.value));
+textColorContainer.appendChild(textColorPicker);
 
-    customColorsSection.appendChild(textLabel);
-    customColorsSection.appendChild(textColorContainer);
+customColorsSection.appendChild(textLabel);
+customColorsSection.appendChild(textColorContainer);
 
-    body.appendChild(customColorsSection);
-
-    // Reset Contrast Button
+body.appendChild(customColorsSection);
+// Reset button
     const resetButton = document.createElement('button');
     resetButton.id = 'reset-contrast-btn';
     resetButton.className = 'contrast-reset-button';
@@ -1540,6 +1537,41 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     popup.appendChild(body);
     document.body.appendChild(popup);
 };
+
+// Reset Contrast
+MicAccessTool.prototype.resetContrast = function () {
+    // Remove all contrast classes from the body
+    document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
+    
+    // Reset body styles
+    document.body.style.backgroundColor = '';
+    document.body.style.color = '';
+
+    // Reset all text elements' color styles
+    const textElements = document.querySelectorAll(
+        'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea'
+    );
+    textElements.forEach((element) => {
+        element.style.color = ''; // Reset text color
+    });
+
+    console.log('Contrast settings reset to original.');
+};
+
+
+// Apply Custom Text Color
+MicAccessTool.prototype.applyCustomTextColor = function (color) {
+    const textElements = document.querySelectorAll(
+        'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea'
+    ); 
+
+    textElements.forEach((element) => {
+        element.style.color = color; 
+    });
+
+    console.log(`Text color updated to: ${color}`);
+};
+
 
 // Apply Custom Colors
 MicAccessTool.prototype.applyCustomColors = function (bgColor, textColor) {
@@ -1585,17 +1617,6 @@ MicAccessTool.prototype.updateContrastButtonStates = function (clickedButton, is
         }
     });
 };
-
-// Reset Contrast
-MicAccessTool.prototype.resetContrast = function () {
-    document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
-    document.body.style.backgroundColor = '';
-    document.body.style.color = '';
-    console.log('Contrast settings reset to original.');
-};
-
-
-
 
 
 
