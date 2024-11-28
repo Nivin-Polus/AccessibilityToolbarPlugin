@@ -1417,8 +1417,8 @@ MicAccessTool.prototype.initContrastFeature = function () {
     const contrastButton = document.getElementById('contrast-btn');
     if (contrastButton) {
         contrastButton.addEventListener('click', () => {
-            this.toggleContrastPopup(); 
-            this.setActiveButton('contrast-btn'); 
+            this.toggleContrastPopup();
+            this.setActiveButton('contrast-btn');
         });
     }
 };
@@ -1427,7 +1427,7 @@ MicAccessTool.prototype.initContrastFeature = function () {
 MicAccessTool.prototype.toggleContrastPopup = function () {
     const existingPopup = document.getElementById('contrast-popup');
     if (existingPopup) {
-        existingPopup.remove(); 
+        existingPopup.remove();
         return;
     }
 
@@ -1469,7 +1469,7 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
         modeButton.id = id;
         modeButton.className = 'contrast-mode-button';
         modeButton.textContent = text;
-        modeButton.addEventListener('click', () => this.toggleContrastMode(id));
+        modeButton.addEventListener('click', (e) => this.toggleContrastMode(id, e.target));
         body.appendChild(modeButton);
     });
 
@@ -1477,13 +1477,7 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     const customColorsSection = document.createElement('div');
     customColorsSection.className = 'contrast-custom-colors';
 
-    const predefinedColors = [
-        '#FFFFFF', // White
-        '#000000', // Black
-        '#F0E68C', // Khaki
-        '#ADD8E6', // Light Blue
-        '#FFB6C1', // Light Pink
-    ];
+    const predefinedColors = ['#FFFFFF', '#000000', '#F0E68C', '#ADD8E6', '#FFB6C1'];
 
     // Background Color Section
     const bgLabel = document.createElement('label');
@@ -1547,21 +1541,6 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     document.body.appendChild(popup);
 };
 
-
-
-// Update Contrast Button States
-MicAccessTool.prototype.updateContrastButtonStates = function (clickedButton, isActive) {
-    // Get all contrast mode buttons
-    const buttons = document.querySelectorAll('.contrast-mode-button');
-
-    buttons.forEach(button => {
-        if (button === clickedButton && !isActive) {
-            button.classList.add('active'); 
-        } else {
-            button.classList.remove('active'); 
-        }
-    });
-};
 // Apply Custom Colors
 MicAccessTool.prototype.applyCustomColors = function (bgColor, textColor) {
     if (bgColor) {
@@ -1570,7 +1549,6 @@ MicAccessTool.prototype.applyCustomColors = function (bgColor, textColor) {
     if (textColor) {
         document.body.style.color = textColor;
     }
-
     console.log(`Custom colors applied: Background (${bgColor || 'unchanged'}), Text (${textColor || 'unchanged'})`);
 };
 
@@ -1596,20 +1574,23 @@ MicAccessTool.prototype.toggleContrastMode = function (mode, button) {
     this.updateContrastButtonStates(button, isActive);
 };
 
+// Update Contrast Button States
+MicAccessTool.prototype.updateContrastButtonStates = function (clickedButton, isActive) {
+    const buttons = document.querySelectorAll('.contrast-mode-button');
+    buttons.forEach((button) => {
+        if (button === clickedButton && !isActive) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
+    });
+};
+
 // Reset Contrast
 MicAccessTool.prototype.resetContrast = function () {
     document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
     document.body.style.backgroundColor = '';
     document.body.style.color = '';
-
-    console.log('Contrast settings reset to original.');
-};
-
-// Reset Contrast
-MicAccessTool.prototype.resetContrast = function () {
-    document.body.style.backgroundColor = '';
-    document.body.style.color = '';
-
     console.log('Contrast settings reset to original.');
 };
 
