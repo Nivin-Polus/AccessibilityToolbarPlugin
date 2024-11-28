@@ -828,7 +828,11 @@ button:active {
     border-radius: 4px;
 }
 
+/* Contrast */
 
+.grayscale {
+    filter: grayscale(1);
+}
 
 
 
