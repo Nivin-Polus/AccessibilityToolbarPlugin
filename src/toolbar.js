@@ -11,7 +11,7 @@ function MicAccessTool(init) {
     this.initBlueFilter();
     this.initRemoveImages();
     this.initAudioRemoval();
-    // this.initReadAloud();
+    this.initReadAloud();
     this.initFontSizeAdjustment();
     this.initHighlightButtons();
     this.initStopAnimationsButton();
@@ -183,17 +183,30 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
 
 // Blue Filter
 MicAccessTool.prototype.initBlueFilter = function () {
-    const blueOverlay = createDiv('blue-overlay');
-    document.body.appendChild(blueOverlay);
-
     const blueFilterButton = document.getElementById('blue-filter-btn');
+
     if (blueFilterButton) {
         blueFilterButton.addEventListener('click', () => {
-            blueOverlay.classList.toggle('active');
-            this.setActiveButton('blue-filter-btn');
+            const blueOverlay = document.querySelector('.blue-overlay');
+
+            if (blueOverlay) {
+                // If overlay exists, remove it (turn off blue filter)
+                blueOverlay.remove();
+                this.setActiveButton('blue-filter-btn', false); // Deactivate button
+            } else {
+                // If no overlay exists, create and activate it (turn on blue filter)
+                const newBlueOverlay = createDiv('blue-overlay');
+                document.body.appendChild(newBlueOverlay);
+                newBlueOverlay.classList.add('active');
+                this.setActiveButton('blue-filter-btn', true); // Activate button
+            }
         });
+    } else {
+        console.error('Blue Filter button is missing.');
     }
 };
+
+
 // Remove images
 MicAccessTool.prototype.initRemoveImages = function () {
     const removeImageButton = document.getElementById('remove-images-btn');
@@ -572,7 +585,7 @@ MicAccessTool.prototype.speakText = function (element) {
         this.clearHighlight(element); 
     };
 
-    // Cancel ongoing speech and start speaking
+
     speechSynthesis.cancel();
     speechSynthesis.speak(msg);
 };
@@ -580,7 +593,7 @@ MicAccessTool.prototype.speakText = function (element) {
 
 
 MicAccessTool.prototype.readCurrentLine = function () {
-    const paragraphs = document.querySelectorAll('p');
+    const paragraphs = document.querySelectorAll('h1,h2,h3,h4,h5,h6,p');
 
     if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= paragraphs.length) {
         console.log('No more paragraphs to read.');
@@ -1680,30 +1693,124 @@ MicAccessTool.prototype.saveToolbarState = function () {
 MicAccessTool.prototype.loadToolbarState = function () {
     const savedState = JSON.parse(localStorage.getItem('toolbarState')) || null;
 
-    if (savedState) {
-        console.log('Restoring toolbar state:', savedState);
-
-        if (savedState.blueFilterActive) document.querySelector('.blue-overlay')?.classList.add('active');
-        if (savedState.imagesHidden) this.toggleImages();
-        if (savedState.isMuted) this.audioRemoval();
-        this.adjustFontSize(savedState.currentFontSize);
-        if (savedState.nightModeActive) document.body.classList.add('night-mode');
-        this.applyZoom(savedState.zoomLevel);
-        this.currentTextSpacingIndex = savedState.textSpacingIndex;
-        this.toggleTextSpacing('text-spacing-btn');
-        this.currentLineHeightIndex = savedState.lineHeightIndex;
-        this.toggleLineHeight('line-height-btn');
-        this.currentCursorSizeIndex = savedState.cursorSizeIndex;
-        this.toggleCursorSize('cursor-size-btn');
-        if (savedState.accessibleFont) document.body.classList.add('accessible-font');
-        if (savedState.animationsDisabled) document.body.classList.add('disable-animations');
-        this.setContrastMode(savedState.contrastMode);
-        savedState.activeButtons.forEach(buttonId => this.setActiveButton(buttonId, true));
-
-        console.log('Toolbar state restored successfully.');
-    } else {
+    if (!savedState) {
         console.log('No saved state found. Using default settings.');
+        return;
     }
+
+    console.log('Restoring toolbar state:', savedState);
+
+    // Restore Blue Filter
+    const blueFilterButton = document.getElementById('blue-filter-btn');
+
+    if (blueFilterButton) {
+        // Initialize Blue Filter
+        this.initBlueFilter();
+    
+        // Check saved state and toggle accordingly
+        if (savedState.blueFilterActive) {
+            blueFilterButton.click(); // Simulate a click to activate the blue filter
+        }
+    } else {
+        console.error('Blue Filter button is missing.');
+    }
+    // Restore Image Visibility
+    if (savedState.imagesHidden) {
+        this.toggleImages(); // Ensures images are hidden
+        this.setActiveButton('remove-images-btn', true);
+    }
+
+    // Restore Audio Mute State
+    if (savedState.isMuted) {
+        this.audioRemoval(); // Ensures audio elements are muted
+        this.setActiveButton('remove-audio-btn', true);
+    }
+
+    // Restore Font Size
+    if (savedState.currentFontSize) {
+        const currentFontSize = parseFloat(savedState.currentFontSize);
+        if (currentFontSize > 0) {
+            const currentBodyFontSize = parseFloat(window.getComputedStyle(document.body).fontSize);
+            const adjustment = currentFontSize - currentBodyFontSize;
+            if (adjustment > 0) {
+                while (adjustment-- > 0) this.adjustFontSize('increase');
+            } else if (adjustment < 0) {
+                while (adjustment++ < 0) this.adjustFontSize('decrease');
+            }
+        }
+    }
+
+    // Restore Night Mode
+    if (savedState.nightModeActive) {
+        document.body.classList.add('night-mode');
+        this.setActiveButton('night-mode-btn', true);
+    }
+
+    // Restore Zoom Level
+    if (savedState.zoomLevel) {
+        this.applyZoom(savedState.zoomLevel);
+        this.setActiveButton('zoom-toggle-btn', savedState.zoomLevel !== 1);
+    }
+
+    // Restore Text Spacing
+    if (typeof savedState.textSpacingIndex !== 'undefined') {
+        this.currentTextSpacingIndex = savedState.textSpacingIndex - 1; // Offset to match toggle logic
+        this.toggleTextSpacing('text-spacing-btn');
+    }
+
+    // Restore Line Height
+    if (typeof savedState.lineHeightIndex !== 'undefined') {
+        this.currentLineHeightIndex = savedState.lineHeightIndex - 1; // Offset to match toggle logic
+        this.toggleLineHeight('line-height-btn');
+    }
+
+    // Restore Cursor Size
+    if (typeof savedState.cursorSizeIndex !== 'undefined') {
+        this.currentCursorSizeIndex = savedState.cursorSizeIndex - 1; // Offset to match toggle logic
+        this.toggleCursorSize('cursor-size-btn');
+    }
+
+
+
+    // Blue Filter Logic
+   
+    if (blueFilterButton) {
+        // Ensure initialization
+        this.initBlueFilter();
+
+        // Apply saved state
+        if (savedState.blueFilterActive) {
+            // If the filter was active, ensure the overlay is created
+            let blueOverlay = document.querySelector('.blue-overlay');
+            if (!blueOverlay) {
+                blueOverlay = createDiv('blue-overlay');
+                document.body.appendChild(blueOverlay);
+                blueOverlay.classList.add('active');
+            }
+            this.setActiveButton('blue-filter-btn', true);
+        }
+    } else {
+        console.error('Blue Filter button is missing.');
+    }
+    
+
+    // Restore Animations
+    if (savedState.animationsDisabled) {
+        document.body.classList.add('disable-animations');
+        this.setActiveButton('stop-animations-btn', true);
+    }
+
+    // Restore Contrast Mode
+    if (savedState.contrastMode) {
+        this.setContrastMode(savedState.contrastMode);
+    }
+
+    // Activate Saved Buttons
+    if (Array.isArray(savedState.activeButtons)) {
+        savedState.activeButtons.forEach((buttonId) => this.setActiveButton(buttonId, true));
+    }
+
+    console.log('Toolbar state restored successfully.');
 };
 
 // Helper Functions
@@ -1714,8 +1821,6 @@ MicAccessTool.prototype.getCurrentFontSize = function () {
 
 MicAccessTool.prototype.getContrastMode = function () {
     if (document.body.classList.contains('grayscale')) return 'grayscale';
-    if (document.body.classList.contains('reverse-contrast')) return 'reverse-contrast';
-    if (document.body.classList.contains('bright-contrast')) return 'bright-contrast';
     return null;
 };
 
