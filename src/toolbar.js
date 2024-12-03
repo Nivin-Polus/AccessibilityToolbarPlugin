@@ -122,7 +122,7 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
         { id: 'contrast-btn', text: 'Contrast Modes', iconClass: '<i class="fas fa-adjust"></i>' },
-        { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
+        // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         { id: 'reset-btn', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
         { id: 'save-settings-btn', text: 'Save', iconClass: '<i class="fas fa-save"></i>' },
     ];
