@@ -168,8 +168,41 @@ MicAccessTool.prototype.createSideButton = function () {
             sideButton.style.left = `${x}px`;
             sideButton.style.top = `${y}px`;
             const toolbox = document.getElementById('toolbox');
-            toolbox.style.left = `${x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2}px`;  // Center the toolbox above the side button
-            toolbox.style.top = `${y - toolbox.offsetHeight - 60}px`;  // Add a 10px space above the side button
+
+            // Calculate the left and top positions for the toolbox
+            let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
+            let toolboxTop = y - toolbox.offsetHeight - 60;  // Add space above the side button
+
+            // Get the window's width and height
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            // Ensure the toolbox stays within the screen boundaries
+
+            // Check if the toolbox goes beyond the right side of the screen
+            if (toolboxLeft + toolbox.offsetWidth > windowWidth) {
+                toolboxLeft = windowWidth - toolbox.offsetWidth - 10;  // Keep it within the right boundary
+            }
+
+            // Check if the toolbox goes beyond the left side of the screen
+            if (toolboxLeft < 10) {
+                toolboxLeft = 10;  // Keep it within the left boundary
+            }
+
+            // Check if the toolbox goes beyond the top of the screen
+            if (toolboxTop < 10) {
+                toolboxTop = 10;  // Keep it within the top boundary
+            }
+
+            // Check if the toolbox goes beyond the bottom of the screen
+            if (toolboxTop + toolbox.offsetHeight > windowHeight) {
+                toolboxTop = windowHeight - toolbox.offsetHeight - 10;  // Keep it within the bottom boundary
+            }
+
+            // Apply the final position
+            toolbox.style.left = `${toolboxLeft}px`;
+            toolbox.style.top = `${toolboxTop}px`;
+             
         }
     });
 
