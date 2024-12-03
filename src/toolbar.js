@@ -162,47 +162,54 @@ MicAccessTool.prototype.createSideButton = function () {
 
     document.addEventListener('mousemove', (e) => {
         if (isDragging) {
-            const x = e.clientX - offsetX;
-            const y = e.clientY - offsetY;
+            let x = e.clientX - offsetX;
+            let y = e.clientY - offsetY;
 
+            // Get window width for snapping logic
+            const windowWidth = window.innerWidth;
+
+            // Determine whether to snap to the left or right edge
+            if (x + sideButton.offsetWidth / 2 < windowWidth / 2) {
+              
+                x = 10;  // 10px margin from the left side
+            } else {
+             
+                x = windowWidth - sideButton.offsetWidth - 20;  
+            }
+
+            // Apply the position to the side button
             sideButton.style.left = `${x}px`;
             sideButton.style.top = `${y}px`;
+
             const toolbox = document.getElementById('toolbox');
 
-            // Calculate the left and top positions for the toolbox
+            // Toolbox should follow the side button
             let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
-            let toolboxTop = y - toolbox.offsetHeight - 60;  // Add space above the side button
+            let toolboxTop = y - toolbox.offsetHeight - 60;  
 
-            // Get the window's width and height
-            const windowWidth = window.innerWidth;
+            // Ensure toolbox stays within the screen bounds horizontally
+            if (toolboxLeft + toolbox.offsetWidth > windowWidth) {
+                toolboxLeft = windowWidth - toolbox.offsetWidth - 10;
+            }
+            if (toolboxLeft < 10) {
+                toolboxLeft = 10;
+            }
+
+            // Get window height to ensure it stays within screen vertically
             const windowHeight = window.innerHeight;
 
-            // Ensure the toolbox stays within the screen boundaries
-
-            // Check if the toolbox goes beyond the right side of the screen
-            if (toolboxLeft + toolbox.offsetWidth > windowWidth) {
-                toolboxLeft = windowWidth - toolbox.offsetWidth - 10;  // Keep it within the right boundary
-            }
-
-            // Check if the toolbox goes beyond the left side of the screen
-            if (toolboxLeft < 10) {
-                toolboxLeft = 10;  // Keep it within the left boundary
-            }
-
-            // Check if the toolbox goes beyond the top of the screen
+            // Ensure toolbox stays within vertical bounds
             if (toolboxTop < 10) {
-                toolboxTop = 10;  // Keep it within the top boundary
+                toolboxTop = 10;
             }
 
-            // Check if the toolbox goes beyond the bottom of the screen
             if (toolboxTop + toolbox.offsetHeight > windowHeight) {
                 toolboxTop = windowHeight - toolbox.offsetHeight - 10;  // Keep it within the bottom boundary
             }
 
-            // Apply the final position
+            // Apply the final position to the toolbox
             toolbox.style.left = `${toolboxLeft}px`;
             toolbox.style.top = `${toolboxTop}px`;
-             
         }
     });
 
@@ -213,6 +220,7 @@ MicAccessTool.prototype.createSideButton = function () {
 
     document.body.appendChild(sideButton);
 };
+;
 
 MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
     this.createToolbox();
@@ -229,9 +237,8 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
         const buttonRect = sideButton.getBoundingClientRect();
         
         // Position the toolbox at the side button location
-        toolbox.style.left = `${buttonRect.left + buttonRect.width}px`;  // Position right of the button
-        toolbox.style.top = `${buttonRect.top}px`;  // Position vertically aligned with the button
-
+        toolbox.style.left = `${buttonRect.left + buttonRect.width}px`;  
+        toolbox.style.top = `${buttonRect.top}px`;  
         toolbox.classList.toggle('visible');
     });
 
