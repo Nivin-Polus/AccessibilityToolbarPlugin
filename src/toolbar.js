@@ -1,3 +1,4 @@
+
 'use strict';
 
 function MicAccessTool(init) {
@@ -25,6 +26,7 @@ function MicAccessTool(init) {
     this.initResetFeature();
     this.initContrastFeature();
     this.initSaveFeature();
+    this.addFontSizeDropdown();
 
 }
 
@@ -110,6 +112,7 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: '<i class="fas fa-volume-up"></i>' },
         { id: 'remove-images-btn', text: 'Remove Images', iconClass: '<i class="fa-regular fa-image"></i>' },
         { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
+        { id: 'font-size-btn', text: 'Font Size', iconClass: '<i class="fas fa-font"></i>' },
         { id: 'increase-text-btn', text: 'Increase Text', iconClass: '<i class="fas fa-text-height"></i>' },
         { id: 'decrease-text-btn', text: 'Decrease Text', iconClass: '<i class="fas fa-text-width"></i>' },
         { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
@@ -129,15 +132,25 @@ MicAccessTool.prototype.createToolbox = function () {
     
     const body = createDiv('toolbox-body');
 
-    buttons.forEach(({ id, text, iconClass }) => {
-        const button = createButton(id, text, iconClass);
-        body.appendChild(button);
-    });
-    toolbox.appendChild(header);
-    toolbox.appendChild(body);
+buttons.forEach(({ id, text, iconClass }) => {
+    // Create a div and set its class name to the button's name (id or text)
+    const buttonDiv = document.createElement('div');
+    buttonDiv.className = id || text.replace(/\s+/g, '-').toLowerCase(); // Use id or sanitized text
 
-    document.body.appendChild(toolbox);
-    this.resetButtonStates();
+    // Create the button and append it to the div
+    const button = createButton(id, text, iconClass);
+    buttonDiv.appendChild(button);
+
+    // Append the button div to the body
+    body.appendChild(buttonDiv);
+});
+
+toolbox.appendChild(header);
+toolbox.appendChild(body);
+
+document.body.appendChild(toolbox);
+this.resetButtonStates();
+
 };
 
 MicAccessTool.prototype.createSideButton = function () {
@@ -739,11 +752,11 @@ MicAccessTool.prototype.initFontSizeAdjustment = function () {
 
 // Adjust font size with limits
 MicAccessTool.prototype.adjustFontSize = function (action) {
-    const minFontSize = 12; 
+    const minFontSize = 12;
     const maxFontSize = 36;
     const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
 
-    let fontSizeUpdated = false; 
+    let fontSizeUpdated = false;
 
     allElements.forEach((element) => {
         const computedStyle = window.getComputedStyle(element);
@@ -765,19 +778,73 @@ MicAccessTool.prototype.adjustFontSize = function (action) {
     });
 
     if (fontSizeUpdated) {
-        // Dynamically capture the current font size and save the state
-        const bodyStyle = window.getComputedStyle(document.body);
-        const updatedFontSize = parseFloat(bodyStyle.fontSize);
-
-        // Save updated font size to state
-        this.saveToolbarState(); // Save the entire toolbar state, including font size
-
-        console.log(`Font size ${action}d to ${updatedFontSize}px.`);
+        const fontSizeDisplay = document.getElementById('font-size-display');
+        if (fontSizeDisplay) {
+            const bodyStyle = window.getComputedStyle(document.body);
+            fontSizeDisplay.textContent = `Font Size: ${parseFloat(bodyStyle.fontSize)}px`;
+        }
     } else {
         console.log('Font size adjustment limit reached.');
     }
 };
 
+
+MicAccessTool.prototype.addFontSizeDropdown = function () {
+    // Find the existing font size div
+    const fontSizeDiv = document.querySelector('.font-size-btn');
+
+    if (!fontSizeDiv) {
+        console.error('Font size div not found.');
+        return;
+    }
+
+    // Create the dropdown container
+    const fontDropdown = document.createElement('div');
+    fontDropdown.className = 'font-dropdown';
+    fontDropdown.style.display = 'none'; // Initially hidden
+    fontDropdown.style.width = '100%';
+    fontDropdown.style.backgroundColor = '#f9f9f9';
+    fontDropdown.style.padding = '10px';
+    fontDropdown.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+    fontDropdown.style.border = '1px solid #ddd';
+    fontDropdown.style.marginTop = '5px';
+
+    // Add + and - buttons and the font size display
+    const increaseButton = document.createElement('button');
+    increaseButton.textContent = '+';
+    increaseButton.style.margin = '5px';
+    increaseButton.style.padding = '8px 16px';
+    increaseButton.addEventListener('click', () => this.adjustFontSize('increase'));
+
+    const decreaseButton = document.createElement('button');
+    decreaseButton.textContent = '-';
+    decreaseButton.style.margin = '5px';
+    decreaseButton.style.padding = '8px 16px';
+    decreaseButton.addEventListener('click', () => this.adjustFontSize('decrease'));
+
+    const fontSizeDisplay = document.createElement('span');
+    fontSizeDisplay.id = 'font-size-display';
+    fontSizeDisplay.textContent = 'Font Size: 16px'; // Initial value
+    fontSizeDisplay.style.marginLeft = '10px';
+    fontSizeDisplay.style.fontWeight = 'bold';
+
+    // Append elements to the dropdown
+    fontDropdown.appendChild(decreaseButton);
+    fontDropdown.appendChild(fontSizeDisplay);
+    fontDropdown.appendChild(increaseButton);
+
+    // Append the dropdown to the font size div
+    fontSizeDiv.appendChild(fontDropdown);
+
+    // Toggle the dropdown on button click
+    const fontSizeButton = document.getElementById('font-size-btn');
+    if (fontSizeButton) {
+        fontSizeButton.addEventListener('click', () => {
+            const isVisible = fontDropdown.style.display === 'block';
+            fontDropdown.style.display = isVisible ? 'none' : 'block';
+        });
+    }
+};
 
 
 

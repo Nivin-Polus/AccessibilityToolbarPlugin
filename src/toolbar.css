@@ -836,8 +836,32 @@ button:active {
     border-radius: 4px;
 }
 
+/* Font */
 
+.font-dropdown {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none; /* Hidden initially */
+    width: 100%;
+    display: grid; /* Use Flexbox for horizontal layout */
+    align-items: center; /* Align items vertically in the center */
+    justify-content: space-between; /* Add space between the buttons and the font-size display */
+    gap: 10px; /* Add space between items */
+}
 
+.font-dropdown button {
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+}
 
-
-
+.font-dropdown span {
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: 10px;
+    flex-shrink: 0; /* Prevent the span from shrinking */
+}
