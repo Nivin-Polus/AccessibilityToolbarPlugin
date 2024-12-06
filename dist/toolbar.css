@@ -105,7 +105,7 @@
 }
 
 .toolbox-button {
-    background-color: white;
+    background-color: white !important;
     border: none;
     border-radius: 10px; 
     padding: 10px;
@@ -547,7 +547,7 @@ button:active {
 .night-mode .toolbox-button {
     background-color: #2e2e2e;
     border: 1px solid #444444;
-    color: #ffffff;
+    color: black !;
 }
 
 .night-mode .toolbox-title {
@@ -917,5 +917,46 @@ button:active {
     color: white;
     text-align: center;
     flex-grow: 1;
+}
+
+
+/* Setting Popup */
+
+.settings-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.settings-popup h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+}
+
+.popup-section {
+    margin-bottom: 15px;
+}
+
+.popup-close {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-close:hover {
+    background: #0056b3;
 }
 
