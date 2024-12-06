@@ -105,7 +105,7 @@
 }
 
 .toolbox-button {
-    background-color: white;
+    background-color: white !important;
     border: none;
     border-radius: 10px; 
     padding: 10px;
@@ -547,7 +547,7 @@ button:active {
 .night-mode .toolbox-button {
     background-color: #2e2e2e;
     border: 1px solid #444444;
-    color: #ffffff;
+    color: black !;
 }
 
 .night-mode .toolbox-title {
@@ -670,7 +670,7 @@ button:active {
 
 /* Accessible Font */
 
-/* Import Open Sans from Google Fonts top */
+
 
 
 /* Accessible Font Class */
@@ -859,26 +859,26 @@ button:active {
     margin-top: 5px;
     background-color: #f9f9f9;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: none; /* Hidden initially */
+    display: none; 
     width: 100%;
-    display: grid; /* Use Flexbox for horizontal layout */
-    align-items: center; /* Align items vertically in the center */
-    justify-content: space-between; /* Add space between the buttons and the font-size display */
-    gap: 10px; /* Add space between items */
+    display: grid; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 10px; 
 }
 
 .font-dropdown button {
     padding: 8px 16px;
     font-size: 16px;
     cursor: pointer;
-    flex-shrink: 0; /* Prevent buttons from shrinking */
+    flex-shrink: 0; 
 }
 
 .font-dropdown span {
     font-size: 18px;
     font-weight: bold;
     margin-left: 10px;
-    flex-shrink: 0; /* Prevent the span from shrinking */
+    flex-shrink: 0;
 }
 
 /* Toolbox top button */
@@ -917,5 +917,46 @@ button:active {
     color: white;
     text-align: center;
     flex-grow: 1;
+}
+
+
+/* Setting Popup */
+
+.settings-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    z-index: 1000;
+    width: 300px;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.settings-popup h3 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+}
+
+.popup-section {
+    margin-bottom: 15px;
+}
+
+.popup-close {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup-close:hover {
+    background: #0056b3;
 }
 

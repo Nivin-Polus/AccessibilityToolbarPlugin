@@ -95,12 +95,7 @@ function createHeading(level, text, className = '') {
 MicAccessTool.prototype.createToolbox = function () {
     const toolbox = createDiv('toolbox hidden', 'toolbox');
     const imageContainer = createDiv('toolbox-image-container');
-    // const image = createImage(
-    //     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmaznO2w-h9n4bz-pEGtsiqy0J1JGh-wlMCw&s',
-    //     'Accessibility Logo',
-    //     'toolbox-image'
-    // );
-    // imageContainer.appendChild(image);
+   
     toolbox.appendChild(imageContainer);
    // Header Section
    const header = createDiv('toolbox-header');
@@ -111,7 +106,7 @@ const headerLeft = createDiv('toolbox-header-left');
 const settingsButton = document.createElement('button');
 settingsButton.id = 'settings-btn';
 settingsButton.className = 'header-btn';
-settingsButton.innerHTML = '<i class="fas fa-cog"></i>'; // Add icon
+settingsButton.innerHTML = '<i class="fas fa-cog"></i>'; 
 headerLeft.style.position = "relative";
 headerLeft.style.bottom = "28%";
 headerLeft.appendChild(settingsButton);
@@ -148,6 +143,9 @@ closeButton.id = 'close-btn';
 closeButton.className = 'header-btn';
 closeButton.innerHTML = '<i class="fas fa-times"></i>'; // Add icon
 headerRight.appendChild(closeButton);
+settingsButton.addEventListener('click', () => {
+    createSettingsPopup();
+});
 
 // Append all parts to the header
 header.appendChild(headerLeft);
@@ -168,7 +166,7 @@ closeButton.addEventListener('click', closeToolboxFromButton);
 
 // Reset Button - Reuse Existing Reset Functionality
 resetButton.addEventListener('click', function () {
-    resetAllSettings(); 
+    initResetFeature(); 
 });
 
     const buttons = [
@@ -190,7 +188,7 @@ resetButton.addEventListener('click', function () {
         { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
         { id: 'contrast-btn', text: 'Contrast Modes', iconClass: '<i class="fas fa-adjust"></i>' },
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
-        { id: 'reset-btn', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
+        { id: 'reset-btn1', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
         { id: 'save-settings-btn', text: 'Save', iconClass: '<i class="fas fa-save"></i>' },
     ];
     
@@ -1601,13 +1599,16 @@ MicAccessTool.prototype.toggleAccessibleFont = function (buttonId) {
 // Reset Function
 
 MicAccessTool.prototype.initResetFeature = function () {
-    const resetButton = document.getElementById('reset-btn');
-    if (resetButton) {
-        resetButton.addEventListener('click', () => {
+    
+    const resetButtons = document.querySelectorAll('#reset-btn, #reset-btn1');
+
+  
+    resetButtons.forEach((button) => {
+        button.addEventListener('click', () => {
             this.resetToolbox(); 
         });
-    }
-};
+    });
+}
 
 
 MicAccessTool.prototype.resetToolbox = function () {
@@ -1666,7 +1667,6 @@ MicAccessTool.prototype.resetToolbox = function () {
     // Trigger resetContrast function to handle contrast settings
     this.resetContrast();
 
-    // Clear toolbox-specific local storage settings
    // Clear toolbox-specific local storage settings
    localStorage.removeItem('animationsDisabled');
    localStorage.removeItem('nightMode');
@@ -2234,6 +2234,69 @@ MicAccessTool.prototype.resetSettings = function () {
     this.resetToolbox();
     console.log('Toolbar state reset.');
 };
+
+// Setting button functions
+
+function createSettingsPopup() {
+    // Check if the popup already exists
+    if (document.querySelector('.settings-popup')) return;
+
+    // Create the popup container
+    const popup = document.createElement('div');
+    popup.className = 'settings-popup';
+
+    const header = document.createElement('div');
+    header.className = 'settings-popup-header';
+    header.style.backgroundColor = '#007bff'; // Set your desired color
+
+    // Add title to the popup
+    const title = document.createElement('h3');
+    title.textContent = 'Settings';
+    popup.appendChild(title);
+
+    // Create language selector
+    const languageSelector = document.createElement('div');
+    languageSelector.className = 'popup-section';
+    const languageLabel = document.createElement('label');
+    languageLabel.textContent = 'Select Language: ';
+    languageLabel.for = 'language-select';
+    const languageDropdown = document.createElement('select');
+    languageDropdown.id = 'language-select';
+    languageDropdown.innerHTML = `
+        <option value="en">English</option>
+        <option value="de">German</option>
+    `;
+    languageSelector.appendChild(languageLabel);
+    languageSelector.appendChild(languageDropdown);
+
+    // Create color picker
+    const colorPicker = document.createElement('div');
+    colorPicker.className = 'popup-section';
+    const colorLabel = document.createElement('label');
+    colorLabel.textContent = 'Pick a Color: ';
+    const colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.id = 'color-picker';
+    colorPicker.appendChild(colorLabel);
+    colorPicker.appendChild(colorInput);
+
+    // Add a close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Close';
+    closeButton.className = 'popup-close';
+    closeButton.addEventListener('click', () => {
+        popup.remove(); // Remove the popup when close is clicked
+    });
+
+    // Append sections to the popup
+    popup.appendChild(languageSelector);
+    popup.appendChild(colorPicker);
+    popup.appendChild(closeButton);
+
+    // Add the popup to the document body
+    document.body.appendChild(popup);
+}
+
 
 
 
