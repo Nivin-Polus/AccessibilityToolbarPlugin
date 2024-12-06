@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap');
 /* General Reset */
 * {
     margin: 0;
@@ -25,31 +26,25 @@
 }
 
 /* Toolbox Window */
+/* Updated Toolbox Styling */
 .toolbox {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 25px;
+    background-color: #EFF1F5; /* Updated background color */
+    border-radius: 15px; /* Adjusted border-radius */
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 300px; 
-    height: 80%;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     position: fixed;
     right: 20px;
-    bottom: 18%;
+    bottom: 80px;
+    width: 350px;
+    height: 80%; 
     visibility: hidden;
     opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 999 !important;
-    visibility: hidden;
-    opacity: 0;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
+    overflow: hidden; /* Prevent scrolling sideways */
+    padding: 10px;
 }
 
-/* Visible State for Toolbox */
+/* Toolbox Visible State */
 .toolbox.visible {
     visibility: visible;
     opacity: 1;
@@ -57,35 +52,44 @@
 
 /* Toolbox Header */
 .toolbox-header {
-    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-    padding-bottom: 20px;
-    margin-bottom: 15px;
-    text-align: center;
-    width: 100%;
-    position: sticky; 
-    top: 0; 
-    z-index: 1; 
-    background: rgba(255, 255, 255, 0.2); 
+    background-color: #393636; 
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 15px 15px 0 0;
+    height: 12%;
+    position: relative;
+}
+
+.toolbox-logo {
+    height: 30px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .toolbox-title {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: black;
+    font-size: 0.7rem;
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    top: 84%;
+    transform: translate(-50%, -50%);
+    text-align: center;
 }
 
-/* Toolbox Body */
+/* Toolbox Buttons */
 .toolbox-body {
     display: grid;
-    grid-template-columns: 1fr 1fr; 
-    gap: 15px;
-    width: 100%;
-    justify-items: center;
-    overflow-y: auto; 
-    padding-right: 10px; 
-    max-height: calc(80vh - 60px); 
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+    text-align: center;
+    overflow-y: auto;
+    max-height: calc(80vh - 60px); /* Updated height for scrolling */
 }
-
 
 .toolbox-body::-webkit-scrollbar {
     width: 8px;
@@ -100,79 +104,92 @@
     background: rgba(255, 255, 255, 0.2); 
 }
 
-/* Buttons in Toolbox */
-
 .toolbox-button {
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
-    gap: 5px; 
-    background-color: rgba(255, 255, 255, 0.3); 
-    color: #333; 
-    border: 2px solid rgba(255, 255, 255, 0.5); 
-    border-radius: 50px; 
-    padding: 15px;
-    font-size: 0.9rem; 
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    width: 100%;
-    height: 90px; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-height: 80vh;
-    overflow: hidden; 
-}
-
-/* Change background and text color on hover */
-.toolbox-button:hover {
-    background-color: rgba(52, 88, 185, 1); 
-    transform: scale(1.05);
-    color:rgba(71, 146, 216);
-}
-
-/* Active button styling */
-.toolbox-button.active {
-    background-color: rgba(52, 88, 185, 1); 
-    color: white; 
-    transform: scale(1); 
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); 
-}
-
-/* Style the icons */
-.toolbox-button i {
-    font-size: 1.5rem; 
-    color: inherit; /
-}
-
-/* Optional: Reduce gap for small buttons */
-.toolbox-button span {
+    background-color: white;
+    border: none;
+    border-radius: 10px; 
+    padding: 10px;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    box-shadow: 0px 3px 4px rgb(0 0 0 / 3%);
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s;
+    width: 100%; /* Takes full grid cell width */
+    max-width: 90px; /* Standardizes button width */
+    height: 94px; /* Standardizes button height */
 }
 
-/* Toolbox Image */
-.toolbox-image-container {
-    margin-bottom: 20px;
-    text-align: center;
+.toolbox-button i {
+    font-size: 1rem; 
+    color: #393636;
+    margin-bottom: 5px;
 }
 
-.toolbox-image {
-    width: 70px;
-    height: auto;
+.toolbox-button span {
+    font-size: 14px; 
+    color: #333;
+}
+
+.toolbox-button:hover {
+    border: 1px solid black; 
+}
+
+/* Side Button */
+.side-button {
+    background-color: transparent;
+    border: none;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
+
+.side-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.side-button:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive Styling */
+@media (max-width: 480px) {
+    .toolbox {
+        max-width: 80%;
+    }
+
+    .toolbox-body {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .toolbox-button {
+        height: 70px;
+    }
+
+    .toolbox-button span {
+        font-size: 11px;
+    }
+}
+
 
 /* Side Button Styling */
 .side-button {
     background-color: transparent;
     border: none;
     position: fixed;
-    right : 20px; 
+    right: 20px; /* Initial position */
     bottom: 0%; 
     transform: translateY(-50%);
     cursor: pointer;
@@ -185,6 +202,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     border-radius: 50%;
     transition: all 0.3s ease;
+    z-index: 1000; /* Ensure it appears above other elements */
 }
 
 .side-button img {
@@ -198,6 +216,7 @@
     transform: translateY(-50%) scale(1.1); 
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
+
 /* Blue Filter */
 
 .blue-overlay {
@@ -220,7 +239,7 @@
 
   button {
     background: #444;
-    color: white;
+    color: #393636;
     border: none;
     padding: 5px 10px;
     border-radius: 5px;
@@ -651,15 +670,15 @@ button:active {
 
 /* Accessible Font */
 
-/* Import Open Sans from Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400&display=swap');
+
+
 
 /* Accessible Font Class */
 .accessible-font {
     font-family: 'Open Sans', Arial, sans-serif !important;
-    line-height: 1.6; 
-    letter-spacing: 0.05em; 
-    font-size: 18px;
+    line-height: 1.6 !important; 
+    letter-spacing: 0.05em !important; 
+    font-size: 18px !important;
 }
 
 /* Contrast Modes */
@@ -720,7 +739,7 @@ button:active {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
-    background-color: rgba(255, 255, 255, 0.3); 
+    background-color: rgba(255, 255, 255, 0.7); 
     color: #333; 
     border: 2px solid rgba(255, 255, 255, 0.5); 
 }
@@ -768,6 +787,10 @@ button:active {
 
 .contrast-reset-button:hover {
     background-color: #4e5dec;
+}
+
+.grayscale {
+    filter: grayscale(1);
 }
 
 
@@ -828,12 +851,71 @@ button:active {
     border-radius: 4px;
 }
 
-/* Contrast */
+/* Font */
 
-.grayscale {
-    filter: grayscale(1);
+.font-dropdown {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: none; 
+    width: 100%;
+    display: grid; 
+    align-items: center; 
+    justify-content: space-between; 
+    gap: 10px; 
+}
+
+.font-dropdown button {
+    padding: 8px 16px;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0; 
+}
+
+.font-dropdown span {
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: 10px;
+    flex-shrink: 0;
+}
+
+/* Toolbox top button */
+
+/* Scoped Header Buttons */
+.toolbox-header-left .header-btn,
+.toolbox-header-right .header-btn {
+    background: none;
+    border: 4px solid transparent;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s, border 0.2s;
+}
+
+.toolbox-header-left .header-btn:hover,
+.toolbox-header-right .header-btn:hover {
+    transform: scale(1.1); 
+    border-color: black;
 }
 
 
 
+/* Logo Styling */
+.toolbox-logo {
+    height: 45px;
+    width: auto;
+    top: 8%;
+}
+
+/* Title Styling */
+.toolbox-title {
+    
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    flex-grow: 1;
+}
 
