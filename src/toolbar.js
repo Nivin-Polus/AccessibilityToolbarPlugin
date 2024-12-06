@@ -155,6 +155,22 @@ header.appendChild(logo);
 header.appendChild(title);
 header.appendChild(headerRight);
 
+// Dedicated close function for the close button
+function closeToolboxFromButton() {
+    const toolbox = document.querySelector('.toolbox');
+    if (toolbox) {
+        toolbox.classList.remove('visible');
+    }
+}
+
+// Link the function to the close button
+closeButton.addEventListener('click', closeToolboxFromButton);
+
+// Reset Button - Reuse Existing Reset Functionality
+resetButton.addEventListener('click', function () {
+    resetAllSettings(); 
+});
+
     const buttons = [
         { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: '<i class="fas fa-adjust"></i>' },
         { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: '<i class="fas fa-volume-up"></i>' },
