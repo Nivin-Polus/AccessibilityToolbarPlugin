@@ -57,15 +57,28 @@ function createElement(tag, attributes = {}, innerText = '') {
 }
 
 // Specific Element Creators
-function createButton(id, text, iconHtml = '') {
+function createButton(id, text, icon = '') {
     // Create the button element
-    const button = createElement('button', { class: 'toolbox-button', id: id },);
+    const button = document.createElement('button');
+    button.className = 'toolbox-button';
+    button.id = id;
 
-    // Add icon (if iconHtml is provided)
-    if (iconHtml) {
-        const iconWrapper = document.createElement('span'); 
-        iconWrapper.innerHTML = iconHtml; 
-        button.appendChild(iconWrapper); 
+    // Check if the icon is a URL or Font Awesome class
+    if (icon) {
+        if (icon.startsWith('http://') || icon.startsWith('https://')) {
+            // Add image icon
+            const iconImg = document.createElement('img');
+            iconImg.src = icon;
+            iconImg.alt = `${text} Icon`; // Add a descriptive alt for accessibility
+            iconImg.className = 'button-icon'; // Add a class for styling
+            button.appendChild(iconImg);
+        } else {
+            // Add Font Awesome icon
+            const iconWrapper = document.createElement('span');
+            iconWrapper.innerHTML = icon; // Add Font Awesome HTML (e.g., `<i class="fas fa-adjust"></i>`)
+            iconWrapper.className = 'font-awesome-icon'; // Add class for additional styling if needed
+            button.appendChild(iconWrapper);
+        }
     }
 
     // Add the button text
@@ -74,6 +87,7 @@ function createButton(id, text, iconHtml = '') {
 
     return button;
 }
+
 
 
 
@@ -170,23 +184,23 @@ resetButton.addEventListener('click', function () {
 });
 
     const buttons = [
-        { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: '<i class="fas fa-adjust"></i>' },
-        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: '<i class="fas fa-volume-up"></i>' },
-        { id: 'remove-images-btn', text: 'Remove Images', iconClass: '<i class="fa-regular fa-image"></i>' },
+        { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/BlueFilter-1.svg'  },
+        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/read-aloud.svg' },
+        { id: 'remove-images-btn', text: 'Remove Images', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/image-off.svg' },
         { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
-        { id: 'font-size-btn', text: 'Font Size', iconClass: '<i class="fas fa-font"></i>' },
+        { id: 'font-size-btn', text: 'Font Size', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/fontsize.svg' },
         // { id: 'increase-text-btn', text: 'Increase Text', iconClass: '<i class="fas fa-text-height"></i>' },
         // { id: 'decrease-text-btn', text: 'Decrease Text', iconClass: '<i class="fas fa-text-width"></i>' },
         { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
         { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
         { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
-        { id: 'night-mode-btn', text: 'Night Mode', iconClass: '<i class="fas fa-moon"></i>' },
+        { id: 'night-mode-btn', text: 'Night Mode', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/mode-night.svg' },
         { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
         { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
         { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
-        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: '<i class="fas fa-adjust"></i>' },
+        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/contrast.svg' },
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         { id: 'reset-btn1', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
         { id: 'save-settings-btn', text: 'Save', iconClass: '<i class="fas fa-save"></i>' },
