@@ -119,7 +119,7 @@ headerLeft.appendChild(resetButton);
 
 // Center Logo and Title
 const logo = document.createElement('img');
-logo.src = 'assests/image.png';
+logo.src = 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/image.png';
 logo.alt = 'Logo';
 logo.className = 'toolbox-logo';
 
@@ -2245,14 +2245,18 @@ function createSettingsPopup() {
     const popup = document.createElement('div');
     popup.className = 'settings-popup';
 
+    // Create the popup header
     const header = document.createElement('div');
     header.className = 'settings-popup-header';
-    header.style.backgroundColor = '#007bff'; // Set your desired color
+    header.style.backgroundColor = '#007bff'; // Default header background color
 
-    // Add title to the popup
-    const title = document.createElement('h3');
-    title.textContent = 'Settings';
-    popup.appendChild(title);
+    const headerTitle = document.createElement('h3');
+    headerTitle.textContent = 'Settings';
+    headerTitle.style.color = 'white'; // Default header text color
+    header.appendChild(headerTitle);
+
+    // Add the header to the popup
+    popup.appendChild(header);
 
     // Create language selector
     const languageSelector = document.createElement('div');
@@ -2277,25 +2281,63 @@ function createSettingsPopup() {
     const colorInput = document.createElement('input');
     colorInput.type = 'color';
     colorInput.id = 'color-picker';
+    colorInput.value = '#007bff'; // Default color
     colorPicker.appendChild(colorLabel);
     colorPicker.appendChild(colorInput);
 
-    // Add a close button
-    const closeButton = document.createElement('button');
-    closeButton.textContent = 'Close';
-    closeButton.className = 'popup-close';
-    closeButton.addEventListener('click', () => {
-        popup.remove(); // Remove the popup when close is clicked
+  // Handle color changes
+    colorInput.addEventListener('input', (event) => {
+        const selectedColor = event.target.value;
+
+        // Change popup header background color
+        header.style.backgroundColor = selectedColor;
+
+        // Change popup title text color
+        headerTitle.style.color = selectedColor;
+
+        // Change toolbox header background color
+        const toolboxHeader = document.querySelector('.toolbox-header');
+        if (toolboxHeader) toolboxHeader.style.backgroundColor = selectedColor;
+
+        // Change toolbox icons and text inside buttons, excluding header buttons
+        const toolboxIcons = document.querySelectorAll('.toolbox-body .toolbox-btn i, .toolbox-body .toolbox-btn span, .toolbox-body svg');
+        toolboxIcons.forEach(icon => {
+            if (icon.tagName === 'svg') {
+                icon.style.fill = selectedColor;
+            } else {
+                icon.style.color = selectedColor;
+            }
+        });
+
+        // Change background color of toolbox buttons
+        const toolboxButtons = document.querySelectorAll('.toolbox-body .toolbox-btn, .toolbox-button');
+        toolboxButtons.forEach(button => {
+            button.style.backgroundColor = selectedColor;
+            button.style.borderColor = selectedColor; 
+            button.style.color = selectedColor; 
+        });
+
     });
 
-    // Append sections to the popup
-    popup.appendChild(languageSelector);
-    popup.appendChild(colorPicker);
-    popup.appendChild(closeButton);
+    
 
-    // Add the popup to the document body
-    document.body.appendChild(popup);
+// Add a close button
+const closeButton = document.createElement('button');
+closeButton.textContent = 'Close';
+closeButton.className = 'popup-close';
+closeButton.addEventListener('click', () => {
+    popup.remove(); // Remove the popup when close is clicked
+});
+
+// Append sections to the popup
+popup.appendChild(languageSelector);
+popup.appendChild(colorPicker);
+popup.appendChild(closeButton);
+
+// Add the popup to the document body
+document.body.appendChild(popup);
 }
+
 
 
 
