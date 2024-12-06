@@ -95,17 +95,65 @@ function createHeading(level, text, className = '') {
 MicAccessTool.prototype.createToolbox = function () {
     const toolbox = createDiv('toolbox hidden', 'toolbox');
     const imageContainer = createDiv('toolbox-image-container');
-    const image = createImage(
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmaznO2w-h9n4bz-pEGtsiqy0J1JGh-wlMCw&s',
-        'Accessibility Logo',
-        'toolbox-image'
-    );
-    imageContainer.appendChild(image);
+    // const image = createImage(
+    //     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmaznO2w-h9n4bz-pEGtsiqy0J1JGh-wlMCw&s',
+    //     'Accessibility Logo',
+    //     'toolbox-image'
+    // );
+    // imageContainer.appendChild(image);
     toolbox.appendChild(imageContainer);
+   // Header Section
+   const header = createDiv('toolbox-header');
 
-    const header = createDiv('toolbox-header');
-    const title = createHeading(2, 'Accessibility Toolbox', 'toolbox-title');
-    header.appendChild(title);
+   // Left Buttons
+const headerLeft = createDiv('toolbox-header-left');
+
+const settingsButton = document.createElement('button');
+settingsButton.id = 'settings-btn';
+settingsButton.className = 'header-btn';
+settingsButton.innerHTML = '<i class="fas fa-cog"></i>'; // Add icon
+headerLeft.style.position = "relative";
+headerLeft.style.bottom = "28%";
+headerLeft.appendChild(settingsButton);
+
+const resetButton = document.createElement('button');
+resetButton.id = 'reset-btn';
+resetButton.className = 'header-btn';
+resetButton.innerHTML = '<i class="fas fa-undo"></i>'; // Add icon
+headerLeft.appendChild(resetButton);
+
+// Center Logo and Title
+const logo = document.createElement('img');
+logo.src = 'assests/image.png';
+logo.alt = 'Logo';
+logo.className = 'toolbox-logo';
+
+const title = document.createElement('h2');
+title.className = 'toolbox-title';
+title.textContent = 'Site Point Eye Assistant';
+
+// Right Buttons
+const headerRight = createDiv('toolbox-header-right');
+
+const infoButton = document.createElement('button');
+infoButton.id = 'info-btn';
+infoButton.className = 'header-btn';
+infoButton.innerHTML = '<i class="fas fa-info-circle"></i>'; // Add icon
+headerRight.style.position = "relative";
+headerRight.style.bottom = "28%";
+headerRight.appendChild(infoButton);
+
+const closeButton = document.createElement('button');
+closeButton.id = 'close-btn';
+closeButton.className = 'header-btn';
+closeButton.innerHTML = '<i class="fas fa-times"></i>'; // Add icon
+headerRight.appendChild(closeButton);
+
+// Append all parts to the header
+header.appendChild(headerLeft);
+header.appendChild(logo);
+header.appendChild(title);
+header.appendChild(headerRight);
 
     const buttons = [
         { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: '<i class="fas fa-adjust"></i>' },
@@ -113,8 +161,8 @@ MicAccessTool.prototype.createToolbox = function () {
         { id: 'remove-images-btn', text: 'Remove Images', iconClass: '<i class="fa-regular fa-image"></i>' },
         { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
         { id: 'font-size-btn', text: 'Font Size', iconClass: '<i class="fas fa-font"></i>' },
-        { id: 'increase-text-btn', text: 'Increase Text', iconClass: '<i class="fas fa-text-height"></i>' },
-        { id: 'decrease-text-btn', text: 'Decrease Text', iconClass: '<i class="fas fa-text-width"></i>' },
+        // { id: 'increase-text-btn', text: 'Increase Text', iconClass: '<i class="fas fa-text-height"></i>' },
+        // { id: 'decrease-text-btn', text: 'Decrease Text', iconClass: '<i class="fas fa-text-width"></i>' },
         { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
         { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
@@ -788,62 +836,81 @@ MicAccessTool.prototype.adjustFontSize = function (action) {
     }
 };
 
-
+// Font size dropdown
 MicAccessTool.prototype.addFontSizeDropdown = function () {
-    // Find the existing font size div
-    const fontSizeDiv = document.querySelector('.font-size-btn');
+    // Find the Font Size button's parent container
+    const fontSizeDiv = document.querySelector('.font-size-btn'); // Assuming this is the button's class
 
     if (!fontSizeDiv) {
-        console.error('Font size div not found.');
+        console.error('Font Size button not found.');
         return;
     }
+
+    // Wrap the button in a container if not already done
+    const fontSizeWrapper = fontSizeDiv.closest('.button-with-dropdown') || document.createElement('div');
+    fontSizeWrapper.className = 'button-with-dropdown';
+    fontSizeWrapper.style.gridColumn = 'span 1'; // Default spans 1 column
+    fontSizeWrapper.style.position = 'relative'; // For dropdown positioning
+    fontSizeWrapper.style.width = '100%'; 
 
     // Create the dropdown container
     const fontDropdown = document.createElement('div');
     fontDropdown.className = 'font-dropdown';
     fontDropdown.style.display = 'none'; // Initially hidden
-    fontDropdown.style.width = '100%';
-    fontDropdown.style.backgroundColor = '#f9f9f9';
-    fontDropdown.style.padding = '10px';
-    fontDropdown.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-    fontDropdown.style.border = '1px solid #ddd';
-    fontDropdown.style.marginTop = '5px';
+    fontDropdown.innerHTML = `
+        <button id="decrease-font-btn">-</button>
+        <span id="font-size-display">Font Size: 16px</span>
+        <button id="increase-font-btn">+</button>
+    `;
 
-    // Add + and - buttons and the font size display
-    const increaseButton = document.createElement('button');
-    increaseButton.textContent = '+';
-    increaseButton.style.margin = '5px';
-    increaseButton.style.padding = '8px 16px';
-    increaseButton.addEventListener('click', () => this.adjustFontSize('increase'));
+    // Append dropdown to the wrapper
+    fontSizeWrapper.appendChild(fontDropdown);
 
-    const decreaseButton = document.createElement('button');
-    decreaseButton.textContent = '-';
-    decreaseButton.style.margin = '5px';
-    decreaseButton.style.padding = '8px 16px';
-    decreaseButton.addEventListener('click', () => this.adjustFontSize('decrease'));
-
-    const fontSizeDisplay = document.createElement('span');
-    fontSizeDisplay.id = 'font-size-display';
-    fontSizeDisplay.textContent = 'Font Size: 16px'; // Initial value
-    fontSizeDisplay.style.marginLeft = '10px';
-    fontSizeDisplay.style.fontWeight = 'bold';
-
-    // Append elements to the dropdown
-    fontDropdown.appendChild(decreaseButton);
-    fontDropdown.appendChild(fontSizeDisplay);
-    fontDropdown.appendChild(increaseButton);
-
-    // Append the dropdown to the font size div
-    fontSizeDiv.appendChild(fontDropdown);
-
-    // Toggle the dropdown on button click
-    const fontSizeButton = document.getElementById('font-size-btn');
-    if (fontSizeButton) {
-        fontSizeButton.addEventListener('click', () => {
-            const isVisible = fontDropdown.style.display === 'block';
-            fontDropdown.style.display = isVisible ? 'none' : 'block';
-        });
+    // Append the wrapper back to the grid if it was created dynamically
+    const toolboxBody = document.querySelector('.toolbox-body');
+    if (!fontSizeDiv.closest('.button-with-dropdown')) {
+        toolboxBody.replaceChild(fontSizeWrapper, fontSizeDiv);
+        fontSizeWrapper.appendChild(fontSizeDiv); // Move the button inside the wrapper
     }
+
+    // Add click event to toggle dropdown and expand to three columns
+    fontSizeDiv.addEventListener('click', () => {
+        const isVisible = fontDropdown.style.display === 'block';
+
+        // Collapse any previously expanded item
+        toolboxBody.querySelectorAll('.button-with-dropdown').forEach((el) => {
+            el.style.gridColumn = 'span 1';
+            const dropdown = el.querySelector('.font-dropdown');
+            if (dropdown) dropdown.style.display = 'none';
+        });
+
+        // Expand or collapse the current dropdown
+        fontDropdown.style.display = isVisible ? 'none' : 'block';
+        fontSizeWrapper.style.gridColumn = isVisible ? 'span 1' : 'span 3';
+    });
+
+    // Add functionality to the dropdown buttons
+    const decreaseButton = fontDropdown.querySelector('#decrease-font-btn');
+    const increaseButton = fontDropdown.querySelector('#increase-font-btn');
+    const fontSizeDisplay = fontDropdown.querySelector('#font-size-display');
+
+    let fontSize = 16;
+
+    decreaseButton.addEventListener('click', () => {
+        if (fontSize > 10) {
+            fontSize -= 2;
+            fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
+            document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+        }
+    });
+
+    increaseButton.addEventListener('click', () => {
+        if (fontSize < 30) {
+            fontSize += 2;
+            fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
+            document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+        }
+    });
 };
 
 
