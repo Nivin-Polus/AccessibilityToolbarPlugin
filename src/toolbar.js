@@ -199,7 +199,7 @@ resetButton.addEventListener('click', function () {
 buttons.forEach(({ id, text, iconClass }) => {
     // Create a div and set its class name to the button's name (id or text)
     const buttonDiv = document.createElement('div');
-    buttonDiv.className = id || text.replace(/\s+/g, '-').toLowerCase(); // Use id or sanitized text
+    buttonDiv.className = id || text.replace(/\s+/g, '-').toLowerCase(); 
 
     // Create the button and append it to the div
     const button = createButton(id, text, iconClass);
@@ -242,13 +242,13 @@ MicAccessTool.prototype.createSideButton = function () {
             let x = e.clientX - offsetX;
             let y = e.clientY - offsetY;
 
-            // Get window width for snapping logic
+          
             const windowWidth = window.innerWidth;
 
-            // Determine whether to snap to the left or right edge
+           
             if (x + sideButton.offsetWidth / 2 < windowWidth / 2) {
               
-                x = 10;  // 10px margin from the left side
+                x = 10;  
             } else {
              
                 x = windowWidth - sideButton.offsetWidth - 20;  
@@ -281,7 +281,7 @@ MicAccessTool.prototype.createSideButton = function () {
             }
 
             if (toolboxTop + toolbox.offsetHeight > windowHeight) {
-                toolboxTop = windowHeight - toolbox.offsetHeight - 10;  // Keep it within the bottom boundary
+                toolboxTop = windowHeight - toolbox.offsetHeight - 10;  
             }
 
             // Apply the final position to the toolbox
