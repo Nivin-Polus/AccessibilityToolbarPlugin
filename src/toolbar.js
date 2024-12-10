@@ -26,7 +26,8 @@ function MicAccessTool(init) {
     this.initResetFeature();
     this.initContrastFeature();
     this.initSaveFeature();
-    this.addFontSizeDropdown();
+    this.addFontSizePopup();
+    this.addSettingsButtonListener();
 
 }
 
@@ -63,30 +64,48 @@ function createButton(id, text, icon = '') {
     button.className = 'toolbox-button';
     button.id = id;
 
+    // Create a wrapper div for the icon
+    const iconWrapper = document.createElement('div');
+    iconWrapper.className = 'icon-wrapper';
+
     // Check if the icon is a URL or Font Awesome class
     if (icon) {
-        if (icon.startsWith('http://') || icon.startsWith('https://')) {
-            // Add image icon
-            const iconImg = document.createElement('img');
-            iconImg.src = icon;
-            iconImg.alt = `${text} Icon`; // Add a descriptive alt for accessibility
-            iconImg.className = 'button-icon'; // Add a class for styling
-            button.appendChild(iconImg);
+        if (icon.startsWith('./') || icon.startsWith('/')) {
+            // Add inline SVG from local path
+            fetch(icon)
+                .then(response => response.text())
+                .then(svgContent => {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = svgContent;
+
+                    const svgElement = tempDiv.querySelector('svg');
+                    if (svgElement) {
+                        svgElement.classList.add('button-icon'); // Add a class for styling
+                        iconWrapper.appendChild(svgElement); // Append inline SVG to the wrapper
+                    }
+                })
+                .catch(error => console.error('Error fetching SVG:', error));
         } else {
             // Add Font Awesome icon
-            const iconWrapper = document.createElement('span');
-            iconWrapper.innerHTML = icon; // Add Font Awesome HTML (e.g., `<i class="fas fa-adjust"></i>`)
-            iconWrapper.className = 'font-awesome-icon'; // Add class for additional styling if needed
-            button.appendChild(iconWrapper);
+            const fontAwesomeIcon = document.createElement('span');
+            fontAwesomeIcon.innerHTML = icon; // Use the provided Font Awesome HTML
+            fontAwesomeIcon.className = 'font-awesome-icon'; // Add a class for styling
+            iconWrapper.appendChild(fontAwesomeIcon); // Append the Font Awesome icon to the wrapper
         }
     }
 
+    // Add the icon wrapper to the button
+    button.appendChild(iconWrapper);
+
     // Add the button text
-    const textNode = document.createTextNode(text);
-    button.appendChild(textNode);
+    const textWrapper = document.createElement('div');
+    textWrapper.className = 'text-wrapper';
+    textWrapper.textContent = text;
+    button.appendChild(textWrapper);
 
     return button;
 }
+
 
 
 
@@ -184,23 +203,21 @@ resetButton.addEventListener('click', function () {
 });
 
     const buttons = [
-        { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/BlueFilter-1.svg'  },
-        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/read-aloud.svg' },
-        { id: 'remove-images-btn', text: 'Remove Images', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/image-off.svg' },
+        { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: './assests/BlueFilter-1.svg'  },
+        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: './assests/read-aloud.svg' },
+        { id: 'remove-images-btn', text: 'Remove Images', iconClass: './assests/image-off.svg' },
         { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
-        { id: 'font-size-btn', text: 'Font Size', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/fontsize.svg' },
-        // { id: 'increase-text-btn', text: 'Increase Text', iconClass: '<i class="fas fa-text-height"></i>' },
-        // { id: 'decrease-text-btn', text: 'Decrease Text', iconClass: '<i class="fas fa-text-width"></i>' },
+        { id: 'font-size-btn', text: 'Font Size', iconClass: './assests/fontsize.svg' },
         { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
         { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
         { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
-        { id: 'night-mode-btn', text: 'Night Mode', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/mode-night.svg' },
+        { id: 'night-mode-btn', text: 'Night Mode', iconClass: './assests/mode-night.svg' },
         { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
         { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
         { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
-        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/contrast.svg' },
+        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: './assests/contrast.svg' },
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         { id: 'reset-btn1', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
         { id: 'save-settings-btn', text: 'Save', iconClass: '<i class="fas fa-save"></i>' },
@@ -238,78 +255,105 @@ MicAccessTool.prototype.createSideButton = function () {
     );
     sideButton.appendChild(buttonImage);
 
-    // Make the side button draggable
-    let isDragging = false;
-    let offsetX, offsetY;
 
-    sideButton.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        offsetX = e.clientX - sideButton.offsetLeft;
-        offsetY = e.clientY - sideButton.offsetTop;
-        document.body.style.cursor = 'move';
-    });
+ // Make the side button draggable
+let isDragging = false;
+let offsetX, offsetY;
 
-    document.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            let x = e.clientX - offsetX;
-            let y = e.clientY - offsetY;
+sideButton.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    offsetX = e.clientX - sideButton.offsetLeft;
+    offsetY = e.clientY - sideButton.offsetTop;
+    document.body.style.cursor = 'move';
+});
 
-          
-            const windowWidth = window.innerWidth;
+document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        let x = e.clientX - offsetX;
+        let y = e.clientY - offsetY;
 
-           
-            if (x + sideButton.offsetWidth / 2 < windowWidth / 2) {
-              
-                x = 10;  
-            } else {
-             
-                x = windowWidth - sideButton.offsetWidth - 20;  
-            }
+        const windowWidth = window.innerWidth;
 
-            // Apply the position to the side button
-            sideButton.style.left = `${x}px`;
-            sideButton.style.top = `${y}px`;
+        // Snap side button to left or right based on the screen center
+        if (x + sideButton.offsetWidth / 2 < windowWidth / 2) {
+            x = 10; // Align to the left edge
+        } else {
+            x = windowWidth - sideButton.offsetWidth - 20; // Align to the right edge
+        }
 
-            const toolbox = document.getElementById('toolbox');
+        // Apply the position to the side button
+        sideButton.style.left = `${x}px`;
+        sideButton.style.top = `${y}px`;
 
-            // Toolbox should follow the side button
-            let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
-            let toolboxTop = y - toolbox.offsetHeight - 60;  
+        const toolbox = document.getElementById('toolbox');
 
-            // Ensure toolbox stays within the screen bounds horizontally
-            if (toolboxLeft + toolbox.offsetWidth > windowWidth) {
-                toolboxLeft = windowWidth - toolbox.offsetWidth - 10;
-            }
-            if (toolboxLeft < 10) {
-                toolboxLeft = 10;
-            }
+        // Toolbox should follow the side button
+        let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
+        let toolboxTop = y - toolbox.offsetHeight - 60;
 
-            // Get window height to ensure it stays within screen vertically
-            const windowHeight = window.innerHeight;
+        // Ensure toolbox stays within the screen bounds horizontally
+        if (toolboxLeft + toolbox.offsetWidth > windowWidth) {
+            toolboxLeft = windowWidth - toolbox.offsetWidth - 10;
+        }
+        if (toolboxLeft < 10) {
+            toolboxLeft = 10;
+        }
 
-            // Ensure toolbox stays within vertical bounds
-            if (toolboxTop < 10) {
-                toolboxTop = 10;
-            }
+        // Get window height to ensure it stays within screen vertically
+        const windowHeight = window.innerHeight;
 
-            if (toolboxTop + toolbox.offsetHeight > windowHeight) {
-                toolboxTop = windowHeight - toolbox.offsetHeight - 10;  
-            }
+        // Ensure toolbox stays within vertical bounds
+        if (toolboxTop < 10) {
+            toolboxTop = 10;
+        }
 
-            // Apply the final position to the toolbox
-            toolbox.style.left = `${toolboxLeft}px`;
-            toolbox.style.top = `${toolboxTop}px`;
+        if (toolboxTop + toolbox.offsetHeight > windowHeight) {
+            toolboxTop = windowHeight - toolbox.offsetHeight - 10;
+        }
+
+        // Apply the final position to the toolbox
+        toolbox.style.left = `${toolboxLeft}px`;
+        toolbox.style.top = `${toolboxTop}px`;
+
+        // Check if toolbox is on the left side of the screen
+        const isToolboxOnLeft = toolboxLeft < windowWidth / 2;
+        
+
+         // Update popup positions
+         updatePopupPositions(isToolboxOnLeft);
         }
     });
-
-    document.addEventListener('mouseup', () => {
+document.addEventListener('mouseup', () => {
+    if (isDragging) {
         isDragging = false;
         document.body.style.cursor = 'default';
-    });
+    }
+});
+
 
     document.body.appendChild(sideButton);
 };
-;
+
+/**
+ * Updates the positions of all popups dynamically based on the toolbox location.
+ * @param {boolean} isToolboxOnLeft 
+ */
+function updatePopupPositions(isToolboxOnLeft) {
+    const popupConfigs = [
+        { selector: '.font-size-popup', left: isToolboxOnLeft ? '19%' : '65%' },
+        { selector: '.settings-popup', left: isToolboxOnLeft ? '27%' : '73%' },
+        { selector: '.contrast-popup', left: isToolboxOnLeft ? '30%' : '70%' },
+    ];
+
+    popupConfigs.forEach(({ selector, left }) => {
+        const popup = document.querySelector(selector);
+        if (popup) {
+            popup.style.setProperty('left', left, 'important');
+        }
+    });
+}
+
+
 
 MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
     this.createToolbox();
@@ -864,82 +908,93 @@ MicAccessTool.prototype.adjustFontSize = function (action) {
     }
 };
 
-// Font size dropdown
-MicAccessTool.prototype.addFontSizeDropdown = function () {
-    // Find the Font Size button's parent container
-    const fontSizeDiv = document.querySelector('.font-size-btn'); // Assuming this is the button's class
+// Font size setting PopuP
+MicAccessTool.prototype.addFontSizePopup = function () {
+    const fontSizeDiv = document.querySelector('.font-size-btn'); // Font Size button
+    const toolbox = document.querySelector('.toolbox-body'); // Toolbox container
 
-    if (!fontSizeDiv) {
-        console.error('Font Size button not found.');
+    if (!fontSizeDiv || !toolbox) {
+        console.error('Font Size button or toolbox not found.');
         return;
     }
 
-    // Wrap the button in a container if not already done
-    const fontSizeWrapper = fontSizeDiv.closest('.button-with-dropdown') || document.createElement('div');
-    fontSizeWrapper.className = 'button-with-dropdown';
-    fontSizeWrapper.style.gridColumn = 'span 1'; // Default spans 1 column
-    fontSizeWrapper.style.position = 'relative'; // For dropdown positioning
-    fontSizeWrapper.style.width = '100%'; 
+    // Check if the popup already exists
+    let fontSizePopup = document.querySelector('.font-size-popup');
+    if (!fontSizePopup) {
+        // Create the popup container
+        fontSizePopup = document.createElement('div');
+        fontSizePopup.className = 'font-size-popup';
 
-    // Create the dropdown container
-    const fontDropdown = document.createElement('div');
-    fontDropdown.className = 'font-dropdown';
-    fontDropdown.style.display = 'none'; // Initially hidden
-    fontDropdown.innerHTML = `
-        <button id="decrease-font-btn">-</button>
-        <span id="font-size-display">Font Size: 16px</span>
-        <button id="increase-font-btn">+</button>
-    `;
+        // Add the popup content
+        fontSizePopup.innerHTML = `
+            <div class="font-popup-header">
+                <span class="font-popup-title">Font Size Settings</span>
+                <button id="close-font-popup" class="close-popup-btn">✖</button>
+            </div>
+            <div class="font-popup-content">
+                <button id="decrease-font-btn" class="font-popup-btn">-</button>
+                <span id="font-size-display" class="font-popup-display">Font Size: 16px</span>
+                <button id="increase-font-btn" class="font-popup-btn">+</button>
+            </div>
+            <div class="font-popup-reset">
+                <button id="reset-font-btn" class="reset-popup-btn">Reset</button>
+            </div>
+        `;
 
-    // Append dropdown to the wrapper
-    fontSizeWrapper.appendChild(fontDropdown);
+        // Append the popup to the body
+        document.body.appendChild(fontSizePopup);
 
-    // Append the wrapper back to the grid if it was created dynamically
-    const toolboxBody = document.querySelector('.toolbox-body');
-    if (!fontSizeDiv.closest('.button-with-dropdown')) {
-        toolboxBody.replaceChild(fontSizeWrapper, fontSizeDiv);
-        fontSizeWrapper.appendChild(fontSizeDiv); // Move the button inside the wrapper
-    }
+        // Position the popup close to the toolbox
+        const toolboxRect = toolbox.getBoundingClientRect();
+        fontSizePopup.style.top = `${toolboxRect.top + 20}px`;
+        fontSizePopup.style.left = `${toolboxRect.left + 20}px`;
 
-    // Add click event to toggle dropdown and expand to three columns
-    fontSizeDiv.addEventListener('click', () => {
-        const isVisible = fontDropdown.style.display === 'block';
+        // Initialize font size logic
+        const decreaseButton = fontSizePopup.querySelector('#decrease-font-btn');
+        const increaseButton = fontSizePopup.querySelector('#increase-font-btn');
+        const resetButton = fontSizePopup.querySelector('#reset-font-btn');
+        const fontSizeDisplay = fontSizePopup.querySelector('#font-size-display');
 
-        // Collapse any previously expanded item
-        toolboxBody.querySelectorAll('.button-with-dropdown').forEach((el) => {
-            el.style.gridColumn = 'span 1';
-            const dropdown = el.querySelector('.font-dropdown');
-            if (dropdown) dropdown.style.display = 'none';
+        let fontSize = 16;
+
+        decreaseButton.addEventListener('click', () => {
+            if (fontSize > 10) {
+                fontSize -= 2;
+                fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
+                document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+            }
         });
 
-        // Expand or collapse the current dropdown
-        fontDropdown.style.display = isVisible ? 'none' : 'block';
-        fontSizeWrapper.style.gridColumn = isVisible ? 'span 1' : 'span 3';
-    });
+        increaseButton.addEventListener('click', () => {
+            if (fontSize < 30) {
+                fontSize += 2;
+                fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
+                document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+            }
+        });
 
-    // Add functionality to the dropdown buttons
-    const decreaseButton = fontDropdown.querySelector('#decrease-font-btn');
-    const increaseButton = fontDropdown.querySelector('#increase-font-btn');
-    const fontSizeDisplay = fontDropdown.querySelector('#font-size-display');
-
-    let fontSize = 16;
-
-    decreaseButton.addEventListener('click', () => {
-        if (fontSize > 10) {
-            fontSize -= 2;
+        resetButton.addEventListener('click', () => {
+            fontSize = 16;
             fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-            document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
-        }
-    });
+            document.body.style.fontSize = `${fontSize}px`; // Reset font size globally
+        });
 
-    increaseButton.addEventListener('click', () => {
-        if (fontSize < 30) {
-            fontSize += 2;
-            fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-            document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
-        }
+        // Close the popup
+        const closeButton = fontSizePopup.querySelector('#close-font-popup');
+        closeButton.addEventListener('click', () => {
+            fontSizePopup.style.display = 'none';
+        });
+    }
+
+    // Toggle the popup visibility on button click
+    fontSizeDiv.addEventListener('click', () => {
+        
+        fontSizePopup.style.display = fontSizePopup.style.display === 'block' ? 'none' : 'block';
     });
 };
+
+
+
 
 
 
@@ -1734,6 +1789,18 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     popup.id = 'contrast-popup';
     popup.className = 'contrast-popup';
 
+    // Position the popup dynamically
+    popup.style.position = 'absolute';
+    popup.style.top = '19%'; // Fixed top position
+
+    const toolbox = document.querySelector('.toolbox');
+    const toolboxRect = toolbox.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const isToolboxOnLeft = toolboxRect.left < windowWidth / 2;
+
+    // Set the left position based on toolbox location
+    popup.style.left = isToolboxOnLeft ? '30%' : '70%';
+
     // Popup Header
     const header = document.createElement('div');
     header.className = 'contrast-popup-header';
@@ -1756,9 +1823,7 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     body.className = 'contrast-popup-body';
 
     // Preset Modes
-    const modes = [
-        { id: 'grayscale', text: 'Uncolored Display' },
-    ];
+    const modes = [{ id: 'grayscale', text: 'Uncolored Display' }];
 
     modes.forEach(({ id, text }) => {
         const modeButton = document.createElement('button');
@@ -1799,32 +1864,33 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     customColorsSection.appendChild(bgLabel);
     customColorsSection.appendChild(bgColorContainer);
 
-// Text Color Section
-const textLabel = document.createElement('label');
-textLabel.textContent = 'Text Color:';
+    // Text Color Section
+    const textLabel = document.createElement('label');
+    textLabel.textContent = 'Text Color:';
 
-const textColorContainer = document.createElement('div');
-textColorContainer.className = 'color-picker-container';
+    const textColorContainer = document.createElement('div');
+    textColorContainer.className = 'color-picker-container';
 
-predefinedColors.forEach((color) => {
-    const colorButton = document.createElement('button');
-    colorButton.className = 'color-button';
-    colorButton.style.backgroundColor = color;
-    colorButton.addEventListener('click', () => this.applyCustomTextColor(color));
-    textColorContainer.appendChild(colorButton);
-});
+    predefinedColors.forEach((color) => {
+        const colorButton = document.createElement('button');
+        colorButton.className = 'color-button';
+        colorButton.style.backgroundColor = color;
+        colorButton.addEventListener('click', () => this.applyCustomTextColor(color));
+        textColorContainer.appendChild(colorButton);
+    });
 
-const textColorPicker = document.createElement('input');
-textColorPicker.type = 'color';
-textColorPicker.id = 'text-color-picker';
-textColorPicker.addEventListener('input', () => this.applyCustomTextColor(textColorPicker.value));
-textColorContainer.appendChild(textColorPicker);
+    const textColorPicker = document.createElement('input');
+    textColorPicker.type = 'color';
+    textColorPicker.id = 'text-color-picker';
+    textColorPicker.addEventListener('input', () => this.applyCustomTextColor(textColorPicker.value));
+    textColorContainer.appendChild(textColorPicker);
 
-customColorsSection.appendChild(textLabel);
-customColorsSection.appendChild(textColorContainer);
+    customColorsSection.appendChild(textLabel);
+    customColorsSection.appendChild(textColorContainer);
 
-body.appendChild(customColorsSection);
-// Reset button
+    body.appendChild(customColorsSection);
+
+    // Reset button
     const resetButton = document.createElement('button');
     resetButton.id = 'reset-contrast-btn';
     resetButton.className = 'contrast-reset-button';
@@ -1835,6 +1901,7 @@ body.appendChild(customColorsSection);
     popup.appendChild(body);
     document.body.appendChild(popup);
 };
+
 
 // Reset Contrast
 MicAccessTool.prototype.resetContrast = function () {
@@ -2251,13 +2318,38 @@ MicAccessTool.prototype.resetSettings = function () {
 
 // Setting button functions
 
-function createSettingsPopup() {
+// Add the event listener for the settings button
+MicAccessTool.prototype.addSettingsButtonListener = function () {
+    const settingsButton = document.getElementById('settings-btn'); // Ensure this ID matches your settings button
+    if (settingsButton) {
+        settingsButton.addEventListener('click', () => {
+            this.createSettingsPopup();
+        });
+    } else {
+        console.error('Settings button not found');
+    }
+};
+
+MicAccessTool.prototype.createSettingsPopup = function () {
     // Check if the popup already exists
     if (document.querySelector('.settings-popup')) return;
 
     // Create the popup container
     const popup = document.createElement('div');
     popup.className = 'settings-popup';
+
+    // Set popup default position
+    popup.style.position = 'absolute';
+    popup.style.top = '19%';
+
+    // Dynamically determine if the toolbox is on the left
+    const toolbox = document.querySelector('.toolbox');
+    const toolboxRect = toolbox.getBoundingClientRect();
+    const windowWidth = window.innerWidth;
+    const isToolboxOnLeft = toolboxRect.left < windowWidth / 2;
+
+    // Set the initial left position based on toolbox location
+    popup.style.left = isToolboxOnLeft ? '27%' : '73%';
 
     // Create the popup header
     const header = document.createElement('div');
@@ -2299,7 +2391,13 @@ function createSettingsPopup() {
     colorPicker.appendChild(colorLabel);
     colorPicker.appendChild(colorInput);
 
-  // Handle color changes
+    // Default settings
+    const defaultSettings = {
+        color: '#393636',
+        language: 'en',
+    };
+
+    // Handle color changes
     colorInput.addEventListener('input', (event) => {
         const selectedColor = event.target.value;
 
@@ -2313,44 +2411,84 @@ function createSettingsPopup() {
         const toolboxHeader = document.querySelector('.toolbox-header');
         if (toolboxHeader) toolboxHeader.style.backgroundColor = selectedColor;
 
-        // Change toolbox icons and text inside buttons, excluding header buttons
-        const toolboxIcons = document.querySelectorAll('.toolbox-body .toolbox-btn i, .toolbox-body .toolbox-btn span, .toolbox-body svg');
-        toolboxIcons.forEach(icon => {
-            if (icon.tagName === 'svg') {
-                icon.style.fill = selectedColor;
-            } else {
-                icon.style.color = selectedColor;
-            }
+        // Change SVG and inner elements' fill and stroke color
+        const toolboxIcons = document.querySelectorAll('.toolbox-body svg');
+        toolboxIcons.forEach(svg => {
+            svg.style.fill = selectedColor;
+            svg.style.stroke = selectedColor;
+
+            // Update inner elements (e.g., paths)
+            const innerElements = svg.querySelectorAll('*');
+            innerElements.forEach(inner => {
+                inner.style.fill = selectedColor;
+                inner.style.stroke = selectedColor;
+            });
         });
 
         // Change background color of toolbox buttons
         const toolboxButtons = document.querySelectorAll('.toolbox-body .toolbox-btn, .toolbox-button');
         toolboxButtons.forEach(button => {
             button.style.backgroundColor = selectedColor;
-            button.style.borderColor = selectedColor; 
-            button.style.color = selectedColor; 
+            button.style.borderColor = selectedColor;
+            button.style.color = selectedColor;
         });
-
     });
 
-    
+    // Add a Reset button
+    const resetButton = document.createElement('button');
+    resetButton.textContent = 'Reset';
+    resetButton.className = 'popup-reset';
+    resetButton.addEventListener('click', () => {
+        // Reset to default settings
+        header.style.backgroundColor = defaultSettings.color;
+        headerTitle.style.color = 'white';
+        colorInput.value = defaultSettings.color;
 
-// Add a close button
-const closeButton = document.createElement('button');
-closeButton.textContent = 'Close';
-closeButton.className = 'popup-close';
-closeButton.addEventListener('click', () => {
-    popup.remove(); // Remove the popup when close is clicked
-});
+        const toolboxHeader = document.querySelector('.toolbox-header');
+        if (toolboxHeader) toolboxHeader.style.backgroundColor = defaultSettings.color;
 
-// Append sections to the popup
-popup.appendChild(languageSelector);
-popup.appendChild(colorPicker);
-popup.appendChild(closeButton);
+        const toolboxIcons = document.querySelectorAll('.toolbox-body svg');
+        toolboxIcons.forEach(svg => {
+            svg.style.fill = defaultSettings.color;
+            svg.style.stroke = defaultSettings.color;
 
-// Add the popup to the document body
-document.body.appendChild(popup);
-}
+            const innerElements = svg.querySelectorAll('*');
+            innerElements.forEach(inner => {
+                inner.style.fill = defaultSettings.color;
+                inner.style.stroke = defaultSettings.color;
+            });
+        });
+
+        const toolboxButtons = document.querySelectorAll('.toolbox-body .toolbox-btn, .toolbox-button');
+        toolboxButtons.forEach(button => {
+            button.style.backgroundColor = defaultSettings.color;
+            button.style.borderColor = defaultSettings.color;
+            button.style.color = defaultSettings.color;
+        });
+
+        languageDropdown.value = defaultSettings.language; // Reset language
+    });
+
+    // Add a close button
+    const closeButton = document.createElement('button');
+    closeButton.textContent = 'Close';
+    closeButton.className = 'popup-close';
+    closeButton.addEventListener('click', () => {
+        popup.remove(); // Remove the popup when close is clicked
+    });
+
+    // Append sections to the popup
+    popup.appendChild(languageSelector);
+    popup.appendChild(colorPicker);
+    popup.appendChild(resetButton); // Add Reset button to the popup
+    popup.appendChild(closeButton);
+
+    // Add the popup to the document body
+    document.body.appendChild(popup);
+
+    // Dynamically update position based on toolbox location
+    this.updatePopupPositions(isToolboxOnLeft);
+};
 
 
 
