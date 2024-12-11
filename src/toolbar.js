@@ -6,6 +6,7 @@ function MicAccessTool(init) {
     this.removedImages = [];
     this.imagesHidden = false;
     this.isMuted = false;
+    this.selectedHeaderColor = null;
 
     // Initialize the toolbox and other features
     this.initializeAccessibilityToolbox();
@@ -341,7 +342,7 @@ document.addEventListener('mouseup', () => {
 function updatePopupPositions(isToolboxOnLeft) {
     const popupConfigs = [
         { selector: '.font-size-popup', left: isToolboxOnLeft ? '27%' : '72%' },
-        { selector: '.settings-popup', left: isToolboxOnLeft ? '27%' : '73%' },
+        { selector: '.settings-popup', left: isToolboxOnLeft ? '28%' : '72%' },
         { selector: '.contrast-popup', left: isToolboxOnLeft ? '30%' : '70%' },
     ];
 
@@ -910,7 +911,6 @@ MicAccessTool.prototype.adjustFontSize = function (action) {
 
 // Font size setting PopuP
 MicAccessTool.prototype.addFontSizePopup = function () {
-    this.closeAllPopups();
     const fontSizeDiv = document.querySelector('.font-size-btn'); // Font Size button
     const toolbox = document.querySelector('.toolbox-body'); // Toolbox container
 
@@ -919,84 +919,86 @@ MicAccessTool.prototype.addFontSizePopup = function () {
         return;
     }
 
-    // Check if the popup already exists
-    let fontSizePopup = document.querySelector('.font-size-popup');
-    if (!fontSizePopup) {
-        // Create the popup container
-        fontSizePopup = document.createElement('div');
-        fontSizePopup.className = 'font-size-popup';
-
-        // Add the popup content
-        fontSizePopup.innerHTML = `
-            <div class="font-popup-header">
-                <span class="font-popup-title">Font Size Settings</span>
-                <button id="close-font-popup" class="close-popup-btn">✖</button>
-            </div>
-            <div class="font-popup-content">
-                <button id="decrease-font-btn" class="font-popup-btn">-</button>
-                <span id="font-size-display" class="font-popup-display">Font Size: 16px</span>
-                <button id="increase-font-btn" class="font-popup-btn">+</button>
-            </div>
-            <div class="font-popup-reset">
-                <button id="reset-font-btn" class="reset-popup-btn">Reset</button>
-            </div>
-        `;
-
-        // Append the popup to the body
-        document.body.appendChild(fontSizePopup);
-
-        // Position the popup close to the toolbox
-        const toolboxRect = toolbox.getBoundingClientRect();
-        fontSizePopup.style.top = `${toolboxRect.top + 20}px`;
-        fontSizePopup.style.left = `${toolboxRect.left + 20}px`;
-
-        // Initialize font size logic
-        const decreaseButton = fontSizePopup.querySelector('#decrease-font-btn');
-        const increaseButton = fontSizePopup.querySelector('#increase-font-btn');
-        const resetButton = fontSizePopup.querySelector('#reset-font-btn');
-        const fontSizeDisplay = fontSizePopup.querySelector('#font-size-display');
-
-        let fontSize = 16;
-
-        decreaseButton.addEventListener('click', () => {
-            if (fontSize > 10) {
-                fontSize -= 2;
-                fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
-            }
-        });
-
-        increaseButton.addEventListener('click', () => {
-            if (fontSize < 30) {
-                fontSize += 2;
-                fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
-            }
-        });
-
-        resetButton.addEventListener('click', () => {
-            fontSize = 16;
-            fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-            document.body.style.fontSize = `${fontSize}px`; // Reset font size globally
-        });
-
-        // Close the popup
-        const closeButton = fontSizePopup.querySelector('#close-font-popup');
-        closeButton.addEventListener('click', () => {
-            fontSizePopup.style.display = 'none';
-        });
-    }
-
-    // Add event listener for the Font Size button
+    // Add event listener for the Font Size button (execute only when button is clicked)
     fontSizeDiv.addEventListener('click', () => {
+        // Check if the popup already exists
+        let fontSizePopup = document.querySelector('.font-size-popup');
+        if (!fontSizePopup) {
+            // Create the popup container
+            fontSizePopup = document.createElement('div');
+            fontSizePopup.className = 'font-size-popup';
+
+            // Add the popup content
+            fontSizePopup.innerHTML = `
+                <div class="font-popup-header">
+                    <span class="font-popup-title">Font Size Settings</span>
+                    <button id="close-font-popup" class="close-popup-btn">✖</button>
+                </div>
+                <div class="font-popup-content">
+                    <button id="decrease-font-btn" class="font-popup-btn">-</button>
+                    <span id="font-size-display" class="font-popup-display">Font Size: 16px</span>
+                    <button id="increase-font-btn" class="font-popup-btn">+</button>
+                </div>
+                <div class="font-popup-reset">
+                    <button id="reset-font-btn" class="reset-popup-btn">Reset</button>
+                </div>
+            `;
+
+            // Append the popup to the body
+            document.body.appendChild(fontSizePopup);
+
+            // Position the popup close to the toolbox
+            const toolboxRect = toolbox.getBoundingClientRect();
+            fontSizePopup.style.top = `${toolboxRect.top + 20}px`;
+            fontSizePopup.style.left = `${toolboxRect.left + 20}px`;
+
+            // Initialize font size logic
+            const decreaseButton = fontSizePopup.querySelector('#decrease-font-btn');
+            const increaseButton = fontSizePopup.querySelector('#increase-font-btn');
+            const resetButton = fontSizePopup.querySelector('#reset-font-btn');
+            const fontSizeDisplay = fontSizePopup.querySelector('#font-size-display');
+            const closeButton = fontSizePopup.querySelector('#close-font-popup');
+
+            let fontSize = 16;
+
+            decreaseButton.addEventListener('click', () => {
+                if (fontSize > 10) {
+                    fontSize -= 2;
+                    fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
+                    document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+                }
+            });
+
+            increaseButton.addEventListener('click', () => {
+                if (fontSize < 30) {
+                    fontSize += 2;
+                    fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
+                    document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+                }
+            });
+
+            resetButton.addEventListener('click', () => {
+                fontSize = 16;
+                fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
+                document.body.style.fontSize = `${fontSize}px`; // Reset font size globally
+            });
+
+            closeButton.addEventListener('click', () => {
+                fontSizePopup.style.display = 'none';
+            });
+        }
+
+        // Toggle popup visibility
         if (fontSizePopup.style.display === 'block') {
-            fontSizePopup.style.display = 'none'; // Close if already open
+            fontSizePopup.style.display = 'none';
         } else {
             this.closeAllPopups(); // Close other popups
             fontSizePopup.style.display = 'block'; // Show font size popup
         }
     });
 };
+
+
 
 
 
@@ -1690,15 +1692,17 @@ MicAccessTool.prototype.resetToolbox = function () {
         el.classList.remove('highlight-links', 'highlight-headers', 'highlight-images');
     });
 
-    // Restore only toolbox-specific font size, spacing, and transforms
+    // Restore only toolbox-specific font size, spacing, and transforms, excluding popups and toolbox
     document.querySelectorAll('[data-toolbox-modified]').forEach(el => {
-        el.style.fontSize = ''; 
-        el.style.letterSpacing = '';
-        el.style.lineHeight = ''; 
-        el.style.transform = ''; 
-        el.style.transformOrigin = ''; 
-        el.style.width = '';
-        el.removeAttribute('data-toolbox-modified'); // Remove the marker attribute
+        if (!el.closest('.font-size-popup') && !el.closest('.toolbox')) { // Exclude popups and toolbox
+            el.style.fontSize = ''; 
+            el.style.letterSpacing = '';
+            el.style.lineHeight = ''; 
+            el.style.transform = ''; 
+            el.style.transformOrigin = ''; 
+            el.style.width = ''; 
+            el.removeAttribute('data-toolbox-modified'); // Remove the marker attribute
+        }
     });
 
     // Remove blue filter if applied by the toolbox
@@ -1740,6 +1744,14 @@ MicAccessTool.prototype.resetToolbox = function () {
     // Trigger resetContrast function to handle contrast settings
     this.resetContrast();
 
+    // Click the reset button in the settings popup if it exists
+    const settingsResetButton = document.querySelector('.settings-popup .reset-popup-btn');
+    if (settingsResetButton) settingsResetButton.click();
+
+    // Click the reset button in the font size popup if it exists
+    const fontSizeResetButton = document.querySelector('.font-size-popup .reset-popup-btn');
+    if (fontSizeResetButton) fontSizeResetButton.click();
+
    // Clear toolbox-specific local storage settings
    localStorage.removeItem('animationsDisabled');
    localStorage.removeItem('nightMode');
@@ -1749,8 +1761,8 @@ MicAccessTool.prototype.resetToolbox = function () {
    // Reset zoom level
    this.applyZoom(1);
 
-   // Reset text spacing
-   const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+   // Reset text spacing, excluding toolbox and popups
+   const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *):not(.font-size-popup):not(.font-size-popup *)');
    elementsToAdjust.forEach(element => {
        element.style.letterSpacing = 'normal';
        element.style.lineHeight = 'normal';
@@ -1765,6 +1777,7 @@ MicAccessTool.prototype.resetToolbox = function () {
 
     console.log('Toolbox reset to the original state.');
 };
+
 
 
 // Contrast Mode
@@ -1838,6 +1851,7 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
         modeButton.addEventListener('click', (e) => this.toggleContrastMode(id, e.target));
         body.appendChild(modeButton);
     });
+    
 
     // Custom Colors Section
     const customColorsSection = document.createElement('div');
@@ -2047,16 +2061,18 @@ MicAccessTool.prototype.saveToolbarState = function () {
         animationsDisabled: document.body.classList.contains('disable-animations') || false,
         contrastMode: this.getContrastMode(),
         customBackgroundColor: this.customBackgroundColor || null,
-        customTextColor: this.customTextColor || null, 
+        customTextColor: this.customTextColor || null,
         activeButtons: this.getActiveButtons(),
         highlightedLinks: document.querySelector('.highlight-links') !== null, 
-        highlightedHeaders: document.querySelector('.highlight-headers') !== null, 
+        highlightedHeaders: document.querySelector('.highlight-headers') !== null,
+        selectedHeaderColor: localStorage.getItem('popupHeaderColor') || null 
     };
 
     // Save state to localStorage
     localStorage.setItem('toolbarState', JSON.stringify(state));
     console.log('Toolbar state saved:', state);
 };
+
 
 
 
@@ -2355,12 +2371,12 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     const isToolboxOnLeft = toolboxRect.left < windowWidth / 2;
 
     // Set the initial left position based on toolbox location
-    popup.style.left = isToolboxOnLeft ? '27%' : '73%';
+    popup.style.left = isToolboxOnLeft ? '28%' : '72%';
 
         // Create the popup header
     const header = document.createElement('div');
     header.className = 'settings-popup-header';
-    header.style.backgroundColor = '#007bff'; // Default header background color
+    header.style.backgroundColor = '#393636'; // Default header background color
 
     const headerTitle = document.createElement('h3');
     headerTitle.textContent = 'Settings';
@@ -2412,16 +2428,24 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     // Handle color changes
     colorInput.addEventListener('input', (event) => {
         const selectedColor = event.target.value;
+        this.selectedHeaderColor = selectedColor;
 
         // Change popup header background color
-        header.style.backgroundColor = selectedColor;
+        header.style.backgroundColor = this.selectedHeaderColor;
 
         // Change popup title text color
         headerTitle.style.color = selectedColor;
+        
 
         // Change toolbox header background color
-        const toolboxHeader = document.querySelector('.toolbox-header');
-        if (toolboxHeader) toolboxHeader.style.backgroundColor = selectedColor;
+        const headers = document.querySelectorAll('.toolbox-header, .settings-popup-header, .contrast-popup-header, .font-popup-header');
+
+        // Apply styles or changes to each header
+        headers.forEach(header => {
+            header.style.backgroundColor = selectedColor; 
+        });
+        this.applyHeaderColor();
+     
 
         // Change SVG and inner elements' fill and stroke color
         const toolboxIcons = document.querySelectorAll('.toolbox-body svg');
@@ -2450,6 +2474,7 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     const resetButton = document.createElement('button');
     resetButton.textContent = 'Reset';
     resetButton.className = 'popup-reset';
+    resetButton.style.color = "white";
     resetButton.addEventListener('click', () => {
         // Reset to default settings
         header.style.backgroundColor = defaultSettings.color;
@@ -2483,7 +2508,7 @@ MicAccessTool.prototype.createSettingsPopup = function () {
 
     // Add a close button
     const closeButton = document.createElement('button');
-    closeButton.textContent = 'Close';
+    closeButton.textContent = 'X';
     closeButton.className = 'popup-close';
     closeButton.addEventListener('click', () => {
         popup.remove(); // Remove the popup when close is clicked

@@ -928,41 +928,87 @@ button:active {
 
 .settings-popup {
     position: fixed;
-    top: 19%;
-    left: 73%;
+    top: 20%; /* Adjusted top position for better alignment */
+    left: 70%; /* Adjusted horizontal position */
     transform: translate(-50%, -50%);
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    padding: 20px;
+    background: #EFF1F5; /* Match the toolbar background */
+    border-radius: 15px; /* Match the toolbar rounded corners */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); /* Stronger shadow for prominence */
+    padding: 0; /* Reset padding to match the toolbar */
     z-index: 1000;
-    width: 300px;
+    width: 350px; /* Match the toolbar width */
     text-align: center;
     font-family: Arial, sans-serif;
+    overflow: hidden; /* Prevent overflow */
+}
+
+.settings-popup-header {
+    background-color: #393636 !important; /* Match the toolbar header */
+    color: white; /* White text */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px; /* Add padding */
+    border-radius: 15px 15px 0 0; /* Match the toolbar header rounding */
+    height: 12%; /* Adjust height to match toolbar style */
+    font-size: 18px;
+    font-weight: bold;
+    position: relative;
 }
 
 .settings-popup h3 {
-    margin-bottom: 15px;
-    font-size: 18px;
-    color: #333;
+    margin: 0;
+    font-size: 1rem;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
 }
 
 .popup-section {
-    margin-bottom: 15px;
+    margin: 20px 0;
+    text-align: left; /* Align content left */
+    padding: 0 20px; /* Add inner padding for spacing */
 }
 
 .popup-close {
-    background: #007bff;
-    color: white;
+    background: none;
     border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
+    color: white;
+    font-size: 20px;
     cursor: pointer;
+    position: absolute;
+    right: 15px; 
+    top: 8px;
 }
 
 .popup-close:hover {
-    background: #0056b3;
+    color: #ff4c4c; /* Highlight close button on hover */
 }
+
+.settings-popup-content {
+    padding: 20px; /* Inner padding for the popup content */
+    font-size: 16px; /* Match toolbar font size */
+    color: white;
+}
+
+.reset-popup-btn {
+    background-color: #007bff;
+    color: white !important;
+    border: none;
+    border-radius: 8px; /* Match modern button style */
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reset-popup-btn:hover {
+    background-color: #0056b3;
+}
+
 
 /* Font size Setting Popup */
 
