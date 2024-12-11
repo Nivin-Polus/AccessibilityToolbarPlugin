@@ -910,6 +910,7 @@ MicAccessTool.prototype.adjustFontSize = function (action) {
 
 // Font size setting PopuP
 MicAccessTool.prototype.addFontSizePopup = function () {
+    this.closeAllPopups();
     const fontSizeDiv = document.querySelector('.font-size-btn'); // Font Size button
     const toolbox = document.querySelector('.toolbox-body'); // Toolbox container
 
@@ -986,13 +987,16 @@ MicAccessTool.prototype.addFontSizePopup = function () {
         });
     }
 
-    // Toggle the popup visibility on button click
+    // Add event listener for the Font Size button
     fontSizeDiv.addEventListener('click', () => {
-        
-        fontSizePopup.style.display = fontSizePopup.style.display === 'block' ? 'none' : 'block';
+        if (fontSizePopup.style.display === 'block') {
+            fontSizePopup.style.display = 'none'; // Close if already open
+        } else {
+            this.closeAllPopups(); // Close other popups
+            fontSizePopup.style.display = 'block'; // Show font size popup
+        }
     });
 };
-
 
 
 
@@ -1778,6 +1782,7 @@ MicAccessTool.prototype.initContrastFeature = function () {
 
 // Toggle Contrast Popup
 MicAccessTool.prototype.toggleContrastPopup = function () {
+    this.closeAllPopups();
     const existingPopup = document.getElementById('contrast-popup');
     if (existingPopup) {
         existingPopup.remove();
@@ -2331,6 +2336,7 @@ MicAccessTool.prototype.addSettingsButtonListener = function () {
 };
 
 MicAccessTool.prototype.createSettingsPopup = function () {
+    this.closeAllPopups();
     // Check if the popup already exists
     if (document.querySelector('.settings-popup')) return;
 
@@ -2489,6 +2495,37 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     // Dynamically update position based on toolbox location
     this.updatePopupPositions(isToolboxOnLeft);
 };
+
+
+// Popup Close
+MicAccessTool.prototype.closeAllPopups = function (excludeSelector) {
+    const popupSelectors = ['.settings-popup', '.contrast-popup', '.font-size-popup']; 
+    popupSelectors.forEach((selector) => {
+        if (selector !== excludeSelector) {
+            const popup = document.querySelector(selector);
+            if (popup) {
+                // Prevent affecting the toolbox explicitly
+                if (!popup.matches('.toolbox-body') && !popup.closest('.toolbox-body')) {
+                    if (selector === '.font-size-popup') {
+                        // Special handling for font-size popup
+                        const closeButton = popup.querySelector('#close-font-popup');
+                        if (closeButton) {
+                            closeButton.addEventListener('click', (event) => {
+                                event.stopPropagation(); 
+                                popup.style.display = 'none';
+                            });
+                            closeButton.click(); 
+                        }
+                    } else {
+                        popup.remove(); 
+                    }
+                }
+            }
+        }
+    });
+};
+
+
 
 
 
