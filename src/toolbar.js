@@ -340,7 +340,7 @@ document.addEventListener('mouseup', () => {
  */
 function updatePopupPositions(isToolboxOnLeft) {
     const popupConfigs = [
-        { selector: '.font-size-popup', left: isToolboxOnLeft ? '19%' : '65%' },
+        { selector: '.font-size-popup', left: isToolboxOnLeft ? '27%' : '72%' },
         { selector: '.settings-popup', left: isToolboxOnLeft ? '27%' : '73%' },
         { selector: '.contrast-popup', left: isToolboxOnLeft ? '30%' : '70%' },
     ];
@@ -2357,15 +2357,21 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     // Set the initial left position based on toolbox location
     popup.style.left = isToolboxOnLeft ? '27%' : '73%';
 
-    // Create the popup header
+        // Create the popup header
     const header = document.createElement('div');
     header.className = 'settings-popup-header';
     header.style.backgroundColor = '#007bff'; // Default header background color
 
     const headerTitle = document.createElement('h3');
     headerTitle.textContent = 'Settings';
-    headerTitle.style.color = 'white'; // Default header text color
+    headerTitle.className = 'settings-popup-title'; // Add class for styling if needed
     header.appendChild(headerTitle);
+
+    // Append the header element to the popup
+    const popup2 = document.querySelector('.settings-popup');
+    if (popup2) {
+        popup.appendChild(header);
+    }
 
     // Add the header to the popup
     popup.appendChild(header);
