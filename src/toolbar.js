@@ -6,7 +6,7 @@ function MicAccessTool(init) {
     this.removedImages = [];
     this.imagesHidden = false;
     this.isMuted = false;
-    this.selectedHeaderColor = null;
+    this.selectedHeaderColor = '#393636';
 
     // Initialize the toolbox and other features
     this.initializeAccessibilityToolbox();
@@ -377,13 +377,19 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
     });
 
     document.addEventListener('click', (event) => {
-        if (
-            !toolbox.contains(event.target) && 
-            !sideButton.contains(event.target)
-        ) {
+        // Check if any popup is currently active by ensuring it exists and is visible
+        const popups = ['.font-size-popup', '.settings-popup', '.contrast-popup', '.read-aloud-popup'];
+        const isPopupActive = popups.some(selector => {
+            const popup = document.querySelector(selector);
+            return popup && (popup.style.display === 'block' || popup.classList.contains('visible'));
+        });
+    
+        // Only close the toolbox if no popup is active
+        if (!isPopupActive && !toolbox.contains(event.target) && !sideButton.contains(event.target)) {
             toolbox.classList.remove('visible');
         }
     });
+    
 };
 
 
@@ -1745,12 +1751,19 @@ MicAccessTool.prototype.resetToolbox = function () {
     this.resetContrast();
 
     // Click the reset button in the settings popup if it exists
-    const settingsResetButton = document.querySelector('.settings-popup .reset-popup-btn');
-    if (settingsResetButton) settingsResetButton.click();
+const settingsResetButton = document.querySelector('.settings-popup .reset-popup-btn, .settings-popup .popup-reset');
+if (settingsResetButton) {
+    settingsResetButton.click();
+    console.log('Settings popup reset triggered.');
+}
 
-    // Click the reset button in the font size popup if it exists
-    const fontSizeResetButton = document.querySelector('.font-size-popup .reset-popup-btn');
-    if (fontSizeResetButton) fontSizeResetButton.click();
+// Click the reset button in the font size popup if it exists
+const fontSizeResetButton = document.querySelector('.font-size-popup .reset-popup-btn, .font-size-popup .popup-reset');
+if (fontSizeResetButton) {
+    fontSizeResetButton.click();
+    console.log('Font size popup reset triggered.');
+}
+
 
    // Clear toolbox-specific local storage settings
    localStorage.removeItem('animationsDisabled');
@@ -1776,7 +1789,7 @@ MicAccessTool.prototype.resetToolbox = function () {
     this.resetButtonStates();
 
     console.log('Toolbox reset to the original state.');
-};
+}
 
 
 
@@ -2322,10 +2335,25 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
     });
 
     document.addEventListener('click', (event) => {
-        if (!toolbox.contains(event.target) && !sideButton.contains(event.target)) {
+        // Check if any popup is currently active
+        const isPopupActive = document.querySelector(
+            '.font-size-popup[style*="display: block"], ' +
+            '.settings-popup[style*="display: block"], ' +
+            '.contrast-popup[style*="display: block"], ' +
+            '.read-aloud-popup[style*="display: block"], ' +
+            '.font-size-popup.visible, ' +
+            '.settings-popup.visible, ' +
+            '.contrast-popup.visible, ' +
+            '.read-aloud-popup.visible'
+        );
+    
+        // Only close the toolbox if no popup is active
+        if (!isPopupActive && !toolbox.contains(event.target) && !sideButton.contains(event.target)) {
             toolbox.classList.remove('visible');
         }
     });
+    
+    
 
     // Load saved state
     this.loadToolbarState();
@@ -2337,11 +2365,15 @@ MicAccessTool.prototype.resetSettings = function () {
     console.log('Toolbar state reset.');
 };
 
+// Color Change Helper
+
+
+
 // Setting button functions
 
 // Add the event listener for the settings button
 MicAccessTool.prototype.addSettingsButtonListener = function () {
-    const settingsButton = document.getElementById('settings-btn'); // Ensure this ID matches your settings button
+    const settingsButton = document.getElementById('settings-btn'); 
     if (settingsButton) {
         settingsButton.addEventListener('click', () => {
             this.createSettingsPopup();
@@ -2376,7 +2408,7 @@ MicAccessTool.prototype.createSettingsPopup = function () {
         // Create the popup header
     const header = document.createElement('div');
     header.className = 'settings-popup-header';
-    header.style.backgroundColor = '#393636'; // Default header background color
+  
 
     const headerTitle = document.createElement('h3');
     headerTitle.textContent = 'Settings';
@@ -2425,50 +2457,86 @@ MicAccessTool.prototype.createSettingsPopup = function () {
         language: 'en',
     };
 
-    // Handle color changes
-    colorInput.addEventListener('input', (event) => {
-        const selectedColor = event.target.value;
-        this.selectedHeaderColor = selectedColor;
+   // Handle color changes
+   colorInput.addEventListener('input', (event) => {
+    const selectedColor = event.target.value;
 
-        // Change popup header background color
-        header.style.backgroundColor = this.selectedHeaderColor;
+    // Change popup header background color
+    header.style.backgroundColor = selectedColor;
 
-        // Change popup title text color
-        headerTitle.style.color = selectedColor;
-        
+    // Change toolbox header background color
+    const toolboxHeaders = document.querySelectorAll('.toolbox-header, .settings-popup-header');
 
-        // Change toolbox header background color
-        const headers = document.querySelectorAll('.toolbox-header, .settings-popup-header, .contrast-popup-header, .font-popup-header');
+    // Iterate over the NodeList and apply the background color with !important
+    toolboxHeaders.forEach(header => {
+        header.style.setProperty('background-color', selectedColor, 'important');
+    });
+    
+    // Change SVG and inner elements' fill and stroke color
+    const toolboxIcons = document.querySelectorAll('.toolbox-body svg');
+    toolboxIcons.forEach(svg => {
+        svg.style.fill = selectedColor;
+        svg.style.stroke = selectedColor;
 
-        // Apply styles or changes to each header
-        headers.forEach(header => {
-            header.style.backgroundColor = selectedColor; 
-        });
-        this.applyHeaderColor();
-     
-
-        // Change SVG and inner elements' fill and stroke color
-        const toolboxIcons = document.querySelectorAll('.toolbox-body svg');
-        toolboxIcons.forEach(svg => {
-            svg.style.fill = selectedColor;
-            svg.style.stroke = selectedColor;
-
-            // Update inner elements (e.g., paths)
-            const innerElements = svg.querySelectorAll('*');
-            innerElements.forEach(inner => {
-                inner.style.fill = selectedColor;
-                inner.style.stroke = selectedColor;
-            });
-        });
-
-        // Change background color of toolbox buttons
-        const toolboxButtons = document.querySelectorAll('.toolbox-body .toolbox-btn, .toolbox-button');
-        toolboxButtons.forEach(button => {
-            button.style.backgroundColor = selectedColor;
-            button.style.borderColor = selectedColor;
-            button.style.color = selectedColor;
+        // Update inner elements (e.g., paths)
+        const innerElements = svg.querySelectorAll('*');
+        innerElements.forEach(inner => {
+            inner.style.fill = selectedColor;
+            inner.style.stroke = selectedColor;
         });
     });
+
+    // Change background color of toolbox buttons
+    const toolboxButtons = document.querySelectorAll(
+        '.toolbox-body .toolbox-btn, .toolbox-button, .font-popup-btn, ' +
+        ' #font-popup-reset'
+    );
+    toolboxButtons.forEach(button => {
+        button.style.backgroundColor = selectedColor;
+        button.style.borderColor = selectedColor;
+        button.style.color = selectedColor;
+    });
+    const root = document.documentElement;
+    root.style.setProperty('--bg-color', selectedColor, 'important');
+
+    // Dynamically update the CSS for .font-popup-btn and .reset-popup-btn
+const styleSheet = document.styleSheets[0]; // Use the first stylesheet or dynamically create one
+
+const updateCSSRule = (selector, property, value) => {
+    let ruleFound = false;
+
+    // Check if the rule exists and update it
+    for (let i = 0; i < styleSheet.cssRules.length; i++) {
+        const rule = styleSheet.cssRules[i];
+        if (rule.selectorText === selector) {
+            rule.style.setProperty(property, value, 'important');
+            ruleFound = true;
+            break;
+        }
+    }
+
+    // If the rule doesn't exist, add it dynamically
+    if (!ruleFound) {
+        styleSheet.insertRule(
+            `${selector} { ${property}: ${value} !important; }`,
+            styleSheet.cssRules.length
+        );
+    }
+};
+
+// Update background color for .font-popup-btn and .reset-popup-btn
+updateCSSRule('.font-popup-btn', 'background-color', selectedColor);
+updateCSSRule('.reset-popup-btn', 'background-color', selectedColor);
+
+    
+
+    // Ensure elements using the variable have the important class
+    const elementsToUpdate = document.querySelectorAll('.uses-bg-color');
+    elementsToUpdate.forEach(element => {
+        element.style.setProperty('background-color', `var(--bg-color)`, 'important');
+    });
+   
+});
 
     // Add a Reset button
     const resetButton = document.createElement('button');
@@ -2494,7 +2562,19 @@ MicAccessTool.prototype.createSettingsPopup = function () {
                 inner.style.fill = defaultSettings.color;
                 inner.style.stroke = defaultSettings.color;
             });
+             // Reset buttons in toolbox and popups to default color
+            const buttonsToReset = document.querySelectorAll(
+                '.toolbox-body .toolbox-btn, .toolbox-button, .font-popup-btn, .reset-popup-btn'
+            );
+
+            buttonsToReset.forEach(button => {
+                button.style.setProperty('background-color', defaultSettings.color, 'important');
+                button.style.setProperty('border-color', defaultSettings.color, 'important');
+                button.style.setProperty('color', 'white', 'important'); // Set text color to white
+            });
         });
+
+        
 
         const toolboxButtons = document.querySelectorAll('.toolbox-body .toolbox-btn, .toolbox-button');
         toolboxButtons.forEach(button => {
@@ -2504,6 +2584,7 @@ MicAccessTool.prototype.createSettingsPopup = function () {
         });
 
         languageDropdown.value = defaultSettings.language; // Reset language
+        document.documentElement.style.setProperty('--bg-color', defaultSettings.color, 'important');
     });
 
     // Add a close button
