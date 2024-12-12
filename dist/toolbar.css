@@ -6,6 +6,10 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
+/* Root */
+:root {
+    --bg-color: #393636 !important; /* Default background color */
+}
 
 /* Button to Open Toolbox */
 .open-toolbox-button {
@@ -52,7 +56,7 @@
 
 /* Toolbox Header */
 .toolbox-header {
-    background-color: #393636; 
+    background-color: var(--bg-color);
     color: white;
     display: flex;
     justify-content: space-between;
@@ -238,7 +242,7 @@
   }
 
   button {
-    background: #444;
+    background: var(--bg-color);
     color: #393636;
     border: none;
     padding: 5px 10px;
@@ -709,7 +713,7 @@ button:active {
     align-items: center;
     padding: 16px;
     border-bottom: 1px solid #ddd;
-    background-color: #393636;
+    background-color: var(--bg-color);
 }
 
 .contrast-popup-title {
@@ -943,7 +947,7 @@ button:active {
 }
 
 .settings-popup-header {
-    background-color: #393636 !important; /* Match the toolbar header */
+    background-color: var(--bg-color); /* Match the toolbar header */
     color: white; /* White text */
     display: flex;
     justify-content: space-between;
@@ -995,7 +999,7 @@ button:active {
 }
 
 .reset-popup-btn {
-    background-color: #007bff;
+    background-color:var(--bg-color);;
     color: white !important;
     border: none;
     border-radius: 8px; /* Match modern button style */
@@ -1006,7 +1010,7 @@ button:active {
 }
 
 .reset-popup-btn:hover {
-    background-color: #0056b3;
+    background-color: var(--bg-color);;
 }
 
 
@@ -1031,7 +1035,7 @@ button:active {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #393636; 
+    background-color:  var(--bg-color);
     color: white; 
     padding: 10px;
     border-radius: 15px 15px 0 0; 
@@ -1078,9 +1082,6 @@ button:active {
     transition: background-color 0.3s ease;
 }
 
-.font-popup-btn:hover {
-    background-color: #555;
-}
 
 .font-popup-display {
     font-size: 16px;
@@ -1094,7 +1095,7 @@ button:active {
 }
 
 .reset-popup-btn {
-    background-color: #393636;
+    background-color: var(--bg-color);
     color: white;
     border: none;
     border-radius: 8px; /* Match modern button style */
