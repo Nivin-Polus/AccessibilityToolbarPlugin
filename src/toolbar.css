@@ -6,9 +6,13 @@
     box-sizing: border-box;
     font-family: Arial, sans-serif;
 }
+/* Root */
+:root {
+    --bg-color: #393636 !important; /* Default background color */
+}
 
 /* Button to Open Toolbox */
-.open-toolbox-button {
+.open-yi-toolbox-button {
     background-color: #007bff;
     color: #fff;
     border: none;
@@ -20,152 +24,167 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.open-toolbox-button:hover {
+.open-yi-toolbox-button:hover {
     background-color: #0056b3;
     transform: scale(1.05);
 }
 
 /* Toolbox Window */
-.toolbox {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 25px;
+/* Updated Toolbox Styling */
+.yi-toolbox {
+    background-color: #EFF1F5; /* Updated background color */
+    border-radius: 15px; /* Adjusted border-radius */
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    width: 25%; 
-    height: 80%;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     position: fixed;
     right: 20px;
-    bottom: 18%;
+    bottom: 80px;
+    width: 350px;
+    height: 80%; 
     visibility: hidden;
     opacity: 0;
-    transition: all 0.3s ease;
-    z-index: 999 !important;
-    visibility: hidden;
-    opacity: 0;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1000;
+    overflow: hidden; /* Prevent scrolling sideways */
+    padding: 10px;
 }
 
-/* Visible State for Toolbox */
-.toolbox.visible {
+/* Toolbox Visible State */
+.yi-toolbox.visible {
     visibility: visible;
     opacity: 1;
 }
 
 /* Toolbox Header */
-.toolbox-header {
-    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-    padding-bottom: 20px;
-    margin-bottom: 15px;
+.yi-toolbox-header {
+    background-color: var(--bg-color);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 15px 15px 0 0;
+    height: 12%;
+    position: relative;
+}
+
+.yi-toolbox-logo {
+    height: 30px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.yi-toolbox-title {
+    font-size: 0.7rem;
+    margin: 0;
+    position: absolute;
+    left: 50%;
+    top: 84%;
+    transform: translate(-50%, -50%);
     text-align: center;
-    width: 100%;
-    position: sticky; 
-    top: 0; 
-    z-index: 1; 
-    background: rgba(255, 255, 255, 0.2); 
 }
 
-.toolbox-title {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: black;
-}
-
-/* Toolbox Body */
-.toolbox-body {
+/* Toolbox Buttons */
+.yi-toolbox-body {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr; 
-    gap: 15px;
-    width: 100%;
-    justify-items: center;
-    overflow-y: auto; 
-    padding-right: 10px; 
-    max-height: calc(80vh - 60px); 
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 10px;
+    text-align: center;
+    overflow-y: auto;
+    max-height: calc(80vh - 60px); /* Updated height for scrolling */
 }
 
-
-.toolbox-body::-webkit-scrollbar {
+.yi-toolbox-body::-webkit-scrollbar {
     width: 8px;
 }
 
-.toolbox-body::-webkit-scrollbar-thumb {
+.yi-toolbox-body::-webkit-scrollbar-thumb {
     background: rgba(52, 88, 185, 0.6); 
     border-radius: 4px;
 }
 
-.toolbox-body::-webkit-scrollbar-track {
+.yi-toolbox-body::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.2); 
 }
 
-/* Buttons in Toolbox */
-
-.toolbox-button {
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
-    gap: 5px; 
-    background-color: rgba(255, 255, 255, 0.3); 
-    color: #333; 
-    border: 2px solid rgba(255, 255, 255, 0.5); 
-    border-radius: 12px; 
-    padding: 15px;
-    font-size: 0.9rem; 
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    width: 100%;
-    height: 90px; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-height: 80vh;
-    overflow: hidden; 
-}
-
-/* Change background and text color on hover */
-.toolbox-button:hover {
-    background-color: rgba(52, 88, 185, 1); 
-    transform: scale(1.05);
-    color: rgb(71, 146, 216);
-}
-
-/* Active button styling */
-.toolbox-button.active {
-    background-color: rgba(52, 88, 185, 1); 
-    color: white; 
-    transform: scale(1); 
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); 
-}
-
-/* Style the icons */
-.toolbox-button i {
-    font-size: 1.5rem; 
-    color: inherit; /
-}
-
-/* Optional: Reduce gap for small buttons */
-.toolbox-button span {
+.yi-toolbox-button {
+    background-color: white !important;
+    border: none;
+    border-radius: 10px; 
+    padding: 10px;
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    box-shadow: 0px 3px 4px rgb(0 0 0 / 3%);
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.3s;
+    width: 100%; /* Takes full grid cell width */
+    max-width: 90px; /* Standardizes button width */
+    height: 94px; /* Standardizes button height */
 }
 
-/* Toolbox Image */
-.toolbox-image-container {
-    margin-bottom: 20px;
-    text-align: center;
+.yi-toolbox-button i {
+    font-size: 1rem; 
+    color: #393636;
+    margin-bottom: 5px;
 }
 
-.toolbox-image {
-    width: 70px;
-    height: auto;
+.yi-toolbox-button span {
+    font-size: 14px; 
+    color: #333;
+}
+
+.yi-toolbox-button:hover {
+    border: 1px solid black; 
+}
+
+/* Side Button */
+.side-button {
+    background-color: transparent;
+    border: none;
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 50%;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.side-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.side-button:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive Styling */
+@media (max-width: 480px) {
+    .yi-toolbox {
+        max-width: 80%;
+    }
+
+    .yi-toolbox-body {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .yi-toolbox-button {
+        height: 70px;
+    }
+
+    .yi-toolbox-button span {
+        font-size: 11px;
+    }
 }
 
 
@@ -223,8 +242,8 @@
   }
 
   button {
-    background: #444;
-    color: white;
+    background: var(--bg-color);
+    color: #393636;
     border: none;
     padding: 5px 10px;
     border-radius: 5px;
@@ -236,9 +255,6 @@ button:hover {
     background: #555;
 }
 
-button:active {
-    background: #666;
-}
   
   /* Read Aloud */
 
@@ -509,7 +525,7 @@ button:active {
 
 /* Styles for Night Mode */
 .night-mode {
-    background-color: #121212 !important;
+    background: #121212 !important;
     color: #e0e0e0 !important;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -523,23 +539,23 @@ button:active {
     filter: brightness(0.8);
 }
 
-.night-mode .toolbox {
+.night-mode .yi-toolbox {
     background-color: #1e1e1e;
     color: #ffffff;
     border: 1px solid #444444;
 }
 
-.night-mode .toolbox-button {
+.night-mode .yi-toolbox-button {
     background-color: #2e2e2e;
     border: 1px solid #444444;
-    color: #ffffff;
+    color: black ;
 }
 
-.night-mode .toolbox-title {
+.night-mode .yi-toolbox-title {
     color: #ffffff !important; /* Ensure title text is white */
 }
 
-.night-mode .toolbox-button:hover {
+.night-mode .yi-toolbox-button:hover {
     background-color: #3e3e3e;
 }
 
@@ -655,7 +671,7 @@ button:active {
 
 /* Accessible Font */
 
-/* Import Open Sans from Google Fonts top */
+
 
 
 /* Accessible Font Class */
@@ -670,9 +686,9 @@ button:active {
 
 /* Contrast Popup Styles */
 .contrast-popup {
-    position: fixed;
+    position: relative;
     top: 20%;
-    left: 50%;
+    left: 70%;
     transform: translate(-50%, -20%);
     width: 400px;
     background: #ffffff;
@@ -690,17 +706,17 @@ button:active {
 
 .contrast-popup-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     padding: 16px;
     border-bottom: 1px solid #ddd;
-    background-color: #f5f5f5;
+    background-color: var(--bg-color);
 }
 
 .contrast-popup-title {
     font-size: 18px;
     font-weight: bold;
-    color: #333;
+    color: white
 }
 
 .contrast-popup-close {
@@ -708,8 +724,12 @@ button:active {
     border: none;
     font-size: 18px;
     cursor: pointer;
-    color: #999;
+    color: #fff; 
+    position: absolute; 
+    top: 10px;
+    right: 10px; /* Adjust as necessary */
 }
+
 
 .contrast-popup-body {
     padding: 16px;
@@ -838,32 +858,254 @@ button:active {
 
 /* Font */
 
-.font-dropdown {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-top: 5px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: none; /* Hidden initially */
-    width: 100%;
-    display: grid; /* Use Flexbox for horizontal layout */
-    align-items: center; /* Align items vertically in the center */
-    justify-content: space-between; /* Add space between the buttons and the font-size display */
-    gap: 10px; /* Add space between items */
-}
+/*  */
 
-.font-dropdown button {
-    padding: 8px 16px;
-    font-size: 16px;
+/* Toolbox top button */
+
+/* Scoped Header Buttons */
+.yi-toolbox-header-left .header-btn,
+.yi-toolbox-header-right .header-btn {
+    background: none;
+    border: 4px solid transparent;
+    color: white;
+    font-size: 1rem;
     cursor: pointer;
-    flex-shrink: 0; /* Prevent buttons from shrinking */
+    transition: transform 0.2s, border 0.2s;
 }
 
-.font-dropdown span {
+.yi-toolbox-header-left .header-btn:hover,
+.yi-toolbox-header-right .header-btn:hover {
+    transform: scale(1.1); 
+    border-color: black;
+}
+
+
+
+/* Logo Styling */
+.yi-toolbox-logo {
+    height: 45px;
+    width: auto;
+    top: 8%;
+}
+
+/* Title Styling */
+.yi-toolbox-title {
+    
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    flex-grow: 1;
+}
+
+
+/* Setting Popup */
+
+.settings-popup {
+    position: relative;
+    top: 20%;
+    left: 70%; 
+    transform: translate(-50%, -50%);
+    background: #EFF1F5; 
+    border-radius: 15px; 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); 
+    padding: 0; 
+    z-index: 1000;
+    width: 350px; 
+    text-align: center;
+    font-family: Arial, sans-serif;
+    overflow: hidden; 
+}
+
+.settings-popup-header {
+    background-color: var(--bg-color); 
+    color: white; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 22px;
+    border-radius: 15px 15px 0 0;
+    height: 12%; 
     font-size: 18px;
     font-weight: bold;
-    margin-left: 10px;
-    flex-shrink: 0; /* Prevent the span from shrinking */
+    position: relative;
+}
+
+.settings-popup h3 {
+    margin: 0;
+    font-size: 1rem;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+}
+
+.popup-section {
+    margin: 20px 0;
+    text-align: left; 
+    padding: 0 20px; 
+}
+
+.popup-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    position: absolute;
+    right: 15px; 
+    top: 8px;
+}
+
+.popup-close:hover {
+    color: #ff4c4c; 
+}
+
+.settings-popup-content {
+    padding: 20px;
+    font-size: 16px; 
+    color: white;
+}
+
+.reset-popup-btn {
+    background-color:var(--bg-color);
+    color: white !important;
+    border: none;
+    border-radius: 8px; 
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.reset-popup-btn:hover {
+    background-color: var(--bg-color);;
 }
 
 
+/* Font size Setting Popup */
+
+.font-size-popup {
+    position: fixed;
+    top: 30% !important;  
+    left: 74% !important; 
+    transform: translate(-50%, -50%); 
+    background-color: #EFF1F5; 
+    border-radius: 15px; 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    padding: 0; 
+    z-index: 1000; 
+    max-width: 400px;
+    text-align: center; 
+    overflow: hidden; 
+    font-family: Arial, sans-serif; 
+}
+
+.font-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-color); 
+    color: white; 
+    padding: 10px 15px; 
+    border-radius: 15px 15px 0 0; 
+    font-size: 18px;
+    font-weight: bold;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+.font-popup-title {
+    margin: 0;
+    font-size: 16px;
+    flex: 1;
+    text-align: center; 
+}
+
+.close-popup-btn {
+    top: 0%;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease-in-out; 
+}
+
+.close-popup-btn:hover {
+    color: #ff4c4c; 
+}
+
+.font-popup-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 20px; 
+}
+
+.font-popup-btn {
+    background-color: var(--bg-color);
+    color: white;
+    border: none;
+    border-radius: 8px; 
+    padding: 10px 20px;
+    font-size: 20px;
+    font-weight: bold; 
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.font-popup-btn:hover {
+    background-color: #444; 
+}
+
+.font-popup-display {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 10px 0; 
+    width: 60px; 
+    text-align: center;
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    background-color: #fff; 
+    color: #333; 
+}
+
+.font-popup-reset {
+    padding: 15px;
+    text-align: center;
+    background-color: #F5F5F5; 
+    border-radius: 0 0 15px 15px; 
+    border-top: 1px solid #ddd; 
+}
+
+.reset-popup-btn {
+    background-color: var(--bg-color); 
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold; 
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease; 
+}
+
+.reset-popup-btn:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+
+/* Button active */
+.active-button {
+    border: 2px solid black; 
+    border-radius: 5px; 
+}
+
+/* Remove Image */
+.hidden-image {
+    visibility: hidden !important; 
+}
