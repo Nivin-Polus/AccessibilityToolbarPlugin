@@ -12,7 +12,7 @@
 }
 
 /* Button to Open Toolbox */
-.open-toolbox-button {
+.open-yi-toolbox-button {
     background-color: #007bff;
     color: #fff;
     border: none;
@@ -24,14 +24,14 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.open-toolbox-button:hover {
+.open-yi-toolbox-button:hover {
     background-color: #0056b3;
     transform: scale(1.05);
 }
 
 /* Toolbox Window */
 /* Updated Toolbox Styling */
-.toolbox {
+.yi-toolbox {
     background-color: #EFF1F5; /* Updated background color */
     border-radius: 15px; /* Adjusted border-radius */
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
@@ -49,13 +49,13 @@
 }
 
 /* Toolbox Visible State */
-.toolbox.visible {
+.yi-toolbox.visible {
     visibility: visible;
     opacity: 1;
 }
 
 /* Toolbox Header */
-.toolbox-header {
+.yi-toolbox-header {
     background-color: var(--bg-color);
     color: white;
     display: flex;
@@ -67,14 +67,14 @@
     position: relative;
 }
 
-.toolbox-logo {
+.yi-toolbox-logo {
     height: 30px;
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
 }
 
-.toolbox-title {
+.yi-toolbox-title {
     font-size: 0.7rem;
     margin: 0;
     position: absolute;
@@ -85,7 +85,7 @@
 }
 
 /* Toolbox Buttons */
-.toolbox-body {
+.yi-toolbox-body {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
@@ -95,20 +95,20 @@
     max-height: calc(80vh - 60px); /* Updated height for scrolling */
 }
 
-.toolbox-body::-webkit-scrollbar {
+.yi-toolbox-body::-webkit-scrollbar {
     width: 8px;
 }
 
-.toolbox-body::-webkit-scrollbar-thumb {
+.yi-toolbox-body::-webkit-scrollbar-thumb {
     background: rgba(52, 88, 185, 0.6); 
     border-radius: 4px;
 }
 
-.toolbox-body::-webkit-scrollbar-track {
+.yi-toolbox-body::-webkit-scrollbar-track {
     background: rgba(255, 255, 255, 0.2); 
 }
 
-.toolbox-button {
+.yi-toolbox-button {
     background-color: white !important;
     border: none;
     border-radius: 10px; 
@@ -125,18 +125,18 @@
     height: 94px; /* Standardizes button height */
 }
 
-.toolbox-button i {
+.yi-toolbox-button i {
     font-size: 1rem; 
     color: #393636;
     margin-bottom: 5px;
 }
 
-.toolbox-button span {
+.yi-toolbox-button span {
     font-size: 14px; 
     color: #333;
 }
 
-.toolbox-button:hover {
+.yi-toolbox-button:hover {
     border: 1px solid black; 
 }
 
@@ -170,19 +170,19 @@
 
 /* Responsive Styling */
 @media (max-width: 480px) {
-    .toolbox {
+    .yi-toolbox {
         max-width: 80%;
     }
 
-    .toolbox-body {
+    .yi-toolbox-body {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .toolbox-button {
+    .yi-toolbox-button {
         height: 70px;
     }
 
-    .toolbox-button span {
+    .yi-toolbox-button span {
         font-size: 11px;
     }
 }
@@ -539,23 +539,23 @@ button:hover {
     filter: brightness(0.8);
 }
 
-.night-mode .toolbox {
+.night-mode .yi-toolbox {
     background-color: #1e1e1e;
     color: #ffffff;
     border: 1px solid #444444;
 }
 
-.night-mode .toolbox-button {
+.night-mode .yi-toolbox-button {
     background-color: #2e2e2e;
     border: 1px solid #444444;
     color: black ;
 }
 
-.night-mode .toolbox-title {
+.night-mode .yi-toolbox-title {
     color: #ffffff !important; /* Ensure title text is white */
 }
 
-.night-mode .toolbox-button:hover {
+.night-mode .yi-toolbox-button:hover {
     background-color: #3e3e3e;
 }
 
@@ -863,8 +863,8 @@ button:hover {
 /* Toolbox top button */
 
 /* Scoped Header Buttons */
-.toolbox-header-left .header-btn,
-.toolbox-header-right .header-btn {
+.yi-toolbox-header-left .header-btn,
+.yi-toolbox-header-right .header-btn {
     background: none;
     border: 4px solid transparent;
     color: white;
@@ -873,8 +873,8 @@ button:hover {
     transition: transform 0.2s, border 0.2s;
 }
 
-.toolbox-header-left .header-btn:hover,
-.toolbox-header-right .header-btn:hover {
+.yi-toolbox-header-left .header-btn:hover,
+.yi-toolbox-header-right .header-btn:hover {
     transform: scale(1.1); 
     border-color: black;
 }
@@ -882,14 +882,14 @@ button:hover {
 
 
 /* Logo Styling */
-.toolbox-logo {
+.yi-toolbox-logo {
     height: 45px;
     width: auto;
     top: 8%;
 }
 
 /* Title Styling */
-.toolbox-title {
+.yi-toolbox-title {
     
     font-size: 12px;
     font-weight: bold;
@@ -970,7 +970,7 @@ button:hover {
 }
 
 .reset-popup-btn {
-    background-color:var(--bg-color);
+    background-color:var(--bg-color);;
     color: white !important;
     border: none;
     border-radius: 8px; 
