@@ -548,7 +548,7 @@ button:hover {
 .night-mode .toolbox-button {
     background-color: #2e2e2e;
     border: 1px solid #444444;
-    color: black !;
+    color: black ;
 }
 
 .night-mode .toolbox-title {
@@ -686,7 +686,7 @@ button:hover {
 
 /* Contrast Popup Styles */
 .contrast-popup {
-    position: fixed;
+    position: relative;
     top: 20%;
     left: 70%;
     transform: translate(-50%, -20%);
@@ -858,33 +858,7 @@ button:hover {
 
 /* Font */
 
-.font-dropdown {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-top: 5px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: none; 
-    width: 100%;
-    display: grid; 
-    align-items: center; 
-    justify-content: space-between; 
-    gap: 10px; 
-}
-
-.font-dropdown button {
-    padding: 8px 16px;
-    font-size: 16px;
-    cursor: pointer;
-    flex-shrink: 0; 
-}
-
-.font-dropdown span {
-    font-size: 18px;
-    font-weight: bold;
-    margin-left: 10px;
-    flex-shrink: 0;
-}
+/*  */
 
 /* Toolbox top button */
 
@@ -928,30 +902,30 @@ button:hover {
 /* Setting Popup */
 
 .settings-popup {
-    position: fixed;
-    top: 20%; /* Adjusted top position for better alignment */
-    left: 70%; /* Adjusted horizontal position */
+    position: relative;
+    top: 20%;
+    left: 70%; 
     transform: translate(-50%, -50%);
-    background: #EFF1F5; /* Match the toolbar background */
-    border-radius: 15px; /* Match the toolbar rounded corners */
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); /* Stronger shadow for prominence */
-    padding: 0; /* Reset padding to match the toolbar */
+    background: #EFF1F5; 
+    border-radius: 15px; 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); 
+    padding: 0; 
     z-index: 1000;
-    width: 350px; /* Match the toolbar width */
+    width: 350px; 
     text-align: center;
     font-family: Arial, sans-serif;
-    overflow: hidden; /* Prevent overflow */
+    overflow: hidden; 
 }
 
 .settings-popup-header {
-    background-color: var(--bg-color); /* Match the toolbar header */
-    color: white; /* White text */
+    background-color: var(--bg-color); 
+    color: white; 
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 22px; /* Add padding */
-    border-radius: 15px 15px 0 0; /* Match the toolbar header rounding */
-    height: 12%; /* Adjust height to match toolbar style */
+    padding: 22px;
+    border-radius: 15px 15px 0 0;
+    height: 12%; 
     font-size: 18px;
     font-weight: bold;
     position: relative;
@@ -970,8 +944,8 @@ button:hover {
 
 .popup-section {
     margin: 20px 0;
-    text-align: left; /* Align content left */
-    padding: 0 20px; /* Add inner padding for spacing */
+    text-align: left; 
+    padding: 0 20px; 
 }
 
 .popup-close {
@@ -986,20 +960,20 @@ button:hover {
 }
 
 .popup-close:hover {
-    color: #ff4c4c; /* Highlight close button on hover */
+    color: #ff4c4c; 
 }
 
 .settings-popup-content {
-    padding: 20px; /* Inner padding for the popup content */
-    font-size: 16px; /* Match toolbar font size */
+    padding: 20px;
+    font-size: 16px; 
     color: white;
 }
 
 .reset-popup-btn {
-    background-color:var(--bg-color);;
+    background-color:var(--bg-color);
     color: white !important;
     border: none;
-    border-radius: 8px; /* Match modern button style */
+    border-radius: 8px; 
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
@@ -1015,8 +989,8 @@ button:hover {
 
 .font-size-popup {
     position: fixed;
-    top: 30% !important; 
-    left: 72% !important; 
+    top: 30% !important;  
+    left: 74% !important; 
     transform: translate(-50%, -50%); 
     background-color: #EFF1F5; 
     border-radius: 15px; 
@@ -1026,18 +1000,20 @@ button:hover {
     max-width: 400px;
     text-align: center; 
     overflow: hidden; 
+    font-family: Arial, sans-serif; 
 }
 
 .font-popup-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color:  var(--bg-color);
+    background-color: var(--bg-color); 
     color: white; 
-    padding: 10px;
+    padding: 10px 15px; 
     border-radius: 15px 15px 0 0; 
     font-size: 18px;
     font-weight: bold;
+    box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.1);
 }
 
 .font-popup-title {
@@ -1048,12 +1024,13 @@ button:hover {
 }
 
 .close-popup-btn {
+    top: 0%;
     background: none;
     border: none;
     color: white;
     font-size: 20px;
     cursor: pointer;
-    top: 0%;
+    transition: color 0.2s ease-in-out; 
 }
 
 .close-popup-btn:hover {
@@ -1069,47 +1046,63 @@ button:hover {
 }
 
 .font-popup-btn {
-    background-color: #333;
+    background-color: var(--bg-color);
     color: white;
     border: none;
     border-radius: 8px; 
     padding: 10px 20px;
     font-size: 20px;
+    font-weight: bold; 
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
+.font-popup-btn:hover {
+    background-color: #444; 
+}
 
 .font-popup-display {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: bold;
+    padding: 10px 0; 
+    width: 60px; 
+    text-align: center;
+    border: 1px solid #ddd; 
+    border-radius: 4px; 
+    background-color: #fff; 
+    color: #333; 
 }
 
 .font-popup-reset {
     padding: 15px;
     text-align: center;
+    background-color: #F5F5F5; 
     border-radius: 0 0 15px 15px; 
+    border-top: 1px solid #ddd; 
 }
 
 .reset-popup-btn {
-    background-color: var(--bg-color);
+    background-color: var(--bg-color); 
     color: white;
     border: none;
-    border-radius: 8px; /* Match modern button style */
+    border-radius: 8px;
     padding: 10px 20px;
     font-size: 16px;
+    font-weight: bold; 
     cursor: pointer;
-    
+    transition: background-color 0.3s ease, transform 0.2s ease; 
 }
 
 .reset-popup-btn:hover {
     background-color: #0056b3;
+    transform: scale(1.05);
 }
+
 
 /* Button active */
 .active-button {
-    border: 2px solid black; /* Example: Thick blue border */
-    border-radius: 5px; /* Optional: Rounded corners */
+    border: 2px solid black; 
+    border-radius: 5px; 
 }
 
 /* Remove Image */
