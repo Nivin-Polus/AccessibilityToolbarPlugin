@@ -12,22 +12,21 @@ function MicAccessTool(init) {
     this.initializeAccessibilityToolbox();
     this.initBlueFilter();
     this.initRemoveImages();
-    this.initAudioRemoval();
-    this.initReadAloud();
-    this.initFontSizeAdjustment();
-    this.initHighlightButtons();
-    this.initStopAnimationsButton();
+    this.addFontSizePopup();
+    // this.initAudioRemoval();
+    // this.initReadAloud();
+    // this.initHighlightButtons();
+    // this.initStopAnimationsButton();
     this.initZoomToggleFeature();
     this.initNightModeFeature();
     this.initTextSpacingFeature();
     this.initLineHeightFeature();
-    this.initCursorSizeAdjustment();
-    this.initKeyboardNavigation();
-    this.initAccessibleFontToggle();
+    // this.initCursorSizeAdjustment();
+    // this.initKeyboardNavigation();
+    // this.initAccessibleFontToggle();
     this.initResetFeature();
     this.initContrastFeature();
-    this.initSaveFeature();
-    this.addFontSizePopup();
+    this.initSaveFeature();   
     this.addSettingsButtonListener();
 
 }
@@ -205,20 +204,20 @@ resetButton.addEventListener('click', function () {
 
     const buttons = [
         { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: './assests/BlueFilter-1.svg'  },
-        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: './assests/read-aloud.svg' },
+        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: './assests/contrast.svg' },
         { id: 'remove-images-btn', text: 'Remove Images', iconClass: './assests/image-off.svg' },
-        { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
         { id: 'font-size-btn', text: 'Font Size', iconClass: './assests/fontsize.svg' },
+        { id: 'night-mode-btn', text: 'Night Mode', iconClass: './assests/mode-night.svg' },
+        { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
+        { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },   
+        { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
         { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
         { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
         { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
-        { id: 'night-mode-btn', text: 'Night Mode', iconClass: './assests/mode-night.svg' },
         { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
-        { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
-        { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
-        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: './assests/contrast.svg' },
+        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: './assests/read-aloud.svg' },
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         { id: 'reset-btn1', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
         { id: 'save-settings-btn', text: 'Save', iconClass: '<i class="fas fa-save"></i>' },
@@ -341,7 +340,7 @@ document.addEventListener('mouseup', () => {
  */
 function updatePopupPositions(isToolboxOnLeft) {
     const popupConfigs = [
-        { selector: '.font-size-popup', left: isToolboxOnLeft ? '27%' : '72%' },
+        { selector: '.font-size-popup', left: isToolboxOnLeft ? '25%' : '74%' },
         { selector: '.settings-popup', left: isToolboxOnLeft ? '28%' : '72%' },
         { selector: '.contrast-popup', left: isToolboxOnLeft ? '30%' : '70%' },
     ];
@@ -435,32 +434,28 @@ MicAccessTool.prototype.initRemoveImages = function () {
 };
 
 MicAccessTool.prototype.toggleImages = function () {
+    // Select all images except the toolbar-related side image
+    const images = document.querySelectorAll('img:not(.toolbox-image):not(.side-button-image)');
+
+    // Toggle visibility based on the state
     if (this.imagesHidden) {
-       
-        this.removedImages.forEach(({ img, parent, nextSibling }) => {
-            if (nextSibling) {
-                parent.insertBefore(img, nextSibling);
-            } else {
-                parent.appendChild(img);
-            }
-        });
-        this.removedImages = []; 
-    } else {
-        // Remove images and store their details
-        const images = document.querySelectorAll('img:not(.toolbox-image):not(.side-button-image)');
+        // Remove the hidden-image class to make images visible again
         images.forEach(img => {
-            this.removedImages.push({
-                img: img,
-                parent: img.parentNode,
-                nextSibling: img.nextSibling,
-            });
-            img.parentNode.removeChild(img);
+            img.classList.remove('hidden-image');
+        });
+    } else {
+        // Add the hidden-image class to hide the images
+        images.forEach(img => {
+            img.classList.add('hidden-image');
         });
     }
 
     // Toggle the state of imagesHidden
     this.imagesHidden = !this.imagesHidden;
 };
+
+
+
 
 // Audio Removal
 
@@ -852,69 +847,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Font Size
-
-// Initialize font size adjustment limits
-MicAccessTool.prototype.initFontSizeAdjustment = function () {
-    const increaseTextButton = document.getElementById('increase-text-btn');
-    const decreaseTextButton = document.getElementById('decrease-text-btn');
-
-    // Add event listeners to buttons
-    if (increaseTextButton) {
-        increaseTextButton.addEventListener('click', () => {
-            this.adjustFontSize('increase');
-            this.setActiveButton('increase-text-btn', true); // Highlight the "Increase Text" button
-            this.setActiveButton('decrease-text-btn', false); // Remove highlight from the "Decrease Text" button
-        });
-    }
-    if (decreaseTextButton) {
-        decreaseTextButton.addEventListener('click', () => {
-            this.adjustFontSize('decrease');
-            this.setActiveButton('decrease-text-btn', true); // Highlight the "Decrease Text" button
-            this.setActiveButton('increase-text-btn', false); // Remove highlight from the "Increase Text" button
-        });
-    }
-};
-
-
-// Adjust font size with limits
-MicAccessTool.prototype.adjustFontSize = function (action) {
-    const minFontSize = 12;
-    const maxFontSize = 36;
-    const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
-
-    let fontSizeUpdated = false;
-
-    allElements.forEach((element) => {
-        const computedStyle = window.getComputedStyle(element);
-        const currentFontSize = parseFloat(computedStyle.fontSize);
-
-        let newFontSize = currentFontSize;
-
-        if (action === 'increase' && currentFontSize < maxFontSize) {
-            newFontSize = Math.min(currentFontSize + 2, maxFontSize);
-            fontSizeUpdated = true;
-        } else if (action === 'decrease' && currentFontSize > minFontSize) {
-            newFontSize = Math.max(currentFontSize - 2, minFontSize);
-            fontSizeUpdated = true;
-        }
-
-        if (fontSizeUpdated) {
-            element.style.fontSize = `${newFontSize}px`;
-        }
-    });
-
-    if (fontSizeUpdated) {
-        const fontSizeDisplay = document.getElementById('font-size-display');
-        if (fontSizeDisplay) {
-            const bodyStyle = window.getComputedStyle(document.body);
-            fontSizeDisplay.textContent = `Font Size: ${parseFloat(bodyStyle.fontSize)}px`;
-        }
-    } else {
-        console.log('Font size adjustment limit reached.');
-    }
-};
-
 // Font size setting PopuP
 MicAccessTool.prototype.addFontSizePopup = function () {
     const fontSizeDiv = document.querySelector('.font-size-btn'); // Font Size button
@@ -942,7 +874,7 @@ MicAccessTool.prototype.addFontSizePopup = function () {
                 </div>
                 <div class="font-popup-content">
                     <button id="decrease-font-btn" class="font-popup-btn">-</button>
-                    <span id="font-size-display" class="font-popup-display">Font Size: 16px</span>
+                    <span id="font-size-display" class="font-popup-display">0</span>
                     <button id="increase-font-btn" class="font-popup-btn">+</button>
                 </div>
                 <div class="font-popup-reset">
@@ -965,28 +897,53 @@ MicAccessTool.prototype.addFontSizePopup = function () {
             const fontSizeDisplay = fontSizePopup.querySelector('#font-size-display');
             const closeButton = fontSizePopup.querySelector('#close-font-popup');
 
-            let fontSize = 16;
+            // Track font size adjustment relative to original
+            let fontSizeChange = 0;
+
+            // Save original font sizes
+            const originalFontSizes = new Map();
+            const allElements = document.body.querySelectorAll('*:not(.toolbox):not(.toolbox *)');
+            allElements.forEach((element) => {
+                const computedStyle = window.getComputedStyle(element);
+                originalFontSizes.set(element, computedStyle.fontSize);
+            });
+
+            // Function to update font size for all elements
+            const applyFontSizeChange = (change) => {
+                allElements.forEach((element) => {
+                    const originalSize = parseFloat(originalFontSizes.get(element));
+                    const newSize = originalSize + change;
+                    element.style.fontSize = `${newSize}px`;
+                });
+            };
+
+            const updateFontSizeDisplay = () => {
+                fontSizeDisplay.textContent = fontSizeChange > 0 ? `+${fontSizeChange}` : `${fontSizeChange}`;
+            };
 
             decreaseButton.addEventListener('click', () => {
-                if (fontSize > 10) {
-                    fontSize -= 2;
-                    fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                    document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+                if (fontSizeChange > -6) { // Limit decrease to -6
+                    fontSizeChange -= 1;
+                    applyFontSizeChange(fontSizeChange);
+                    updateFontSizeDisplay();
                 }
             });
 
             increaseButton.addEventListener('click', () => {
-                if (fontSize < 30) {
-                    fontSize += 2;
-                    fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                    document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+                if (fontSizeChange < 6) { // Limit increase to +6
+                    fontSizeChange += 1;
+                    applyFontSizeChange(fontSizeChange);
+                    updateFontSizeDisplay();
                 }
             });
 
             resetButton.addEventListener('click', () => {
-                fontSize = 16;
-                fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                document.body.style.fontSize = `${fontSize}px`; // Reset font size globally
+                // Reset all elements to their original font size
+                allElements.forEach((element) => {
+                    element.style.fontSize = originalFontSizes.get(element);
+                });
+                fontSizeChange = 0; // Reset the change
+                updateFontSizeDisplay(); // Reset display to 0
             });
 
             closeButton.addEventListener('click', () => {
@@ -1003,6 +960,7 @@ MicAccessTool.prototype.addFontSizePopup = function () {
         }
     });
 };
+
 
 
 
@@ -1226,14 +1184,30 @@ MicAccessTool.prototype.initNightModeFeature = function () {
 };
 
 MicAccessTool.prototype.toggleNightMode = function () {
-    const isNightModeEnabled = document.body.classList.toggle('night-mode'); 
+    // Select all elements on the page except buttons, inputs, and the toolbar (including its children)
+    const allElements = document.querySelectorAll(':not(button):not(input):not(.toolbox):not(.toolbox *)');
+
+    // Toggle night mode state
+    const isNightModeEnabled = document.body.classList.toggle('night-mode');
     localStorage.setItem('nightMode', isNightModeEnabled);
+
+    // Add or remove the `night-mode` class for each element individually, excluding the toolbar
+    allElements.forEach(element => {
+        if (isNightModeEnabled) {
+            element.classList.add('night-mode');
+        } else {
+            element.classList.remove('night-mode');
+        }
+    });
 
     // Update button state explicitly based on the current mode
     this.setActiveButton('night-mode-btn', isNightModeEnabled);
 
     console.log(`Night Mode ${isNightModeEnabled ? 'enabled' : 'disabled'}.`);
 };
+
+
+
 
 
 
@@ -1622,16 +1596,16 @@ MicAccessTool.prototype.setActiveButton = function (activeButtonId, isActive = n
     const button = document.getElementById(activeButtonId);
 
     if (button) {
-        
+        // Determine the new state
         const newState = isActive !== null ? isActive : button.dataset.active !== 'true';
 
         if (newState) {
             // Activate the button
-            button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
+            button.classList.add('active-button'); // Add active class
             button.dataset.active = 'true'; 
         } else {
             // Deactivate the button
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
+            button.classList.remove('active-button'); // Remove active class
             button.dataset.active = 'false'; 
         }
     }
@@ -1864,7 +1838,6 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
         modeButton.addEventListener('click', (e) => this.toggleContrastMode(id, e.target));
         body.appendChild(modeButton);
     });
-    
 
     // Custom Colors Section
     const customColorsSection = document.createElement('div');
@@ -1872,27 +1845,60 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
 
     const predefinedColors = ['#FFFFFF', '#000000', '#F0E68C', '#ADD8E6', '#FFB6C1'];
 
-    // Background Color Section
+    // Background Section
     const bgLabel = document.createElement('label');
-    bgLabel.textContent = 'Background Color:';
+    bgLabel.textContent = 'Background:';
 
     const bgColorContainer = document.createElement('div');
     bgColorContainer.className = 'color-picker-container';
 
+    // Predefined color buttons
     predefinedColors.forEach((color) => {
         const colorButton = document.createElement('button');
         colorButton.className = 'color-button';
         colorButton.style.backgroundColor = color;
-        colorButton.addEventListener('click', () => this.applyCustomColors(color, null));
+
+        colorButton.addEventListener('click', () => {
+            this.applyCustomColors(color, null);
+            this.applyBackgroundColor(color);
+        });
+
         bgColorContainer.appendChild(colorButton);
     });
 
+    // Color picker for custom color
     const bgColorPicker = document.createElement('input');
     bgColorPicker.type = 'color';
     bgColorPicker.id = 'bg-color-picker';
-    bgColorPicker.addEventListener('input', () => this.applyCustomColors(bgColorPicker.value, null));
+
+    bgColorPicker.addEventListener('input', () => {
+        const selectedColor = bgColorPicker.value;
+        this.applyCustomColors(selectedColor, null);
+        this.applyBackgroundColor(selectedColor);
+    });
+
     bgColorContainer.appendChild(bgColorPicker);
 
+    // Function to apply background color to specific elements
+    MicAccessTool.prototype.applyBackgroundColor = function (color) {
+        // Select all elements except buttons, inputs, toolbar, and popups
+        const elements = document.querySelectorAll(
+            '*:not(button):not(input):not(.toolbox):not(.toolbox *):not(.contrast-popup):not(.contrast-popup *)'
+        );
+
+        elements.forEach((element) => {
+            const computedStyle = window.getComputedStyle(element);
+
+            // Skip elements without a background-related style
+            if (computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                element.style.backgroundColor = color;
+            }
+        });
+
+        console.log(`Background color applied: ${color}`);
+    };
+
+    // Append elements to the custom colors section
     customColorsSection.appendChild(bgLabel);
     customColorsSection.appendChild(bgColorContainer);
 
