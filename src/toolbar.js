@@ -1,33 +1,32 @@
 
 'use strict';
 
-function MicAccessTool(init) {
+function YourInclusion(init) {
     this.init = init || {};
     this.removedImages = [];
     this.imagesHidden = false;
     this.isMuted = false;
-    this.selectedHeaderColor = null;
+    this.selectedHeaderColor = '#393636';
 
     // Initialize the toolbox and other features
     this.initializeAccessibilityToolbox();
     this.initBlueFilter();
     this.initRemoveImages();
-    this.initAudioRemoval();
-    this.initReadAloud();
-    this.initFontSizeAdjustment();
-    this.initHighlightButtons();
+    this.addFontSizePopup();
+    // this.initAudioRemoval();
+    // this.initReadAloud();
+    // this.initHighlightButtons();
     this.initStopAnimationsButton();
     this.initZoomToggleFeature();
     this.initNightModeFeature();
     this.initTextSpacingFeature();
     this.initLineHeightFeature();
-    this.initCursorSizeAdjustment();
-    this.initKeyboardNavigation();
-    this.initAccessibleFontToggle();
+    // this.initCursorSizeAdjustment();
+    // this.initKeyboardNavigation();
+    // this.initAccessibleFontToggle();
     this.initResetFeature();
     this.initContrastFeature();
-    this.initSaveFeature();
-    this.addFontSizePopup();
+    this.initSaveFeature();   
     this.addSettingsButtonListener();
 
 }
@@ -44,7 +43,8 @@ function loadFontAwesome() {
 }
 
 // Generic Element Creator
-function createElement(tag, attributes = {}, innerText = '') {
+
+    YourInclusion.prototype.createEle = function (tag, attributes = {}, innerText = '') {
     const element = document.createElement(tag);
 
     for (const [key, value] of Object.entries(attributes)) {
@@ -59,10 +59,11 @@ function createElement(tag, attributes = {}, innerText = '') {
 }
 
 // Specific Element Creators
-function createButton(id, text, icon = '') {
+
+    YourInclusion.prototype.createButton = function(id, text, icon = ''){
     // Create the button element
     const button = document.createElement('button');
-    button.className = 'toolbox-button';
+    button.className = 'yi-toolbox-button';
     button.id = id;
 
     // Create a wrapper div for the icon
@@ -108,34 +109,33 @@ function createButton(id, text, icon = '') {
 }
 
 
-
-
-
-function createDiv(className, id = '') {
+    YourInclusion.prototype.createDiv = function(className, id = ''){
     const attributes = { class: className };
     if (id) attributes.id = id;
-    return createElement('div', attributes);
+    return this.createEle('div', attributes);
 }
 
-function createImage(src, alt, className) {
-    return createElement('img', { src: src, alt: alt, class: className });
+
+    YourInclusion.prototype.createImage = function (src, alt, className) {
+    return this.createEle('img', { src: src, alt: alt, class: className });
 }
 
-function createHeading(level, text, className = '') {
-    return createElement(`h${level}`, { class: className }, text);
+
+    YourInclusion.prototype.createHeading = function (level, text, className = '') {
+    return this.createEle(`h${level}`, { class: className }, text);
 }
 
 // Create Toolbox
-MicAccessTool.prototype.createToolbox = function () {
-    const toolbox = createDiv('toolbox hidden', 'toolbox');
-    const imageContainer = createDiv('toolbox-image-container');
+YourInclusion.prototype.createToolbox = function () {
+    const toolbox = this.createDiv('yi-toolbox hidden', 'yi-toolbox');
+    const imageContainer = this.createDiv('yi-toolbox-image-container');
    
     toolbox.appendChild(imageContainer);
    // Header Section
-   const header = createDiv('toolbox-header');
+   const header = this.createDiv('yi-toolbox-header');
 
    // Left Buttons
-const headerLeft = createDiv('toolbox-header-left');
+const headerLeft = this.createDiv('yi-toolbox-header-left');
 
 const settingsButton = document.createElement('button');
 settingsButton.id = 'settings-btn';
@@ -155,14 +155,14 @@ headerLeft.appendChild(resetButton);
 const logo = document.createElement('img');
 logo.src = 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/image.png';
 logo.alt = 'Logo';
-logo.className = 'toolbox-logo';
+logo.className = 'yi-toolbox-logo';
 
 const title = document.createElement('h2');
-title.className = 'toolbox-title';
+title.className = 'yi-toolbox-title';
 title.textContent = 'Site Point Eye Assistant';
 
 // Right Buttons
-const headerRight = createDiv('toolbox-header-right');
+const headerRight = this.createDiv('yi-toolbox-header-right');
 
 const infoButton = document.createElement('button');
 infoButton.id = 'info-btn';
@@ -188,15 +188,16 @@ header.appendChild(title);
 header.appendChild(headerRight);
 
 // Dedicated close function for the close button
-function closeToolboxFromButton() {
-    const toolbox = document.querySelector('.toolbox');
-    if (toolbox) {
-        toolbox.classList.remove('visible');
+YourInclusion.prototype.closeToolboxFromButton = function () {
+    
+    const toolbox = document.querySelector('.yi-toolbox');
+    if (yi-toolbox) {
+        yi-toolbox.classList.remove('visible');
     }
 }
 
 // Link the function to the close button
-closeButton.addEventListener('click', closeToolboxFromButton);
+closeButton.addEventListener('click', this.closeToolboxFromButton);
 
 // Reset Button - Reuse Existing Reset Functionality
 resetButton.addEventListener('click', function () {
@@ -205,26 +206,26 @@ resetButton.addEventListener('click', function () {
 
     const buttons = [
         { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: './assests/BlueFilter-1.svg'  },
-        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: './assests/read-aloud.svg' },
+        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: './assests/contrast.svg' },
         { id: 'remove-images-btn', text: 'Remove Images', iconClass: './assests/image-off.svg' },
-        { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
         { id: 'font-size-btn', text: 'Font Size', iconClass: './assests/fontsize.svg' },
+        { id: 'night-mode-btn', text: 'Night Mode', iconClass: './assests/mode-night.svg' },
+        { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
+        { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },   
+        { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
         { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
         { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
         { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
         { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
-        { id: 'night-mode-btn', text: 'Night Mode', iconClass: './assests/mode-night.svg' },
         { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
-        { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
-        { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },       
         { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
-        { id: 'contrast-btn', text: 'Contrast Modes', iconClass: './assests/contrast.svg' },
+        { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: './assests/read-aloud.svg' },
         // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
         { id: 'reset-btn1', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
         { id: 'save-settings-btn', text: 'Save', iconClass: '<i class="fas fa-save"></i>' },
     ];
     
-    const body = createDiv('toolbox-body');
+    const body = this.createDiv('yi-toolbox-body');
 
 buttons.forEach(({ id, text, iconClass }) => {
     // Create a div and set its class name to the button's name (id or text)
@@ -232,24 +233,24 @@ buttons.forEach(({ id, text, iconClass }) => {
     buttonDiv.className = id || text.replace(/\s+/g, '-').toLowerCase(); 
 
     // Create the button and append it to the div
-    const button = createButton(id, text, iconClass);
+    const button = this.createButton(id, text, iconClass);
     buttonDiv.appendChild(button);
 
     // Append the button div to the body
     body.appendChild(buttonDiv);
 });
 
-toolbox.appendChild(header);
-toolbox.appendChild(body);
+yi-toolbox.appendChild(header);
+yi-toolbox.appendChild(body);
 
-document.body.appendChild(toolbox);
+document.body.appendChild(yi-toolbox);
 this.resetButtonStates();
 
 };
 
-MicAccessTool.prototype.createSideButton = function () {
-    const sideButton = createDiv('side-button', 'openToolboxButton');
-    const buttonImage = createImage(
+YourInclusion.prototype.createSideButton = function () {
+    const sideButton = this.createDiv('side-button', 'openToolboxButton');
+    const buttonImage = this.createImage(
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmaznO2w-h9n4bz-pEGtsiqy0J1JGh-wlMCw&s',
         'Open Toolbox',
         'side-button-image'
@@ -286,15 +287,15 @@ document.addEventListener('mousemove', (e) => {
         sideButton.style.left = `${x}px`;
         sideButton.style.top = `${y}px`;
 
-        const toolbox = document.getElementById('toolbox');
+        const toolbox = document.getElementById('yi-toolbox');
 
         // Toolbox should follow the side button
-        let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
-        let toolboxTop = y - toolbox.offsetHeight - 60;
+        let toolboxLeft = x + sideButton.offsetWidth / 2 - yi-toolbox.offsetWidth / 2;
+        let toolboxTop = y - yi-toolbox.offsetHeight - 60;
 
         // Ensure toolbox stays within the screen bounds horizontally
-        if (toolboxLeft + toolbox.offsetWidth > windowWidth) {
-            toolboxLeft = windowWidth - toolbox.offsetWidth - 10;
+        if (toolboxLeft + yi-toolbox.offsetWidth > windowWidth) {
+            toolboxLeft = windowWidth - yi-toolbox.offsetWidth - 10;
         }
         if (toolboxLeft < 10) {
             toolboxLeft = 10;
@@ -308,7 +309,7 @@ document.addEventListener('mousemove', (e) => {
             toolboxTop = 10;
         }
 
-        if (toolboxTop + toolbox.offsetHeight > windowHeight) {
+        if (toolboxTop + yi-toolbox.offsetHeight > windowHeight) {
             toolboxTop = windowHeight - toolbox.offsetHeight - 10;
         }
 
@@ -321,7 +322,7 @@ document.addEventListener('mousemove', (e) => {
         
 
          // Update popup positions
-         updatePopupPositions(isToolboxOnLeft);
+         this.updatePopupPositions(isToolboxOnLeft);
         }
     });
 document.addEventListener('mouseup', () => {
@@ -339,9 +340,11 @@ document.addEventListener('mouseup', () => {
  * Updates the positions of all popups dynamically based on the toolbox location.
  * @param {boolean} isToolboxOnLeft 
  */
-function updatePopupPositions(isToolboxOnLeft) {
+
+    YourInclusion.prototype.updatePopupPositions = function (isToolboxOnLeft) {
+
     const popupConfigs = [
-        { selector: '.font-size-popup', left: isToolboxOnLeft ? '27%' : '72%' },
+        { selector: '.font-size-popup', left: isToolboxOnLeft ? '25%' : '74%' },
         { selector: '.settings-popup', left: isToolboxOnLeft ? '28%' : '72%' },
         { selector: '.contrast-popup', left: isToolboxOnLeft ? '30%' : '70%' },
     ];
@@ -356,11 +359,11 @@ function updatePopupPositions(isToolboxOnLeft) {
 
 
 
-MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
+YourInclusion.prototype.initializeAccessibilityToolbox = function () {
     this.createToolbox();
     this.createSideButton();
 
-    const toolbox = document.getElementById('toolbox');
+    const toolbox = document.getElementById('yi-toolbox');
     const sideButton = document.getElementById('openToolboxButton');
 
     // Open/close toolbox on side button click
@@ -376,14 +379,20 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
         toolbox.classList.toggle('visible');
     });
 
-    document.addEventListener('click', (event) => {
-        if (
-            !toolbox.contains(event.target) && 
-            !sideButton.contains(event.target)
-        ) {
-            toolbox.classList.remove('visible');
-        }
-    });
+    // document.addEventListener('click', (event) => {
+    //     // Check if any popup is currently active by ensuring it exists and is visible
+    //     const popups = ['.font-size-popup', '.settings-popup', '.contrast-popup', '.read-aloud-popup'];
+    //     const isPopupActive = popups.some(selector => {
+    //         const popup = document.querySelector(selector);
+    //         return popup && (popup.style.display === 'block' || popup.classList.contains('visible'));
+    //     });
+    
+    //     // Only close the toolbox if no popup is active
+    //     if (!isPopupActive && !toolbox.contains(event.target) && !sideButton.contains(event.target)) {
+    //         toolbox.classList.remove('visible');
+    //     }
+    // });
+    
 };
 
 
@@ -392,7 +401,7 @@ MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
 
 
 // Blue Filter
-MicAccessTool.prototype.initBlueFilter = function () {
+YourInclusion.prototype.initBlueFilter = function () {
     const blueFilterButton = document.getElementById('blue-filter-btn');
 
     if (blueFilterButton) {
@@ -405,7 +414,7 @@ MicAccessTool.prototype.initBlueFilter = function () {
                 this.setActiveButton('blue-filter-btn', false);
             } else {
                
-                const newBlueOverlay = createDiv('blue-overlay');
+                const newBlueOverlay = this.createDiv('blue-overlay');
                 document.body.appendChild(newBlueOverlay);
                 newBlueOverlay.classList.add('active');
                 this.setActiveButton('blue-filter-btn', true); 
@@ -418,7 +427,7 @@ MicAccessTool.prototype.initBlueFilter = function () {
 
 
 // Remove images
-MicAccessTool.prototype.initRemoveImages = function () {
+YourInclusion.prototype.initRemoveImages = function () {
     const removeImageButton = document.getElementById('remove-images-btn');
     if (removeImageButton) {
         removeImageButton.addEventListener('click', () => {
@@ -428,27 +437,20 @@ MicAccessTool.prototype.initRemoveImages = function () {
     }
 };
 
-MicAccessTool.prototype.toggleImages = function () {
+YourInclusion.prototype.toggleImages = function () {
+    // Select all images except the toolbar-related side image
+    const images = document.querySelectorAll('img:not(.yi-toolbox-image):not(.side-button-image)');
+
+    // Toggle visibility based on the state
     if (this.imagesHidden) {
-       
-        this.removedImages.forEach(({ img, parent, nextSibling }) => {
-            if (nextSibling) {
-                parent.insertBefore(img, nextSibling);
-            } else {
-                parent.appendChild(img);
-            }
-        });
-        this.removedImages = []; 
-    } else {
-        // Remove images and store their details
-        const images = document.querySelectorAll('img:not(.toolbox-image):not(.side-button-image)');
+        // Remove the hidden-image class to make images visible again
         images.forEach(img => {
-            this.removedImages.push({
-                img: img,
-                parent: img.parentNode,
-                nextSibling: img.nextSibling,
-            });
-            img.parentNode.removeChild(img);
+            img.classList.remove('hidden-image');
+        });
+    } else {
+        // Add the hidden-image class to hide the images
+        images.forEach(img => {
+            img.classList.add('hidden-image');
         });
     }
 
@@ -456,9 +458,12 @@ MicAccessTool.prototype.toggleImages = function () {
     this.imagesHidden = !this.imagesHidden;
 };
 
+
+
+
 // Audio Removal
 
-MicAccessTool.prototype.initAudioRemoval = function () {
+YourInclusion.prototype.initAudioRemoval = function () {
     const audioRemovalButton = document.getElementById('remove-audio-btn');
     if (audioRemovalButton) {
         audioRemovalButton.addEventListener('click', () => {
@@ -468,7 +473,7 @@ MicAccessTool.prototype.initAudioRemoval = function () {
     }
 };
 
-MicAccessTool.prototype.audioRemoval = function () {
+YourInclusion.prototype.audioRemoval = function () {
     const soundElements = document.querySelectorAll('audio, video');
     this.isMuted = !this.isMuted; 
     soundElements.forEach(element => {
@@ -478,7 +483,7 @@ MicAccessTool.prototype.audioRemoval = function () {
 
 // Read Aloud
 // Initialize Read Aloud Feature
-MicAccessTool.prototype.initReadAloud = function () {
+YourInclusion.prototype.initReadAloud = function () {
     const readAloudBtn = document.getElementById('read-aloud-btn');
     if (readAloudBtn) {
         readAloudBtn.addEventListener('click', () => {
@@ -495,7 +500,7 @@ MicAccessTool.prototype.initReadAloud = function () {
     }
 };
 
-MicAccessTool.prototype.toggleReadAloud = function (buttonId) {
+YourInclusion.prototype.toggleReadAloud = function (buttonId) {
     const toolbar = document.getElementById('read-aloud-toolbar');
     const isActive = this.isReadAloudActive || false; 
 
@@ -525,13 +530,13 @@ MicAccessTool.prototype.toggleReadAloud = function (buttonId) {
 
 
 // Create the Read Aloud Toolbar
-MicAccessTool.prototype.createReadAloudToolbar = function () {
-    const toolbar = createDiv('read-aloud-toolbar', 'read-aloud-toolbar');
+YourInclusion.prototype.createReadAloudToolbar = function () {
+    const toolbar = this.createDiv('read-aloud-toolbar', 'read-aloud-toolbar');
 
     // Toolbar Header
-    const header = createDiv('toolbar-header');
-    const title = createHeading(2, 'Read Aloud Settings', 'toolbar-title');
-    const closeButton = createButton('close-toolbar', '✖');
+    const header = this.createDiv('toolbar-header');
+    const title = this.createHeading(2, 'Read Aloud Settings', 'toolbar-title');
+    const closeButton = this.createButton('close-toolbar', '✖');
     closeButton.addEventListener('click', () => {
         toolbar.remove();
         this.disableDefaultClickToRead();
@@ -541,30 +546,30 @@ MicAccessTool.prototype.createReadAloudToolbar = function () {
     toolbar.appendChild(header);
 
     // Toolbar Controls
-    const controls = createDiv('toolbar-controls');
+    const controls = this.createDiv('toolbar-controls');
 
     // Cursor Read Aloud Button
-    const cursorButton = createButton('cursor-read-btn', 'Cursor Read Aloud');
+    const cursorButton = this.createButton('cursor-read-btn', 'Cursor Read Aloud');
     cursorButton.innerHTML = `<i class="fas fa-mouse-pointer"></i> Cursor Read Aloud`;
     cursorButton.addEventListener('click', this.enableCursorReadAloud.bind(this));
 
     // Previous Line Button
-     const previousButton = createButton('previous-line-btn', 'Previous Line');
+     const previousButton = this.createButton('previous-line-btn', 'Previous Line');
      previousButton.innerHTML = `<i class="fas fa-arrow-left"></i> `;
      previousButton.addEventListener('click', this.readPreviousLine.bind(this));
 
     // Play Button
-    const playButton = createButton('play-read-btn', '▶');
+    const playButton = this.createButton('play-read-btn', '▶');
     playButton.innerHTML = `<i class="fas fa-play"></i>`;
     playButton.addEventListener('click', this.playReadAloud.bind(this));
 
     // Stop Button
-    const stopButton = createButton('stop-read-btn', '⏹');
+    const stopButton = this.createButton('stop-read-btn', '⏹');
     stopButton.innerHTML = `<i class="fas fa-stop"></i>`;
     stopButton.addEventListener('click', this.stopReadAloud.bind(this));
  
 // Next Line Button
-const nextButton = createButton('next-line-btn', 'Next Line');
+const nextButton = this.createButton('next-line-btn', 'Next Line');
 nextButton.innerHTML = `<i class="fas fa-arrow-right"></i> `;
 nextButton.addEventListener('click', this.readNextLine.bind(this));
 
@@ -637,7 +642,7 @@ speedWrapper.appendChild(speedSlider);
 };
 
 // Helper Function to Highlight Text
-MicAccessTool.prototype.highlightText = function (element, start, length) {
+YourInclusion.prototype.highlightText = function (element, start, length) {
     const text = element.dataset.originalText || element.innerText || '';
     const before = text.slice(0, start);
     const highlight = text.slice(start, start + length);
@@ -648,7 +653,7 @@ MicAccessTool.prototype.highlightText = function (element, start, length) {
 
 
 // Enable Default Click-to-Read
-MicAccessTool.prototype.enableDefaultClickToRead = function () {
+YourInclusion.prototype.enableDefaultClickToRead = function () {
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
     elements.forEach(element => {
         element.addEventListener('click', this.readElementContent.bind(this));
@@ -656,7 +661,7 @@ MicAccessTool.prototype.enableDefaultClickToRead = function () {
 };
 
 // Disable Default Click-to-Read
-MicAccessTool.prototype.disableDefaultClickToRead = function () {
+YourInclusion.prototype.disableDefaultClickToRead = function () {
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
     elements.forEach(element => {
         element.removeEventListener('click', this.readElementContent.bind(this));
@@ -664,7 +669,7 @@ MicAccessTool.prototype.disableDefaultClickToRead = function () {
 };
 
 // Read Element Content with Highlighting
-MicAccessTool.prototype.readElementContent = function (event) {
+YourInclusion.prototype.readElementContent = function (event) {
     const element = event.target;
     const text = element.innerText || element.value || '';
     const msg = new SpeechSynthesisUtterance(text);
@@ -690,7 +695,7 @@ MicAccessTool.prototype.readElementContent = function (event) {
     speechSynthesis.speak(msg);
 };
 
-MicAccessTool.prototype.clearHighlight = function (element) {
+YourInclusion.prototype.clearHighlight = function (element) {
     if (element.dataset.originalText) {
         element.innerHTML = element.dataset.originalText;
     }
@@ -699,7 +704,7 @@ MicAccessTool.prototype.clearHighlight = function (element) {
 
 
 // Play Entire Page Read Aloud with Highlighting
-MicAccessTool.prototype.playReadAloud = function () {
+YourInclusion.prototype.playReadAloud = function () {
     if (!this.isReadAloudActive) {
         console.log('Read Aloud is not active. Please enable it first.');
         return;
@@ -721,7 +726,7 @@ MicAccessTool.prototype.playReadAloud = function () {
 
 
 // Enable Cursor Read Aloud
-MicAccessTool.prototype.enableCursorReadAloud = function () {
+YourInclusion.prototype.enableCursorReadAloud = function () {
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
     elements.forEach(element => {
         let timeoutId;
@@ -741,7 +746,7 @@ MicAccessTool.prototype.enableCursorReadAloud = function () {
     });
 };
 
-MicAccessTool.prototype.readPreviousLine = function () {
+YourInclusion.prototype.readPreviousLine = function () {
     if (this.currentParagraphIndex > 0) {
         this.currentParagraphIndex--;
         this.readCurrentLine();
@@ -752,7 +757,7 @@ MicAccessTool.prototype.readPreviousLine = function () {
 
 
 
-MicAccessTool.prototype.readNextLine = function () {
+YourInclusion.prototype.readNextLine = function () {
     const paragraphs = document.querySelectorAll('p');
 
     if (this.currentParagraphIndex === undefined) this.currentParagraphIndex = 0;
@@ -767,7 +772,7 @@ MicAccessTool.prototype.readNextLine = function () {
 
 
 
-MicAccessTool.prototype.speakText = function (element) {
+YourInclusion.prototype.speakText = function (element) {
     const text = element.innerText || '';
     const msg = new SpeechSynthesisUtterance(text);
     msg.volume = this.currentVolume || 1;
@@ -802,7 +807,7 @@ MicAccessTool.prototype.speakText = function (element) {
 
 
 
-MicAccessTool.prototype.readCurrentLine = function () {
+YourInclusion.prototype.readCurrentLine = function () {
     const paragraphs = document.querySelectorAll('h1,h2,h3,h4,h5,h6,p');
 
     if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= paragraphs.length) {
@@ -817,7 +822,7 @@ MicAccessTool.prototype.readCurrentLine = function () {
 
 
 // Stop Read Aloud
-MicAccessTool.prototype.stopReadAloud = function () {
+YourInclusion.prototype.stopReadAloud = function () {
     speechSynthesis.cancel(); 
     this.currentParagraphIndex = undefined; 
 
@@ -834,7 +839,7 @@ MicAccessTool.prototype.stopReadAloud = function () {
 
 document.addEventListener('DOMContentLoaded', () => {
    
-    const buttons = document.querySelectorAll('.toolbox-button');
+    const buttons = document.querySelectorAll('.yi-toolbox-button');
 
     buttons.forEach(button => {
         button.addEventListener('click', () => {
@@ -846,73 +851,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Font Size
-
-// Initialize font size adjustment limits
-MicAccessTool.prototype.initFontSizeAdjustment = function () {
-    const increaseTextButton = document.getElementById('increase-text-btn');
-    const decreaseTextButton = document.getElementById('decrease-text-btn');
-
-    // Add event listeners to buttons
-    if (increaseTextButton) {
-        increaseTextButton.addEventListener('click', () => {
-            this.adjustFontSize('increase');
-            this.setActiveButton('increase-text-btn', true); // Highlight the "Increase Text" button
-            this.setActiveButton('decrease-text-btn', false); // Remove highlight from the "Decrease Text" button
-        });
-    }
-    if (decreaseTextButton) {
-        decreaseTextButton.addEventListener('click', () => {
-            this.adjustFontSize('decrease');
-            this.setActiveButton('decrease-text-btn', true); // Highlight the "Decrease Text" button
-            this.setActiveButton('increase-text-btn', false); // Remove highlight from the "Increase Text" button
-        });
-    }
-};
-
-
-// Adjust font size with limits
-MicAccessTool.prototype.adjustFontSize = function (action) {
-    const minFontSize = 12;
-    const maxFontSize = 36;
-    const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
-
-    let fontSizeUpdated = false;
-
-    allElements.forEach((element) => {
-        const computedStyle = window.getComputedStyle(element);
-        const currentFontSize = parseFloat(computedStyle.fontSize);
-
-        let newFontSize = currentFontSize;
-
-        if (action === 'increase' && currentFontSize < maxFontSize) {
-            newFontSize = Math.min(currentFontSize + 2, maxFontSize);
-            fontSizeUpdated = true;
-        } else if (action === 'decrease' && currentFontSize > minFontSize) {
-            newFontSize = Math.max(currentFontSize - 2, minFontSize);
-            fontSizeUpdated = true;
-        }
-
-        if (fontSizeUpdated) {
-            element.style.fontSize = `${newFontSize}px`;
-        }
-    });
-
-    if (fontSizeUpdated) {
-        const fontSizeDisplay = document.getElementById('font-size-display');
-        if (fontSizeDisplay) {
-            const bodyStyle = window.getComputedStyle(document.body);
-            fontSizeDisplay.textContent = `Font Size: ${parseFloat(bodyStyle.fontSize)}px`;
-        }
-    } else {
-        console.log('Font size adjustment limit reached.');
-    }
-};
-
 // Font size setting PopuP
-MicAccessTool.prototype.addFontSizePopup = function () {
+YourInclusion.prototype.addFontSizePopup = function () {
     const fontSizeDiv = document.querySelector('.font-size-btn'); // Font Size button
-    const toolbox = document.querySelector('.toolbox-body'); // Toolbox container
+    const toolbox = document.querySelector('.yi-toolbox-body'); // Toolbox container
 
     if (!fontSizeDiv || !toolbox) {
         console.error('Font Size button or toolbox not found.');
@@ -936,7 +878,7 @@ MicAccessTool.prototype.addFontSizePopup = function () {
                 </div>
                 <div class="font-popup-content">
                     <button id="decrease-font-btn" class="font-popup-btn">-</button>
-                    <span id="font-size-display" class="font-popup-display">Font Size: 16px</span>
+                    <span id="font-size-display" class="font-popup-display">0</span>
                     <button id="increase-font-btn" class="font-popup-btn">+</button>
                 </div>
                 <div class="font-popup-reset">
@@ -948,9 +890,9 @@ MicAccessTool.prototype.addFontSizePopup = function () {
             document.body.appendChild(fontSizePopup);
 
             // Position the popup close to the toolbox
-            const toolboxRect = toolbox.getBoundingClientRect();
-            fontSizePopup.style.top = `${toolboxRect.top + 20}px`;
-            fontSizePopup.style.left = `${toolboxRect.left + 20}px`;
+            const toolboxRect = yi-toolbox.getBoundingClientRect();
+            fontSizePopup.style.top = `${yi-toolboxRect.top + 20}px`;
+            fontSizePopup.style.left = `${yi-toolboxRect.left + 20}px`;
 
             // Initialize font size logic
             const decreaseButton = fontSizePopup.querySelector('#decrease-font-btn');
@@ -959,28 +901,53 @@ MicAccessTool.prototype.addFontSizePopup = function () {
             const fontSizeDisplay = fontSizePopup.querySelector('#font-size-display');
             const closeButton = fontSizePopup.querySelector('#close-font-popup');
 
-            let fontSize = 16;
+            // Track font size adjustment relative to original
+            let fontSizeChange = 0;
+
+            // Save original font sizes
+            const originalFontSizes = new Map();
+            const allElements = document.body.querySelectorAll('*:not(.yi-toolbox):not(.yi-toolbox *)');
+            allElements.forEach((element) => {
+                const computedStyle = window.getComputedStyle(element);
+                originalFontSizes.set(element, computedStyle.fontSize);
+            });
+
+            // Function to update font size for all elements
+            const applyFontSizeChange = (change) => {
+                allElements.forEach((element) => {
+                    const originalSize = parseFloat(originalFontSizes.get(element));
+                    const newSize = originalSize + change;
+                    element.style.fontSize = `${newSize}px`;
+                });
+            };
+
+            const updateFontSizeDisplay = () => {
+                fontSizeDisplay.textContent = fontSizeChange > 0 ? `+${fontSizeChange}` : `${fontSizeChange}`;
+            };
 
             decreaseButton.addEventListener('click', () => {
-                if (fontSize > 10) {
-                    fontSize -= 2;
-                    fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                    document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+                if (fontSizeChange > -6) { // Limit decrease to -6
+                    fontSizeChange -= 1;
+                    applyFontSizeChange(fontSizeChange);
+                    updateFontSizeDisplay();
                 }
             });
 
             increaseButton.addEventListener('click', () => {
-                if (fontSize < 30) {
-                    fontSize += 2;
-                    fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                    document.body.style.fontSize = `${fontSize}px`; // Adjust font size globally
+                if (fontSizeChange < 6) { // Limit increase to +6
+                    fontSizeChange += 1;
+                    applyFontSizeChange(fontSizeChange);
+                    updateFontSizeDisplay();
                 }
             });
 
             resetButton.addEventListener('click', () => {
-                fontSize = 16;
-                fontSizeDisplay.textContent = `Font Size: ${fontSize}px`;
-                document.body.style.fontSize = `${fontSize}px`; // Reset font size globally
+                // Reset all elements to their original font size
+                allElements.forEach((element) => {
+                    element.style.fontSize = originalFontSizes.get(element);
+                });
+                fontSizeChange = 0; // Reset the change
+                updateFontSizeDisplay(); // Reset display to 0
             });
 
             closeButton.addEventListener('click', () => {
@@ -1005,8 +972,9 @@ MicAccessTool.prototype.addFontSizePopup = function () {
 
 
 
+
 // HightLight Functions
-MicAccessTool.prototype.initHighlightButtons = function () {
+YourInclusion.prototype.initHighlightButtons = function () {
     const highlightLinksButton = document.getElementById('highlight-links-btn');
     if (highlightLinksButton) {
         highlightLinksButton.addEventListener('click', () => {
@@ -1032,7 +1000,7 @@ MicAccessTool.prototype.initHighlightButtons = function () {
     }
 };
 
-MicAccessTool.prototype.highlightContent = function (type) {
+YourInclusion.prototype.highlightContent = function (type) {
     const highlightClass = `highlight-${type}`;
 
     let selector;
@@ -1078,7 +1046,7 @@ MicAccessTool.prototype.highlightContent = function (type) {
 
     console.log(`${elements.length} ${type} elements toggled for highlighting.`);
 };
-MicAccessTool.prototype.getHighlightedButtons = function () {
+YourInclusion.prototype.getHighlightedButtons = function () {
     const highlighted = [];
     const highlightButtons = document.querySelectorAll('.highlight-links, .highlight-headers, .highlight-images');
     highlightButtons.forEach((button) => {
@@ -1094,7 +1062,7 @@ MicAccessTool.prototype.getHighlightedButtons = function () {
 // Stop Animation
 
 // Stop Animation Functionality
-MicAccessTool.prototype.stopAnimations = function () {
+YourInclusion.prototype.stopAnimations = function () {
     const isDisabled = document.body.classList.toggle('disable-animations'); 
 
     // Persist the state in localStorage
@@ -1110,7 +1078,7 @@ MicAccessTool.prototype.stopAnimations = function () {
 };
 
 // Restore Animation State on Load
-MicAccessTool.prototype.restoreAnimationState = function () {
+YourInclusion.prototype.restoreAnimationState = function () {
     const isDisabled = localStorage.getItem('animationsDisabled') === 'true';
     if (isDisabled) {
         document.body.classList.add('disable-animations');
@@ -1122,7 +1090,7 @@ MicAccessTool.prototype.restoreAnimationState = function () {
 };
 
 // Add Stop Animations Button Listener
-MicAccessTool.prototype.initStopAnimationsButton = function () {
+YourInclusion.prototype.initStopAnimationsButton = function () {
     const stopAnimationsButton = document.getElementById('stop-animations-btn');
     if (stopAnimationsButton) {
         stopAnimationsButton.addEventListener('click', this.stopAnimations.bind(this));
@@ -1130,13 +1098,13 @@ MicAccessTool.prototype.initStopAnimationsButton = function () {
 };
 
 // Initialize the app and restore state
-MicAccessTool.prototype.initialApp = function () {
+YourInclusion.prototype.initialApp = function () {
     this.restoreAnimationState();
     console.log('Accessibility toolbox initialized.');
 };
 
 // Zoom
-MicAccessTool.prototype.initZoomToggleFeature = function () {
+YourInclusion.prototype.initZoomToggleFeature = function () {
     this.zoomStates = [1, 1.25, 1.5, 1.75]; 
     this.zoomIndex = 0; 
 
@@ -1151,7 +1119,7 @@ MicAccessTool.prototype.initZoomToggleFeature = function () {
 
 
 // Toggle Zoom Function
-MicAccessTool.prototype.toggleZoom = function () {
+YourInclusion.prototype.toggleZoom = function () {
     this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; 
     const zoomLevel = this.zoomStates[this.zoomIndex];
 
@@ -1167,8 +1135,8 @@ MicAccessTool.prototype.toggleZoom = function () {
 
 
 // Apply Zoom Function
-MicAccessTool.prototype.applyZoom = function (zoomLevel) {
-    const elementsToZoom = document.querySelectorAll('body > *:not(#toolbox):not(#openToolboxButton):not(img)');
+YourInclusion.prototype.applyZoom = function (zoomLevel) {
+    const elementsToZoom = document.querySelectorAll('body > *:not(#yi-toolbox):not(#openToolboxButton):not(img)');
 
     elementsToZoom.forEach(element => {
         element.style.transform = `scale(${zoomLevel})`;
@@ -1183,7 +1151,7 @@ MicAccessTool.prototype.applyZoom = function (zoomLevel) {
 };
 
 
-MicAccessTool.prototype.restoreZoomState = function () {
+YourInclusion.prototype.restoreZoomState = function () {
     const savedZoomLevel = parseFloat(localStorage.getItem('zoomLevel')) || 1; 
     this.applyZoom(savedZoomLevel);
 
@@ -1198,14 +1166,14 @@ MicAccessTool.prototype.restoreZoomState = function () {
 
 
 // Save Zoom State on Change
-MicAccessTool.prototype.saveZoomState = function (zoomLevel) {
+YourInclusion.prototype.saveZoomState = function (zoomLevel) {
     localStorage.setItem('zoomLevel', zoomLevel);
     console.log(`Zoom level saved: ${zoomLevel}`);
 };
 
 
 // Night Mode Feature
-MicAccessTool.prototype.initNightModeFeature = function () {
+YourInclusion.prototype.initNightModeFeature = function () {
     const nightModeButton = document.getElementById('night-mode-btn');
     if (nightModeButton) {
         nightModeButton.addEventListener('click', () => {
@@ -1219,9 +1187,22 @@ MicAccessTool.prototype.initNightModeFeature = function () {
     this.setActiveButton('night-mode-btn', isNightModeEnabled);
 };
 
-MicAccessTool.prototype.toggleNightMode = function () {
-    const isNightModeEnabled = document.body.classList.toggle('night-mode'); 
+YourInclusion.prototype.toggleNightMode = function () {
+    // Select all elements on the page except buttons, inputs, and the toolbar (including its children)
+    const allElements = document.querySelectorAll(':not(button):not(input):not(.yi-toolbox):not(.yi-toolbox *)');
+
+    // Toggle night mode state
+    const isNightModeEnabled = document.body.classList.toggle('night-mode');
     localStorage.setItem('nightMode', isNightModeEnabled);
+
+    // Add or remove the `night-mode` class for each element individually, excluding the toolbar
+    allElements.forEach(element => {
+        if (isNightModeEnabled) {
+            element.classList.add('night-mode');
+        } else {
+            element.classList.remove('night-mode');
+        }
+    });
 
     // Update button state explicitly based on the current mode
     this.setActiveButton('night-mode-btn', isNightModeEnabled);
@@ -1231,8 +1212,11 @@ MicAccessTool.prototype.toggleNightMode = function () {
 
 
 
+
+
+
 // Text Spacing Feature
-MicAccessTool.prototype.initTextSpacingFeature = function () {
+YourInclusion.prototype.initTextSpacingFeature = function () {
     const textSpacingButton = document.getElementById('text-spacing-btn');
     if (textSpacingButton) {
         textSpacingButton.addEventListener('click', () => {
@@ -1242,8 +1226,8 @@ MicAccessTool.prototype.initTextSpacingFeature = function () {
 };
 
 // Toggle Text Spacing with Active State Management
-MicAccessTool.prototype.toggleTextSpacing = function (buttonId) {
-    const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+YourInclusion.prototype.toggleTextSpacing = function (buttonId) {
+    const elementsToAdjust = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *)');
     const spacingStates = ['normal', '0.1em', '0.2em', '0.3em'];
 
     // Initialize the spacing index if not already set
@@ -1269,7 +1253,7 @@ MicAccessTool.prototype.toggleTextSpacing = function (buttonId) {
 
 
 // Line Height Feature
-MicAccessTool.prototype.initLineHeightFeature = function () {
+YourInclusion.prototype.initLineHeightFeature = function () {
     const lineHeightButton = document.getElementById('line-height-btn');
     if (lineHeightButton) {
         lineHeightButton.addEventListener('click', () => {
@@ -1279,8 +1263,8 @@ MicAccessTool.prototype.initLineHeightFeature = function () {
 };
 
 // Toggle Line Height with Active State Management
-MicAccessTool.prototype.toggleLineHeight = function (buttonId) {
-    const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+YourInclusion.prototype.toggleLineHeight = function (buttonId) {
+    const elementsToAdjust = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *)');
     const lineHeightStates = ['normal', '1.5', '2', '2.5'];
 
     // Initialize the line height index if not already set
@@ -1311,7 +1295,7 @@ MicAccessTool.prototype.toggleLineHeight = function (buttonId) {
 // Cursor Size
 
 // Initialize Cursor Size Adjustment
-MicAccessTool.prototype.initCursorSizeAdjustment = function () {
+YourInclusion.prototype.initCursorSizeAdjustment = function () {
     const cursorSizeButton = document.getElementById('cursor-size-btn');
     if (cursorSizeButton) {
         cursorSizeButton.addEventListener('click', () => {
@@ -1321,7 +1305,7 @@ MicAccessTool.prototype.initCursorSizeAdjustment = function () {
 };
 
 // Toggle Cursor Size with Active State Management
-MicAccessTool.prototype.toggleCursorSize = function (buttonId) {
+YourInclusion.prototype.toggleCursorSize = function (buttonId) {
     const cursorSizes = [
         {
             size: 'normal',
@@ -1382,7 +1366,7 @@ MicAccessTool.prototype.toggleCursorSize = function (buttonId) {
 // Keyboard Navigation
 
 // Keyboard Navigation Initialization
-MicAccessTool.prototype.initKeyboardNavigation = function () {
+YourInclusion.prototype.initKeyboardNavigation = function () {
     const keyboardNavButton = document.getElementById('keyboard-navigation-btn');
     if (keyboardNavButton) {
         keyboardNavButton.addEventListener('click', () => {
@@ -1402,14 +1386,14 @@ MicAccessTool.prototype.initKeyboardNavigation = function () {
 
 
 // Enable Keyboard Navigation
-MicAccessTool.prototype.enableKeyboardNavigation = function () {
+YourInclusion.prototype.enableKeyboardNavigation = function () {
     console.log('Keyboard Navigation Enabled');
     document.addEventListener('keydown', this.handleKeyboardNavigation.bind(this));
     document.body.classList.add('keyboard-navigation-active');
 };
 
 // Disable Keyboard Navigation
-MicAccessTool.prototype.disableKeyboardNavigation = function () {
+YourInclusion.prototype.disableKeyboardNavigation = function () {
     console.log('Keyboard Navigation Disabled');
     document.removeEventListener('keydown', this.handleKeyboardNavigation.bind(this));
     document.body.classList.remove('keyboard-navigation-active');
@@ -1417,7 +1401,7 @@ MicAccessTool.prototype.disableKeyboardNavigation = function () {
 };
 
 // Handle Keyboard Navigation
-MicAccessTool.prototype.handleKeyboardNavigation = function (event) {
+YourInclusion.prototype.handleKeyboardNavigation = function (event) {
     const focusableSelectors = 'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
     const focusableElements = Array.from(document.querySelectorAll(focusableSelectors)).filter(
         (el) => !el.disabled && el.offsetParent !== null
@@ -1479,7 +1463,7 @@ MicAccessTool.prototype.handleKeyboardNavigation = function (event) {
 
 
 // Focus on an Element
-MicAccessTool.prototype.focusElement = function (element) {
+YourInclusion.prototype.focusElement = function (element) {
     if (element) {
         element.focus();
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1487,7 +1471,7 @@ MicAccessTool.prototype.focusElement = function (element) {
 };
 
 // Scroll the Page
-MicAccessTool.prototype.scrollPage = function (direction) {
+YourInclusion.prototype.scrollPage = function (direction) {
     const scrollAmount = 70; // Amount to scroll per action
     const scrollMap = {
         up: () => window.scrollBy({ top: -scrollAmount, behavior: 'smooth' }),
@@ -1502,7 +1486,7 @@ MicAccessTool.prototype.scrollPage = function (direction) {
 };
 
 // Show Keyboard Shortcuts Popup
-MicAccessTool.prototype.showKeyboardNavigationPopup = function () {
+YourInclusion.prototype.showKeyboardNavigationPopup = function () {
     const existingPopup = document.getElementById('keyboard-navigation-popup');
     if (existingPopup) return;
 
@@ -1558,7 +1542,7 @@ MicAccessTool.prototype.showKeyboardNavigationPopup = function () {
 };
 
 // Hide Keyboard Shortcuts Popup
-MicAccessTool.prototype.hideKeyboardNavigationPopup = function () {
+YourInclusion.prototype.hideKeyboardNavigationPopup = function () {
     const popup = document.getElementById('keyboard-navigation-popup');
     if (popup) {
         popup.remove();
@@ -1566,19 +1550,19 @@ MicAccessTool.prototype.hideKeyboardNavigationPopup = function () {
 };
 
 // Highlight Selection
-MicAccessTool.prototype.highlightSelection = function (element) {
+YourInclusion.prototype.highlightSelection = function (element) {
     this.clearSelectionHighlight();
     if (element) {
         element.classList.add('keyboard-focus');
     }
 };
-MicAccessTool.prototype.clearSelectionHighlight = function () {
+YourInclusion.prototype.clearSelectionHighlight = function () {
     document.querySelectorAll('.keyboard-focus').forEach((el) => el.classList.remove('keyboard-focus'));
 };
 
 
 // Navigate to Specific Elements
-MicAccessTool.prototype.navigateToNext = function (type) {
+YourInclusion.prototype.navigateToNext = function (type) {
     const selectors = {
         heading: 'h1, h2, h3, h4, h5, h6',
         list: 'ul, ol',
@@ -1602,7 +1586,7 @@ MicAccessTool.prototype.navigateToNext = function (type) {
 };
 
 // Navigate to Start
-MicAccessTool.prototype.navigateToStart = function () {
+YourInclusion.prototype.navigateToStart = function () {
     const firstFocusable = document.querySelector('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
     if (firstFocusable) {
         firstFocusable.focus();
@@ -1612,20 +1596,20 @@ MicAccessTool.prototype.navigateToStart = function () {
 
 // Button Active
 
-MicAccessTool.prototype.setActiveButton = function (activeButtonId, isActive = null) {
+YourInclusion.prototype.setActiveButton = function (activeButtonId, isActive = null) {
     const button = document.getElementById(activeButtonId);
 
     if (button) {
-        
+        // Determine the new state
         const newState = isActive !== null ? isActive : button.dataset.active !== 'true';
 
         if (newState) {
             // Activate the button
-            button.style.backgroundColor = 'rgba(52, 88, 185, 1)'; // Active state
+            button.classList.add('active-button'); // Add active class
             button.dataset.active = 'true'; 
         } else {
             // Deactivate the button
-            button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; // Default state
+            button.classList.remove('active-button'); // Remove active class
             button.dataset.active = 'false'; 
         }
     }
@@ -1633,8 +1617,8 @@ MicAccessTool.prototype.setActiveButton = function (activeButtonId, isActive = n
 
 
 
-MicAccessTool.prototype.resetButtonStates = function () {
-    const buttons = document.querySelectorAll('.toolbox-button');
+YourInclusion.prototype.resetButtonStates = function () {
+    const buttons = document.querySelectorAll('.yi-toolbox-button');
     buttons.forEach((button) => {
         button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; 
         button.dataset.active = 'false'; 
@@ -1644,7 +1628,7 @@ MicAccessTool.prototype.resetButtonStates = function () {
 
 // Accessible Function
 
-MicAccessTool.prototype.initAccessibleFontToggle = function () {
+YourInclusion.prototype.initAccessibleFontToggle = function () {
     const fontToggleButton = document.getElementById('accessible-font-btn');
     if (fontToggleButton) {
         fontToggleButton.addEventListener('click', () => {
@@ -1656,7 +1640,7 @@ MicAccessTool.prototype.initAccessibleFontToggle = function () {
     }
 };
 
-MicAccessTool.prototype.toggleAccessibleFont = function (buttonId) {
+YourInclusion.prototype.toggleAccessibleFont = function (buttonId) {
     // Toggle the class on the body element
     const isFontApplied = document.body.classList.toggle('accessible-font');
 
@@ -1673,7 +1657,7 @@ MicAccessTool.prototype.toggleAccessibleFont = function (buttonId) {
 
 // Reset Function
 
-MicAccessTool.prototype.initResetFeature = function () {
+YourInclusion.prototype.initResetFeature = function () {
     
     const resetButtons = document.querySelectorAll('#reset-btn, #reset-btn1');
 
@@ -1686,7 +1670,7 @@ MicAccessTool.prototype.initResetFeature = function () {
 }
 
 
-MicAccessTool.prototype.resetToolbox = function () {
+YourInclusion.prototype.resetToolbox = function () {
     // Remove highlights added by the toolbox
     document.querySelectorAll('.highlight-links, .highlight-headers, .highlight-images').forEach(el => {
         el.classList.remove('highlight-links', 'highlight-headers', 'highlight-images');
@@ -1694,7 +1678,7 @@ MicAccessTool.prototype.resetToolbox = function () {
 
     // Restore only toolbox-specific font size, spacing, and transforms, excluding popups and toolbox
     document.querySelectorAll('[data-toolbox-modified]').forEach(el => {
-        if (!el.closest('.font-size-popup') && !el.closest('.toolbox')) { // Exclude popups and toolbox
+        if (!el.closest('.font-size-popup') && !el.closest('.yi-toolbox')) { // Exclude popups and toolbox
             el.style.fontSize = ''; 
             el.style.letterSpacing = '';
             el.style.lineHeight = ''; 
@@ -1745,12 +1729,19 @@ MicAccessTool.prototype.resetToolbox = function () {
     this.resetContrast();
 
     // Click the reset button in the settings popup if it exists
-    const settingsResetButton = document.querySelector('.settings-popup .reset-popup-btn');
-    if (settingsResetButton) settingsResetButton.click();
+const settingsResetButton = document.querySelector('.settings-popup .reset-popup-btn, .settings-popup .popup-reset');
+if (settingsResetButton) {
+    settingsResetButton.click();
+    console.log('Settings popup reset triggered.');
+}
 
-    // Click the reset button in the font size popup if it exists
-    const fontSizeResetButton = document.querySelector('.font-size-popup .reset-popup-btn');
-    if (fontSizeResetButton) fontSizeResetButton.click();
+// Click the reset button in the font size popup if it exists
+const fontSizeResetButton = document.querySelector('.font-size-popup .reset-popup-btn, .font-size-popup .popup-reset');
+if (fontSizeResetButton) {
+    fontSizeResetButton.click();
+    console.log('Font size popup reset triggered.');
+}
+
 
    // Clear toolbox-specific local storage settings
    localStorage.removeItem('animationsDisabled');
@@ -1762,7 +1753,7 @@ MicAccessTool.prototype.resetToolbox = function () {
    this.applyZoom(1);
 
    // Reset text spacing, excluding toolbox and popups
-   const elementsToAdjust = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *):not(.font-size-popup):not(.font-size-popup *)');
+   const elementsToAdjust = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *):not(.font-size-popup):not(.font-size-popup *)');
    elementsToAdjust.forEach(element => {
        element.style.letterSpacing = 'normal';
        element.style.lineHeight = 'normal';
@@ -1776,25 +1767,25 @@ MicAccessTool.prototype.resetToolbox = function () {
     this.resetButtonStates();
 
     console.log('Toolbox reset to the original state.');
-};
+}
 
 
 
 // Contrast Mode
 
 // Initialize Contrast Feature
-MicAccessTool.prototype.initContrastFeature = function () {
+YourInclusion.prototype.initContrastFeature = function () {
     const contrastButton = document.getElementById('contrast-btn');
     if (contrastButton) {
         contrastButton.addEventListener('click', () => {
-            this.toggleContrastPopup();
+            this.createContrastPopup();
             this.setActiveButton('contrast-btn');
         });
     }
 };
 
 // Toggle Contrast Popup
-MicAccessTool.prototype.toggleContrastPopup = function () {
+YourInclusion.prototype.createContrastPopup = function () {
     this.closeAllPopups();
     const existingPopup = document.getElementById('contrast-popup');
     if (existingPopup) {
@@ -1802,7 +1793,7 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
         return;
     }
 
-    // Create the popup
+    // Create the popup container
     const popup = document.createElement('div');
     popup.id = 'contrast-popup';
     popup.className = 'contrast-popup';
@@ -1811,8 +1802,8 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     popup.style.position = 'absolute';
     popup.style.top = '19%'; // Fixed top position
 
-    const toolbox = document.querySelector('.toolbox');
-    const toolboxRect = toolbox.getBoundingClientRect();
+    const toolbox = document.querySelector('.yi-toolbox');
+    const toolboxRect = yi-toolbox.getBoundingClientRect();
     const windowWidth = window.innerWidth;
     const isToolboxOnLeft = toolboxRect.left < windowWidth / 2;
 
@@ -1820,27 +1811,48 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     popup.style.left = isToolboxOnLeft ? '30%' : '70%';
 
     // Popup Header
-    const header = document.createElement('div');
-    header.className = 'contrast-popup-header';
-
-    const title = document.createElement('h3');
-    title.className = 'contrast-popup-title';
-    title.textContent = 'Contrast Settings';
-    header.appendChild(title);
-
-    const closeButton = document.createElement('button');
-    closeButton.className = 'contrast-popup-close';
-    closeButton.textContent = '✖';
-    closeButton.addEventListener('click', () => popup.remove());
-    header.appendChild(closeButton);
-
+    const header = this.createPopupHeader('Contrast Settings', () => popup.remove());
     popup.appendChild(header);
 
     // Popup Body
     const body = document.createElement('div');
     body.className = 'contrast-popup-body';
 
-    // Preset Modes
+    // Add preset modes
+    this.addPresetModes(body);
+
+    // Add custom color controls
+    this.addCustomColorControls(body);
+
+    // Add Reset Button
+    const resetButton = document.createElement('button');
+    resetButton.id = 'reset-contrast-btn';
+    resetButton.className = 'contrast-reset-button';
+    resetButton.textContent = 'Reset Contrast';
+    resetButton.addEventListener('click', () => this.resetContrast());
+    body.appendChild(resetButton);
+
+    popup.appendChild(body);
+    document.body.appendChild(popup);
+};
+YourInclusion.prototype.createPopupHeader = function (titleText, closeCallback) {
+    const header = document.createElement('div');
+    header.className = 'contrast-popup-header';
+
+    const title = document.createElement('h3');
+    title.className = 'contrast-popup-title';
+    title.textContent = titleText;
+    header.appendChild(title);
+
+    const closeButton = document.createElement('button');
+    closeButton.className = 'contrast-popup-close';
+    closeButton.textContent = '✖';
+    closeButton.addEventListener('click', closeCallback);
+    header.appendChild(closeButton);
+
+    return header;
+};
+YourInclusion.prototype.addPresetModes = function (container) {
     const modes = [{ id: 'grayscale', text: 'Uncolored Display' }];
 
     modes.forEach(({ id, text }) => {
@@ -1849,19 +1861,18 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
         modeButton.className = 'contrast-mode-button';
         modeButton.textContent = text;
         modeButton.addEventListener('click', (e) => this.toggleContrastMode(id, e.target));
-        body.appendChild(modeButton);
+        container.appendChild(modeButton);
     });
-    
-
-    // Custom Colors Section
+};
+YourInclusion.prototype.addCustomColorControls = function (container) {
     const customColorsSection = document.createElement('div');
     customColorsSection.className = 'contrast-custom-colors';
 
     const predefinedColors = ['#FFFFFF', '#000000', '#F0E68C', '#ADD8E6', '#FFB6C1'];
 
-    // Background Color Section
+    // Background Section
     const bgLabel = document.createElement('label');
-    bgLabel.textContent = 'Background Color:';
+    bgLabel.textContent = 'Background:';
 
     const bgColorContainer = document.createElement('div');
     bgColorContainer.className = 'color-picker-container';
@@ -1870,16 +1881,24 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
         const colorButton = document.createElement('button');
         colorButton.className = 'color-button';
         colorButton.style.backgroundColor = color;
-        colorButton.addEventListener('click', () => this.applyCustomColors(color, null));
+
+        colorButton.addEventListener('click', () => {
+            this.applyBackgroundColor(color);
+        });
+
         bgColorContainer.appendChild(colorButton);
     });
 
     const bgColorPicker = document.createElement('input');
     bgColorPicker.type = 'color';
     bgColorPicker.id = 'bg-color-picker';
-    bgColorPicker.addEventListener('input', () => this.applyCustomColors(bgColorPicker.value, null));
-    bgColorContainer.appendChild(bgColorPicker);
 
+    bgColorPicker.addEventListener('input', () => {
+        const selectedColor = bgColorPicker.value;
+        this.applyBackgroundColor(selectedColor);
+    });
+
+    bgColorContainer.appendChild(bgColorPicker);
     customColorsSection.appendChild(bgLabel);
     customColorsSection.appendChild(bgColorContainer);
 
@@ -1901,50 +1920,84 @@ MicAccessTool.prototype.toggleContrastPopup = function () {
     const textColorPicker = document.createElement('input');
     textColorPicker.type = 'color';
     textColorPicker.id = 'text-color-picker';
+
     textColorPicker.addEventListener('input', () => this.applyCustomTextColor(textColorPicker.value));
     textColorContainer.appendChild(textColorPicker);
 
     customColorsSection.appendChild(textLabel);
     customColorsSection.appendChild(textColorContainer);
 
-    body.appendChild(customColorsSection);
+    container.appendChild(customColorsSection);
+};
+YourInclusion.prototype.applyBackgroundColor = function (color) {
+    // Select all elements except buttons, inputs, toolbar, and popups
+    const elements = document.querySelectorAll(
+        '*:not(button):not(input):not(.yi-toolbox):not(.yi-toolbox *):not(.contrast-popup):not(.contrast-popup *)'
+    );
 
-    // Reset button
-    const resetButton = document.createElement('button');
-    resetButton.id = 'reset-contrast-btn';
-    resetButton.className = 'contrast-reset-button';
-    resetButton.textContent = 'Reset Contrast';
-    resetButton.addEventListener('click', () => this.resetContrast());
-    body.appendChild(resetButton);
+    elements.forEach((element) => {
+        const computedStyle = window.getComputedStyle(element);
 
-    popup.appendChild(body);
-    document.body.appendChild(popup);
+        // Forcefully add or override the background property
+        if (!computedStyle.background || computedStyle.background === 'none') {
+            element.style.setProperty('background', color, 'important');
+        } else {
+            element.style.setProperty('background', color, 'important');
+        }
+
+        // Always override the background-color
+        element.style.setProperty('background-color', color, 'important');
+    });
+
+    console.log(`Background and background-color applied to all elements: ${color}`);
 };
 
 
+
+YourInclusion.prototype.applyCustomTextColor = function (color) {
+    const elements = document.querySelectorAll(
+        '*:not(button):not(input):not(.yi-toolbox):not(.yi-toolbox *):not(.contrast-popup):not(.contrast-popup *)'
+    );
+
+    elements.forEach((element) => {
+        element.style.color = color;
+    });
+
+    console.log(`Text color applied: ${color}`);
+};
+
+
+
 // Reset Contrast
-MicAccessTool.prototype.resetContrast = function () {
+YourInclusion.prototype.resetContrast = function () {
     // Remove all contrast classes from the body
     document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
-    
+
     // Reset body styles
+    document.body.style.background = ''; // Reset both background and background-color
     document.body.style.backgroundColor = '';
     document.body.style.color = '';
 
-    // Reset all text elements' color styles
-    const textElements = document.querySelectorAll(
-        'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea'
+    // Reset all elements' background and text color styles
+    const allElements = document.querySelectorAll(
+        '*:not(.yi-toolbox):not(.yi-toolbox *):not(.contrast-popup):not(.contrast-popup *)'
     );
-    textElements.forEach((element) => {
-        element.style.color = ''; 
+    allElements.forEach((element) => {
+        // Reset background properties
+        element.style.background = '';
+        element.style.backgroundColor = '';
+
+        // Reset text color
+        element.style.color = '';
     });
 
     console.log('Contrast settings reset to original.');
 };
 
 
+
 // Apply Custom Text Color
-MicAccessTool.prototype.applyCustomTextColor = function (color) {
+YourInclusion.prototype.applyCustomTextColor = function (color) {
     if (color) {
         const textElements = document.querySelectorAll(
             'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea'
@@ -1960,7 +2013,7 @@ MicAccessTool.prototype.applyCustomTextColor = function (color) {
 
 
 // Apply Custom Colors
-MicAccessTool.prototype.applyCustomColors = function (bgColor, textColor) {
+YourInclusion.prototype.applyCustomColors = function (bgColor, textColor) {
     if (bgColor) {
         document.body.style.backgroundColor = bgColor;
         this.customBackgroundColor = bgColor; // Store the custom background color
@@ -1979,7 +2032,7 @@ MicAccessTool.prototype.applyCustomColors = function (bgColor, textColor) {
 
 
 // Toggle Contrast Modes
-MicAccessTool.prototype.toggleContrastMode = function (mode, button) {
+YourInclusion.prototype.toggleContrastMode = function (mode, button) {
     const bodyClassList = document.body.classList;
 
     // Check if the mode is currently active
@@ -2001,7 +2054,7 @@ MicAccessTool.prototype.toggleContrastMode = function (mode, button) {
 };
 
 // Update Contrast Button States
-MicAccessTool.prototype.updateContrastButtonStates = function (clickedButton, isActive) {
+YourInclusion.prototype.updateContrastButtonStates = function (clickedButton, isActive) {
     const buttons = document.querySelectorAll('.contrast-mode-button');
     buttons.forEach((button) => {
         if (button === clickedButton && !isActive) {
@@ -2013,7 +2066,7 @@ MicAccessTool.prototype.updateContrastButtonStates = function (clickedButton, is
 };
 
 // Set the Contrast Mode
-MicAccessTool.prototype.setContrastMode = function (savedState) {
+YourInclusion.prototype.setContrastMode = function (savedState) {
     if (!savedState) return;
 
     const { contrastMode, bgColor, textColor } = savedState;
@@ -2046,7 +2099,7 @@ MicAccessTool.prototype.setContrastMode = function (savedState) {
 // Save Function
 
 // Save Toolbar State
-MicAccessTool.prototype.saveToolbarState = function () {
+YourInclusion.prototype.saveToolbarState = function () {
     const state = {
         blueFilterActive: document.querySelector('.blue-overlay')?.classList.contains('active') || false,
         imagesHidden: this.imagesHidden || false,
@@ -2077,7 +2130,7 @@ MicAccessTool.prototype.saveToolbarState = function () {
 
 
 // Load Toolbar State
-MicAccessTool.prototype.loadToolbarState = function () {
+YourInclusion.prototype.loadToolbarState = function () {
     const savedState = JSON.parse(localStorage.getItem('toolbarState')) || null;
 
     if (!savedState) {
@@ -2170,7 +2223,7 @@ MicAccessTool.prototype.loadToolbarState = function () {
            
             let blueOverlay = document.querySelector('.blue-overlay');
             if (!blueOverlay) {
-                blueOverlay = createDiv('blue-overlay');
+                blueOverlay = this.createDiv('blue-overlay');
                 document.body.appendChild(blueOverlay);
                 blueOverlay.classList.add('active');
             }
@@ -2253,8 +2306,8 @@ if (savedState.customBackgroundColor) {
 
 
 // Helper Functions
-MicAccessTool.prototype.getCurrentFontSize = function () {
-    const allElements = document.querySelectorAll('body *:not(.toolbox):not(.toolbox *)');
+YourInclusion.prototype.getCurrentFontSize = function () {
+    const allElements = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *)');
     let totalFontSize = 0;
     let count = 0;
 
@@ -2275,17 +2328,17 @@ MicAccessTool.prototype.getCurrentFontSize = function () {
 };
 
 
-MicAccessTool.prototype.getContrastMode = function () {
+YourInclusion.prototype.getContrastMode = function () {
     if (document.body.classList.contains('grayscale')) return 'grayscale';
     return null;
 };
 
-MicAccessTool.prototype.getActiveButtons = function () {
-    const buttons = Array.from(document.querySelectorAll('.toolbox-button[data-active="true"]'));
+YourInclusion.prototype.getActiveButtons = function () {
+    const buttons = Array.from(document.querySelectorAll('.yi-toolbox-button[data-active="true"]'));
     return buttons.map(button => button.id);
 };
 
-MicAccessTool.prototype.initSaveFeature = function () {
+YourInclusion.prototype.initSaveFeature = function () {
     const saveButton = document.getElementById('save-settings-btn');
     if (saveButton) {
         saveButton.addEventListener('click', () => {
@@ -2296,7 +2349,7 @@ MicAccessTool.prototype.initSaveFeature = function () {
         console.error('Save button not found.');
     }
 };
-MicAccessTool.prototype.getHighlightedButtons = function () {
+YourInclusion.prototype.getHighlightedButtons = function () {
     const highlighted = [];
     if (document.querySelectorAll('.highlight-links.active').length > 0) {
         highlighted.push('highlight-links-btn');
@@ -2308,40 +2361,59 @@ MicAccessTool.prototype.getHighlightedButtons = function () {
 };
 
 
-MicAccessTool.prototype.initializeAccessibilityToolbox = function () {
+YourInclusion.prototype.initializeAccessibilityToolbox = function () {
     this.createToolbox();
     this.createSideButton();
 
-    const toolbox = document.getElementById('toolbox');
+    const toolbox = document.getElementById('yi-toolbox');
     const sideButton = document.getElementById('openToolboxButton');
 
     // Open/close toolbox on side button click
     sideButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        toolbox.classList.toggle('visible');
+        yi-toolbox.classList.toggle('visible');
     });
 
-    document.addEventListener('click', (event) => {
-        if (!toolbox.contains(event.target) && !sideButton.contains(event.target)) {
-            toolbox.classList.remove('visible');
-        }
-    });
+    // document.addEventListener('click', (event) => {
+    //     // Check if any popup is currently active
+    //     const isPopupActive = document.querySelector(
+    //         '.font-size-popup[style*="display: block"], ' +
+    //         '.settings-popup[style*="display: block"], ' +
+    //         '.contrast-popup[style*="display: block"], ' +
+    //         '.read-aloud-popup[style*="display: block"], ' +
+    //         '.font-size-popup.visible, ' +
+    //         '.settings-popup.visible, ' +
+    //         '.contrast-popup.visible, ' +
+    //         '.read-aloud-popup.visible'
+    //     );
+    
+    //     // Only close the toolbox if no popup is active
+    //     if (!isPopupActive && !toolbox.contains(event.target) && !sideButton.contains(event.target)) {
+    //         toolbox.classList.remove('visible');
+    //     }
+    // });
+    
+    
 
     // Load saved state
     this.loadToolbarState();
 };
 
-MicAccessTool.prototype.resetSettings = function () {
+YourInclusion.prototype.resetSettings = function () {
     localStorage.removeItem('toolbarState');
     this.resetToolbox();
     console.log('Toolbar state reset.');
 };
 
+// Color Change Helper
+
+
+
 // Setting button functions
 
 // Add the event listener for the settings button
-MicAccessTool.prototype.addSettingsButtonListener = function () {
-    const settingsButton = document.getElementById('settings-btn'); // Ensure this ID matches your settings button
+YourInclusion.prototype.addSettingsButtonListener = function () {
+    const settingsButton = document.getElementById('settings-btn'); 
     if (settingsButton) {
         settingsButton.addEventListener('click', () => {
             this.createSettingsPopup();
@@ -2351,7 +2423,7 @@ MicAccessTool.prototype.addSettingsButtonListener = function () {
     }
 };
 
-MicAccessTool.prototype.createSettingsPopup = function () {
+YourInclusion.prototype.createSettingsPopup = function () {
     this.closeAllPopups();
     // Check if the popup already exists
     if (document.querySelector('.settings-popup')) return;
@@ -2365,7 +2437,7 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     popup.style.top = '19%';
 
     // Dynamically determine if the toolbox is on the left
-    const toolbox = document.querySelector('.toolbox');
+    const toolbox = document.querySelector('.yi-toolbox');
     const toolboxRect = toolbox.getBoundingClientRect();
     const windowWidth = window.innerWidth;
     const isToolboxOnLeft = toolboxRect.left < windowWidth / 2;
@@ -2376,7 +2448,7 @@ MicAccessTool.prototype.createSettingsPopup = function () {
         // Create the popup header
     const header = document.createElement('div');
     header.className = 'settings-popup-header';
-    header.style.backgroundColor = '#393636'; // Default header background color
+  
 
     const headerTitle = document.createElement('h3');
     headerTitle.textContent = 'Settings';
@@ -2432,15 +2504,16 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     // Change popup header background color
     header.style.backgroundColor = selectedColor;
 
-    // Change popup title text color
-    headerTitle.style.color = selectedColor;
-
     // Change toolbox header background color
-    const toolboxHeader = document.querySelector('.toolbox-header');
-    if (toolboxHeader) toolboxHeader.style.backgroundColor = selectedColor;
+    const toolboxHeaders = document.querySelectorAll('.yi-toolbox-header, .settings-popup-header');
 
+    // Iterate over the NodeList and apply the background color with !important
+    toolboxHeaders.forEach(header => {
+        header.style.setProperty('background-color', selectedColor, 'important');
+    });
+    
     // Change SVG and inner elements' fill and stroke color
-    const toolboxIcons = document.querySelectorAll('.toolbox-body svg');
+    const toolboxIcons = document.querySelectorAll('.yi-toolbox-body svg');
     toolboxIcons.forEach(svg => {
         svg.style.fill = selectedColor;
         svg.style.stroke = selectedColor;
@@ -2454,12 +2527,55 @@ MicAccessTool.prototype.createSettingsPopup = function () {
     });
 
     // Change background color of toolbox buttons
-    const toolboxButtons = document.querySelectorAll('.toolbox-body .toolbox-btn, .toolbox-button');
+    const toolboxButtons = document.querySelectorAll(
+        '.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button, .font-popup-btn, ' +
+        ' #font-popup-reset'
+    );
     toolboxButtons.forEach(button => {
         button.style.backgroundColor = selectedColor;
         button.style.borderColor = selectedColor;
         button.style.color = selectedColor;
     });
+    const root = document.documentElement;
+    root.style.setProperty('--bg-color', selectedColor, 'important');
+
+    // Dynamically update the CSS for .font-popup-btn and .reset-popup-btn
+const styleSheet = document.styleSheets[0]; // Use the first stylesheet or dynamically create one
+
+const updateCSSRule = (selector, property, value) => {
+    let ruleFound = false;
+
+    // Check if the rule exists and update it
+    for (let i = 0; i < styleSheet.cssRules.length; i++) {
+        const rule = styleSheet.cssRules[i];
+        if (rule.selectorText === selector) {
+            rule.style.setProperty(property, value, 'important');
+            ruleFound = true;
+            break;
+        }
+    }
+
+    // If the rule doesn't exist, add it dynamically
+    if (!ruleFound) {
+        styleSheet.insertRule(
+            `${selector} { ${property}: ${value} !important; }`,
+            styleSheet.cssRules.length
+        );
+    }
+};
+
+// Update background color for .font-popup-btn and .reset-popup-btn
+updateCSSRule('.font-popup-btn', 'background-color', selectedColor);
+updateCSSRule('.reset-popup-btn', 'background-color', selectedColor);
+
+    
+
+    // Ensure elements using the variable have the important class
+    const elementsToUpdate = document.querySelectorAll('.uses-bg-color');
+    elementsToUpdate.forEach(element => {
+        element.style.setProperty('background-color', `var(--bg-color)`, 'important');
+    });
+   
 });
 
     // Add a Reset button
@@ -2473,10 +2589,10 @@ MicAccessTool.prototype.createSettingsPopup = function () {
         headerTitle.style.color = 'white';
         colorInput.value = defaultSettings.color;
 
-        const toolboxHeader = document.querySelector('.toolbox-header');
+        const toolboxHeader = document.querySelector('.yi-toolbox-header');
         if (toolboxHeader) toolboxHeader.style.backgroundColor = defaultSettings.color;
 
-        const toolboxIcons = document.querySelectorAll('.toolbox-body svg');
+        const toolboxIcons = document.querySelectorAll('.yi-toolbox-body svg');
         toolboxIcons.forEach(svg => {
             svg.style.fill = defaultSettings.color;
             svg.style.stroke = defaultSettings.color;
@@ -2486,9 +2602,21 @@ MicAccessTool.prototype.createSettingsPopup = function () {
                 inner.style.fill = defaultSettings.color;
                 inner.style.stroke = defaultSettings.color;
             });
+             // Reset buttons in toolbox and popups to default color
+            const buttonsToReset = document.querySelectorAll(
+                '.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button, .font-popup-btn, .reset-popup-btn'
+            );
+
+            buttonsToReset.forEach(button => {
+                button.style.setProperty('background-color', defaultSettings.color, 'important');
+                button.style.setProperty('border-color', defaultSettings.color, 'important');
+                button.style.setProperty('color', 'white', 'important'); // Set text color to white
+            });
         });
 
-        const toolboxButtons = document.querySelectorAll('.toolbox-body .toolbox-btn, .toolbox-button');
+        
+
+        const toolboxButtons = document.querySelectorAll('.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button');
         toolboxButtons.forEach(button => {
             button.style.backgroundColor = defaultSettings.color;
             button.style.borderColor = defaultSettings.color;
@@ -2496,6 +2624,7 @@ MicAccessTool.prototype.createSettingsPopup = function () {
         });
 
         languageDropdown.value = defaultSettings.language; // Reset language
+        document.documentElement.style.setProperty('--bg-color', defaultSettings.color, 'important');
     });
 
     // Add a close button
@@ -2521,14 +2650,14 @@ MicAccessTool.prototype.createSettingsPopup = function () {
 
 
 // Popup Close
-MicAccessTool.prototype.closeAllPopups = function (excludeSelector) {
+YourInclusion.prototype.closeAllPopups = function (excludeSelector) {
     const popupSelectors = ['.settings-popup', '.contrast-popup', '.font-size-popup']; 
     popupSelectors.forEach((selector) => {
         if (selector !== excludeSelector) {
             const popup = document.querySelector(selector);
             if (popup) {
                 // Prevent affecting the toolbox explicitly
-                if (!popup.matches('.toolbox-body') && !popup.closest('.toolbox-body')) {
+                if (!popup.matches('.yi-toolbox-body') && !popup.closest('.yi-toolbox-body')) {
                     if (selector === '.font-size-popup') {
                         // Special handling for font-size popup
                         const closeButton = popup.querySelector('#close-font-popup');
@@ -2556,6 +2685,6 @@ MicAccessTool.prototype.closeAllPopups = function (excludeSelector) {
 
 // Initialize on Page Load
 document.addEventListener('DOMContentLoaded', () => {
-    new MicAccessTool();
+    new YourInclusion();
     loadFontAwesome();
 });
