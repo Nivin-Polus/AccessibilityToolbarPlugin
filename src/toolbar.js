@@ -16,7 +16,7 @@ function YourInclusion(init) {
     // this.initAudioRemoval();
     // this.initReadAloud();
     // this.initHighlightButtons();
-    this.initStopAnimationsButton();
+    // this.initStopAnimationsButton();
     this.initZoomToggleFeature();
     this.initNightModeFeature();
     this.initTextSpacingFeature();
@@ -26,12 +26,13 @@ function YourInclusion(init) {
     // this.initAccessibleFontToggle();
     this.initResetFeature();
     this.initContrastFeature();
-    this.initSaveFeature();   
+    // this.initSaveFeature();   
     this.addSettingsButtonListener();
+    this.addDevelopmentAlerts();
 
 }
 
-// Load FontAwesome
+// Load Script
 function loadScript() {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -250,12 +251,13 @@ this.resetButtonStates();
 };
 
 YourInclusion.prototype.arePopupsInactive = function () {
-    const popups = ['.font-size-popup', '.settings-popup', '.contrast-popup'];
-    return popups.every((selector) => {
-        const popup = document.querySelector(selector);
-        return !popup || !popup.classList.contains('visible'); // Popup is either not present or not visible
-    });
+    // Check the status of each popup flag
+    const allInactive = !this.isFontSizePopupActive && !this.isSettingsPopupActive && !this.isContrastPopupActive;
+
+    console.log(`Are all popups inactive? ${allInactive}`);
+    return allInactive; // Return true only if all flags are false
 };
+
 
 
 YourInclusion.prototype.initializeAccessibilityToolbox = function () {
@@ -273,10 +275,18 @@ YourInclusion.prototype.initializeAccessibilityToolbox = function () {
 
     document.addEventListener('click', (event) => {
         const isToolboxActive = toolbox.classList.contains('visible');
-
-        // Only close the toolbox if it is active and all popups are inactive
-        if (isToolboxActive && this.arePopupsInactive() && !toolbox.contains(event.target) && !sideButton.contains(event.target)) {
-            toolbox.classList.remove('visible');
+    
+        // Check if the toolbox is active and all popups are inactive
+        if (isToolboxActive) {
+            if (this.arePopupsInactive()) {
+                // Close the toolbox only if all popups are inactive and the click is outside the toolbox and sideButton
+                if (!toolbox.contains(event.target) && !sideButton.contains(event.target)) {
+                    toolbox.classList.remove('visible');
+                    console.log('Toolbox closed as all popups are inactive.');
+                }
+            } else {
+                console.log('Toolbox remains open because a popup is active.');
+            }
         }
     });
     
@@ -435,7 +445,7 @@ YourInclusion.prototype.initRemoveImages = function () {
 
 YourInclusion.prototype.toggleImages = function () {
     // Select all images except the toolbar-related side image
-    const images = document.querySelectorAll('img:not(.yi-toolbox-image):not(.side-button-image)');
+    const images = document.querySelectorAll('img:not(.yi-toolbox-image):not(.side-button-image):not(.yi-toolbox-logo)');
 
     // Toggle visibility based on the state
     if (this.imagesHidden) {
@@ -1692,17 +1702,12 @@ YourInclusion.prototype.resetToolbox = function () {
     if (blueOverlay) blueOverlay.classList.remove('active');
 
     // Restore images hidden by the toolbox
-    if (this.imagesHidden) {
-        this.removedImages.forEach(({ img, parent, nextSibling }) => {
-            if (nextSibling) {
-                parent.insertBefore(img, nextSibling);
-            } else {
-                parent.appendChild(img);
-            }
-        });
-        this.removedImages = [];
-        this.imagesHidden = false;
+    const removeImageButton = document.getElementById('remove-images-btn');
+    if (this.imagesHidden && removeImageButton) {
+        removeImageButton.click();
+        console.log('Remove Images button triggered via reset.');
     }
+
 
     // Unmute audio/video elements muted by the toolbox
     const soundElements = document.querySelectorAll('[data-toolbox-muted]');
@@ -1712,7 +1717,10 @@ YourInclusion.prototype.resetToolbox = function () {
     });
 
     // Disable night mode introduced by the toolbox
-    document.body.classList.remove('night-mode');
+    const nightModeButton = document.getElementById('night-mode-btn');
+    if (document.body.classList.contains('night-mode') && nightModeButton) {
+        nightModeButton.click(); // Trigger the Night Mode button
+    }
 
     // Reset cursor size to default
     document.documentElement.style.cursor = 'auto';
@@ -1761,6 +1769,11 @@ if (fontSizeResetButton) {
    // Reset font size
    this.currentFontSize = null;
 
+    //Reset Language and Default color    
+   languageDropdown.value = defaultSettings.language; // Reset language
+    document.documentElement.style.setProperty('--bg-color', defaultSettings.color, 'important');
+    
+
     // Reset button states controlled by the toolbox
     this.resetButtonStates();
 
@@ -1784,87 +1797,104 @@ YourInclusion.prototype.initContrastFeature = function () {
 
 // Toggle Contrast Popup
 YourInclusion.prototype.createContrastPopup = function () {
-    this.closeAllPopups();
+    this.closeAllPopups(); // Close any other active popups
+
+    // Check if the popup already exists
     const existingPopup = document.getElementById('contrast-popup');
     if (existingPopup) {
         existingPopup.remove();
+        this.isContrastPopupActive = false;
         return;
     }
 
     // Create the popup container
     const popup = document.createElement('div');
     popup.id = 'contrast-popup';
-    popup.className = 'contrast-popup';
+    popup.className = 'contrast-popup'; // Ensure this class is styled in your CSS
 
-    // Position the popup dynamically
-    popup.style.position = 'absolute';
-    popup.style.top = '19%'; // Fixed top position
-
-    const toolbox = document.querySelector('.yi-toolbox');
-    const toolboxRect = toolbox.getBoundingClientRect();
-    const windowWidth = window.innerWidth;
-    const isToolboxOnLeft = toolboxRect.left < windowWidth / 2;
-
-    // Set the left position based on toolbox location
-    popup.style.left = isToolboxOnLeft ? '30%' : '70%';
-
-    // Popup Header
-    const header = this.createPopupHeader('Contrast Settings', () => popup.remove());
+    // Attach the header using the createPopupHeader function
+    const header = this.createPopupHeader('Contrast Settings', () => {
+        popup.remove(); // Remove the popup when closed
+        this.isContrastPopupActive = false;
+    });
     popup.appendChild(header);
 
-    // Popup Body
+    // Create the body content
     const body = document.createElement('div');
     body.className = 'contrast-popup-body';
 
-    // Add preset modes
+    // Add buttons, controls, or other elements to the body
     this.addPresetModes(body);
-
-    // Add custom color controls
     this.addCustomColorControls(body);
 
-    this.isContrastPopupActive = true;
-
-    // Toggle visibility dynamically
-    popup.addEventListener('click', () => {
-        if (popup.style.display === 'block') {
-            popup.style.display = 'none';
-            this.isContrastPopupActive = false; // Update flag
-        } else {
-            popup.style.display = 'block';
-            this.isContrastPopupActive = true; // Update flag
-        }
-    });
-
-    
-
-    // Add Reset Button
+    // Add a reset button to the body
     const resetButton = document.createElement('button');
-    resetButton.id = 'reset-contrast-btn';
     resetButton.className = 'contrast-reset-button';
     resetButton.textContent = 'Reset Contrast';
     resetButton.addEventListener('click', () => this.resetContrast());
     body.appendChild(resetButton);
 
     popup.appendChild(body);
-    document.body.appendChild(popup);
-};
-YourInclusion.prototype.createPopupHeader = function (titleText, closeCallback) {
-    const header = document.createElement('div');
-    header.className = 'contrast-popup-header';
 
+    // Position the popup dynamically relative to the toolbox
+    const toolbox = document.querySelector('.yi-toolbox');
+    if (!toolbox) {
+        console.error('Toolbox element not found!');
+        return;
+    }
+
+    const toolboxRect = toolbox.getBoundingClientRect(); // Get the position of the toolbox
+    const popupWidth = 400; // Match the width defined in your CSS
+
+     
+
+    // Position the popup to the right or left of the toolbox
+    popup.style.position = 'absolute';
+    popup.style.top = `${toolboxRect.top + window.scrollY}px`; // Account for scrolling
+    if (toolboxRect.left < window.innerWidth / 2) {
+        // Place popup to the right of the toolbox
+        popup.style.left = `${toolboxRect.right + 10}px`; // Add spacing
+    } else {
+        // Place popup to the left of the toolbox
+        popup.style.left = `${toolboxRect.left - popupWidth - 10}px`; // Subtract width and spacing
+    }
+    
+
+    // Add the popup to the document body
+    document.body.appendChild(popup);
+
+    this.isContrastPopupActive = true; // Update the active state
+};
+
+
+YourInclusion.prototype.createPopupHeader = function (titleText, closeCallback) {
+    // Create the header container
+    const header = document.createElement('div');
+    header.className = 'contrast-popup-header'; // Ensure this class is styled in your CSS
+
+    // Create the title element
     const title = document.createElement('h3');
-    title.className = 'contrast-popup-title';
+    title.className = 'contrast-popup-title'; // Ensure this class is styled in your CSS
     title.textContent = titleText;
     header.appendChild(title);
 
+
+
+    // Create the close button
     const closeButton = document.createElement('button');
-    closeButton.className = 'contrast-popup-close';
-    closeButton.textContent = '✖';
-    closeButton.addEventListener('click', closeCallback);
+    closeButton.className = 'contrast-popup-close'; // Ensure this class is styled in your CSS
+    closeButton.textContent = '✖'; // Close icon
+    closeButton.setAttribute('aria-label', 'Close'); // Accessibility: screen reader-friendly
+    closeButton.addEventListener('click', () => {
+        if (typeof closeCallback === 'function') {
+            closeCallback(); // Call the callback to handle the close action
+        }
+    });
     header.appendChild(closeButton);
 
     return header;
 };
+
 YourInclusion.prototype.addPresetModes = function (container) {
     const modes = [{ id: 'grayscale', text: 'Uncolored Display' }];
 
@@ -1957,9 +1987,6 @@ YourInclusion.prototype.applyBackgroundColor = function (color) {
     console.log(`Background applied to all elements: ${color}`);
 };
 
-
-
-
 YourInclusion.prototype.applyCustomTextColor = function (color) {
     if (color) {
         // Dynamically exclude elements inside toolbox and popup
@@ -1986,13 +2013,6 @@ YourInclusion.prototype.applyCustomTextColor = function (color) {
         this.customTextColor = color; // Store the applied color
     }
 };
-
-
-
-
-
-
-
 
 
 // Reset Contrast
@@ -2022,45 +2042,6 @@ YourInclusion.prototype.resetContrast = function () {
     });
 
     console.log('Contrast settings reset to original.');
-};
-
-
-
-// Apply Custom Text Color
-YourInclusion.prototype.applyCustomTextColor = function (color) {
-    if (color) {
-        // Select text elements but exclude toolbox and popup
-        const textElements = document.querySelectorAll(
-            'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea' +
-            ':not(.yi-toolbox):not(.contrast-popup):not(.yi-toolbox *):not(.contrast-popup *)'
-        );
-
-        textElements.forEach((element) => {
-            element.style.color = color; 
-        });
-    
-        this.customTextColor = color;
-    }
-};
-
-
-
-// Apply Custom Colors
-YourInclusion.prototype.applyCustomColors = function (bgColor, textColor) {
-    if (bgColor) {
-        document.body.style.backgroundColor = bgColor;
-        this.customBackgroundColor = bgColor; // Store the custom background color
-    }
-    if (textColor) {
-        const textElements = document.querySelectorAll(
-            'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea'
-        );
-        textElements.forEach((element) => {
-            element.style.color = textColor;
-        });
-        this.customTextColor = textColor; 
-    }
-    console.log(`Custom colors applied: Background (${bgColor || 'unchanged'}), Text (${textColor || 'unchanged'})`);
 };
 
 
@@ -2529,7 +2510,6 @@ YourInclusion.prototype.createSettingsPopup = function () {
     toolboxButtons.forEach(button => {
         button.style.backgroundColor = selectedColor;
         button.style.borderColor = selectedColor;
-        button.style.color = selectedColor;
     });
     const root = document.documentElement;
     root.style.setProperty('--bg-color', selectedColor, 'important');
@@ -2694,6 +2674,32 @@ YourInclusion.prototype.closeAllPopups = function (excludeSelector) {
     });
 };
 
+// Alert for buttons
+
+YourInclusion.prototype.addDevelopmentAlerts = function () {
+    const buttonIds = [
+        'remove-audio-btn',
+        'highlight-links-btn',
+        'highlight-headers-btn',
+        'stop-animations-btn',
+        'zoom-toggle-btn',
+        'cursor-size-btn',
+        'accessible-font-btn',
+        'read-aloud-btn',
+        'save-settings-btn'
+    ];
+
+    buttonIds.forEach((id) => {
+        const button = document.getElementById(id);
+        if (button) {
+            button.addEventListener('click', () => {
+                alert("Function under development.");
+            });
+        } else {
+            console.warn(`Button with ID '${id}' not found.`);
+        }
+    });
+};
 
 
 
