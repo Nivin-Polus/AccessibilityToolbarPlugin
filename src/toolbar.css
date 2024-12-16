@@ -45,7 +45,7 @@
     transition: opacity 0.3s ease, visibility 0.3s ease;
     z-index: 1000;
     overflow: hidden; /* Prevent scrolling sideways */
-    padding: 10px;
+    /* padding: 10px; */
 }
 
 /* Toolbox Visible State */
@@ -121,7 +121,7 @@
     cursor: pointer;
     transition: transform 0.2s, background-color 0.3s;
     width: 100%; /* Takes full grid cell width */
-    max-width: 90px; /* Standardizes button width */
+    /* max-width: 90px; */
     height: 94px; /* Standardizes button height */
 }
 
@@ -686,9 +686,9 @@ button:hover {
 
 /* Contrast Popup Styles */
 .contrast-popup {
-    position: relative;
-    top: 20%;
-    left: 70%;
+    position: fixed !important;
+    top: 20% !important;
+    left: 69% !important;
     transform: translate(-50%, -20%);
     width: 400px;
     background: #ffffff;
@@ -902,9 +902,9 @@ button:hover {
 /* Setting Popup */
 
 .settings-popup {
-    position: relative;
+    position: fixed !important;
     top: 20%;
-    left: 70%; 
+    left: 71% !important; 
     transform: translate(-50%, -50%);
     background: #EFF1F5; 
     border-radius: 15px; 
@@ -970,7 +970,7 @@ button:hover {
 }
 
 .reset-popup-btn {
-    background-color:var(--bg-color);
+    background-color:var(--bg-color);;
     color: white !important;
     border: none;
     border-radius: 8px; 
