@@ -45,7 +45,7 @@
     transition: opacity 0.3s ease, visibility 0.3s ease;
     z-index: 1000;
     overflow: hidden; /* Prevent scrolling sideways */
-    padding: 10px;
+    /* padding: 10px; */
 }
 
 /* Toolbox Visible State */
@@ -121,7 +121,7 @@
     cursor: pointer;
     transition: transform 0.2s, background-color 0.3s;
     width: 100%; /* Takes full grid cell width */
-    max-width: 90px; /* Standardizes button width */
+    /* max-width: 90px;  */
     height: 94px; /* Standardizes button height */
 }
 
@@ -797,6 +797,21 @@ button:hover {
 .grayscale {
     filter: grayscale(1);
 }
+
+#grayscale-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Allow interaction with the page */
+    z-index: 9998; /* Ensure it stays below the toolbox but above content */
+    filter: grayscale(1); /* Grayscale effect */
+    background-color: transparent; /* Transparent overlay */
+    mix-blend-mode: luminosity; /* Ensures only a grayscale effect is visible */
+}
+
+
 
 
 /* Keyboard Accessibility */

@@ -61,53 +61,107 @@ function loadScript() {
 
 // Specific Element Creators
 
-    YourInclusion.prototype.createButton = function(id, text, icon = ''){
-    // Create the button element
+YourInclusion.prototype.createButton = function (id, text, icon = '') {
+    const button = this.createBaseButton(id);
+    const iconWrapper = this.createIconWrapper(icon, text || id);
+
+    if (iconWrapper) {
+        button.appendChild(iconWrapper); // Add icon wrapper if it exists
+    }
+
+    if (text) {
+        const textWrapper = this.createTextWrapper(text);
+        button.appendChild(textWrapper); // Add text wrapper
+    }
+
+    return button;
+};
+
+// Function to create a base button
+YourInclusion.prototype.createBaseButton = function (id) {
     const button = document.createElement('button');
     button.className = 'yi-toolbox-button';
     button.id = id;
+    return button;
+};
 
-    // Create a wrapper div for the icon
+// Function to create an icon wrapper
+YourInclusion.prototype.createIconWrapper = function (icon, altText) {
+    if (!icon) return null;
+
     const iconWrapper = document.createElement('div');
     iconWrapper.className = 'icon-wrapper';
 
-    // Check if the icon is a URL or Font Awesome class
-    if (icon) {
-        if (icon.startsWith('./') || icon.startsWith('/')) {
-            // Add inline SVG from local path
-            fetch(icon)
-                .then(response => response.text())
-                .then(svgContent => {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = svgContent;
-
-                    const svgElement = tempDiv.querySelector('svg');
-                    if (svgElement) {
-                        svgElement.classList.add('button-icon'); // Add a class for styling
-                        iconWrapper.appendChild(svgElement); // Append inline SVG to the wrapper
-                    }
-                })
-                .catch(error => console.error('Error fetching SVG:', error));
-        } else {
-            // Add Font Awesome icon
-            const fontAwesomeIcon = document.createElement('span');
-            fontAwesomeIcon.innerHTML = icon; // Use the provided Font Awesome HTML
-            fontAwesomeIcon.className = 'font-awesome-icon'; // Add a class for styling
-            iconWrapper.appendChild(fontAwesomeIcon); // Append the Font Awesome icon to the wrapper
-        }
+    if (icon.startsWith('./') || icon.startsWith('/')) {
+        // Inline SVG
+        this.fetchAndAppendSVG(icon, iconWrapper);
+    } else if (icon.endsWith('.png') || icon.endsWith('.jpg') || icon.endsWith('.jpeg')) {
+        // Image files
+        const imgIcon = this.createImageIcon(icon, altText);
+        iconWrapper.appendChild(imgIcon);
+    } else {
+        // Font Awesome or other icons
+        const fontAwesomeIcon = this.createFontAwesomeIcon(icon);
+        iconWrapper.appendChild(fontAwesomeIcon);
     }
 
-    // Add the icon wrapper to the button
-    button.appendChild(iconWrapper);
+    return iconWrapper;
+};
 
-    // Add the button text
-    const textWrapper = document.createElement('div');
+// Function to fetch and append SVG
+YourInclusion.prototype.fetchAndAppendSVG = function (icon, wrapper) {
+    fetch(icon)
+        .then(response => response.text())
+        .then(svgContent => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = svgContent;
+
+            const svgElement = tempDiv.querySelector('svg');
+            if (svgElement) {
+                svgElement.classList.add('button-icon'); // Add a class for styling
+                wrapper.appendChild(svgElement); // Append inline SVG to the wrapper
+            }
+        })
+        .catch(error => console.error('Error fetching SVG:', error));
+};
+
+// Function to create an image icon
+YourInclusion.prototype.createImageIcon = function (src, alt) {
+    const imgIcon = document.createElement('img');
+    imgIcon.src = src;
+    imgIcon.alt = alt;
+    imgIcon.className = 'button-icon';
+    return imgIcon;
+};
+
+// Function to create a Font Awesome icon
+YourInclusion.prototype.createFontAwesomeIcon = function (icon) {
+    const fontAwesomeIcon = document.createElement('span');
+    fontAwesomeIcon.innerHTML = icon; // Use the provided Font Awesome HTML
+    fontAwesomeIcon.className = 'font-awesome-icon'; // Add a class for styling
+    return fontAwesomeIcon;
+};
+
+// Function to create a text wrapper
+YourInclusion.prototype.createTextWrapper = function (text) {
+    const textWrapper = document.createElement('span');
     textWrapper.className = 'text-wrapper';
     textWrapper.textContent = text;
-    button.appendChild(textWrapper);
+    return textWrapper;
+};
+
+// Function to create a button with only an icon (e.g., header buttons)
+YourInclusion.prototype.createButtonWithIcon = function (id, iconClass) {
+    const button = document.createElement('button');
+    button.className = 'header-btn';
+    button.id = id;
+
+    const icon = document.createElement('span');
+    icon.className = iconClass; // Use Font Awesome class for the icon
+    button.appendChild(icon);
 
     return button;
-}
+};
 
 
     YourInclusion.prototype.createDiv = function(className, id = ''){
@@ -127,128 +181,145 @@ function loadScript() {
 }
 
 // Create Toolbox
+// Function to initialize the toolbox
 YourInclusion.prototype.createToolbox = function () {
     const toolbox = this.createDiv('yi-toolbox hidden', 'yi-toolbox');
-    const imageContainer = this.createDiv('yi-toolbox-image-container');
-   
-    toolbox.appendChild(imageContainer);
-   // Header Section
-   const header = this.createDiv('yi-toolbox-header');
 
-   // Left Buttons
-const headerLeft = this.createDiv('yi-toolbox-header-left');
+    // Create toolbox sections
+    const header = this.createToolboxHeader(); // Header Section
+    const body = this.createToolboxBody();     // Body Section
 
-const settingsButton = document.createElement('button');
-settingsButton.id = 'settings-btn';
-settingsButton.className = 'header-btn';
-settingsButton.innerHTML = '<i class="fas fa-cog"></i>'; 
-headerLeft.style.position = "relative";
-headerLeft.style.bottom = "28%";
-headerLeft.appendChild(settingsButton);
+    // Append all parts to the toolbox
+    toolbox.appendChild(header);
+    toolbox.appendChild(body);
 
-const resetButton = document.createElement('button');
-resetButton.id = 'reset-btn';
-resetButton.className = 'header-btn';
-resetButton.innerHTML = '<i class="fas fa-undo"></i>'; // Add icon
-headerLeft.appendChild(resetButton);
+    // Add the toolbox to the document
+    document.body.appendChild(toolbox);
 
-// Center Logo and Title
-const logo = document.createElement('img');
-logo.src = 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/image.png';
-logo.alt = 'Logo';
-logo.className = 'yi-toolbox-logo';
+    // Reset button states after creating the toolbox
+    this.resetButtonStates();
+};
 
-const title = document.createElement('h2');
-title.className = 'yi-toolbox-title';
-title.textContent = 'Site Point Eye Assistant';
 
-// Right Buttons
-const headerRight = this.createDiv('yi-toolbox-header-right');
+// Function to create the toolbox header
+YourInclusion.prototype.createToolboxHeader = function () {
+    const header = this.createDiv('yi-toolbox-header');
 
-const infoButton = document.createElement('button');
-infoButton.id = 'info-btn';
-infoButton.className = 'header-btn';
-infoButton.innerHTML = '<i class="fas fa-info-circle"></i>'; // Add icon
-headerRight.style.position = "relative";
-headerRight.style.bottom = "28%";
-headerRight.appendChild(infoButton);
+    // Left Buttons (Settings and Reset)
+    const headerLeft = this.createHeaderLeftSection();
 
-const closeButton = document.createElement('button');
-closeButton.id = 'close-btn';
-closeButton.className = 'header-btn';
-closeButton.innerHTML = '<i class="fas fa-times"></i>'; // Add icon
-headerRight.appendChild(closeButton);
-settingsButton.addEventListener('click', () => {
-    createSettingsPopup();
-});
+    // Center Logo and Title
+    const logo = this.createLogo();
+    const title = this.createTitle('Site Point Eye Assistant');
 
-// Append all parts to the header
-header.appendChild(headerLeft);
-header.appendChild(logo);
-header.appendChild(title);
-header.appendChild(headerRight);
+    // Right Buttons (Info and Close)
+    const headerRight = this.createHeaderRightSection();
 
-// Dedicated close function for the close button
+    // Append all parts to the header
+    header.appendChild(headerLeft);
+    header.appendChild(logo);
+    header.appendChild(title);
+    header.appendChild(headerRight);
+
+    return header;
+};
+
+// Function to create the left section of the header
+YourInclusion.prototype.createHeaderLeftSection = function () {
+    const headerLeft = this.createDiv('yi-toolbox-header-left');
+    headerLeft.style.position = 'relative';
+    headerLeft.style.bottom = '28%';
+
+    // Settings Button with Font Awesome Icon
+    const settingsButton = this.createButtonWithIcon('settings-btn', 'fas fa-cog');
+    settingsButton.addEventListener('click', () => createSettingsPopup());
+    headerLeft.appendChild(settingsButton);
+
+    // Reset Button with Font Awesome Icon
+    const resetButton = this.createButtonWithIcon('reset-btn', 'fas fa-undo');
+    resetButton.addEventListener('click', () => initResetFeature());
+    headerLeft.appendChild(resetButton);
+
+    return headerLeft;
+};
+
+YourInclusion.prototype.createHeaderRightSection = function () {
+    const headerRight = this.createDiv('yi-toolbox-header-right');
+    headerRight.style.position = 'relative';
+    headerRight.style.bottom = '28%';
+
+    // Info Button 
+    const infoButton = this.createButtonWithIcon('info-btn', 'fas fa-info-circle');
+    headerRight.appendChild(infoButton);
+
+    // Close Button 
+    const closeButton = this.createButtonWithIcon('close-btn', 'fas fa-times');
+    closeButton.addEventListener('click', () => this.closeToolboxFromButton());
+    headerRight.appendChild(closeButton);
+
+    return headerRight;
+};
 YourInclusion.prototype.closeToolboxFromButton = function () {
     const toolbox = document.querySelector('.yi-toolbox');
-    if (toolbox) { // Corrected the variable reference
-        toolbox.classList.remove('visible');
+    if (toolbox) {
+        toolbox.classList.remove('visible'); // Hide toolbox by removing the 'visible' class
+        console.log('Toolbox has been closed.');
     }
 };
 
-// Link the function to the close button
-closeButton.addEventListener('click', () => {
-    this.closeToolboxFromButton();
-});
 
-// Reset Button - Reuse Existing Reset Functionality
-resetButton.addEventListener('click', function () {
-    initResetFeature(); 
-});
+// Function to create the toolbox logo
+YourInclusion.prototype.createLogo = function () {
+    const logo = document.createElement('img');
+    logo.src = 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/image.png';
+    logo.alt = 'Logo';
+    logo.className = 'yi-toolbox-logo';
+    return logo;
+};
+
+// Function to create the toolbox title
+YourInclusion.prototype.createTitle = function (text) {
+    const title = document.createElement('h2');
+    title.className = 'yi-toolbox-title';
+    title.textContent = text;
+    return title;
+};
+
+// Function to create the toolbox body with all buttons
+YourInclusion.prototype.createToolboxBody = function () {
+    const body = this.createDiv('yi-toolbox-body');
 
     const buttons = [
-        { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: './assests/BlueFilter-1.svg'  },
+        { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: './assests/BlueFilter-1.svg' },
         { id: 'contrast-btn', text: 'Contrast Modes', iconClass: './assests/contrast.svg' },
         { id: 'remove-images-btn', text: 'Remove Images', iconClass: './assests/image-off.svg' },
         { id: 'font-size-btn', text: 'Font Size', iconClass: './assests/fontsize.svg' },
         { id: 'night-mode-btn', text: 'Night Mode', iconClass: './assests/mode-night.svg' },
-        { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: '<i class="fas fa-text-width"></i>' },
-        { id: 'line-height-btn', text: 'Line Height', iconClass: '<i class="fas fa-text-height"></i>' },   
-        { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: '<i class="fas fa-microphone-slash"></i>' },
-        { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: '<i class="fas fa-link"></i>' },
-        { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: '<i class="fas fa-heading"></i>' },
-        { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: '<i class="fas fa-ban"></i>' },
-        { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: '<i class="fas fa-search"></i>' },
-        { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: '<i class="fas fa-mouse-pointer"></i>' },
-        { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: '<i class="fas fa-font"></i>' },
+        { id: 'text-spacing-btn', text: 'Text Spacing', iconClass: './assests/ri_text-spacing 2.svg' },
+        { id: 'line-height-btn', text: 'Line Height', iconClass: './assests/ri_line-height 1.svg' },
+        { id: 'remove-audio-btn', text: 'Remove Audio', iconClass: './assests/mdi_mute 1.svg' },
+        { id: 'highlight-links-btn', text: 'Highlight Links', iconClass: './assests/link 1.svg' },
+        { id: 'highlight-headers-btn', text: 'Highlight Headers', iconClass: './assests/cil_header 1.svg' },
+        { id: 'stop-animations-btn', text: 'Stop Animations', iconClass: './assests/stop 1.svg' },
+        { id: 'zoom-toggle-btn', text: 'Zoom', iconClass: './assests/zoom 1.svg' },
+        { id: 'cursor-size-btn', text: 'Change Cursor Size', iconClass: './assests/cursor 1.svg' },
+        { id: 'accessible-font-btn', text: 'Accessible Font', iconClass: './assests/font 1.svg' },
         { id: 'read-aloud-btn', text: 'Read Aloud', iconClass: './assests/read-aloud.svg' },
-        // { id: 'keyboard-navigation-btn', text: 'Keyboard Navigation', iconClass: '<i class="fas fa-keyboard"></i>' },
-        { id: 'reset-btn1', text: 'Reset', iconClass: '<i class="fas fa-undo"></i>' },
-        { id: 'save-settings-btn', text: 'Save', iconClass: '<i class="fas fa-save"></i>' },
+        { id: 'reset-btn1', text: 'Reset', iconClass: './assests/reset 1.svg' },
+        { id: 'save-settings-btn', text: 'Save', iconClass: './assests/save 1.svg' },
     ];
-    
-    const body = this.createDiv('yi-toolbox-body');
 
-buttons.forEach(({ id, text, iconClass }) => {
-    // Create a div and set its class name to the button's name (id or text)
-    const buttonDiv = document.createElement('div');
-    buttonDiv.className = id || text.replace(/\s+/g, '-').toLowerCase(); 
+    buttons.forEach(({ id, text, iconClass }) => {
+        const buttonDiv = this.createDiv(id || text.replace(/\s+/g, '-').toLowerCase());
+        const button = this.createButton(id, text, iconClass);
+        buttonDiv.appendChild(button);
+        body.appendChild(buttonDiv);
+    });
 
-    // Create the button and append it to the div
-    const button = this.createButton(id, text, iconClass);
-    buttonDiv.appendChild(button);
-
-    // Append the button div to the body
-    body.appendChild(buttonDiv);
-});
-
-toolbox.appendChild(header);
-toolbox.appendChild(body);
-
-document.body.appendChild(toolbox);
-this.resetButtonStates();
-
+    return body;
 };
+
+
 
 YourInclusion.prototype.arePopupsInactive = function () {
     // Check the status of each popup flag
@@ -393,7 +464,7 @@ document.addEventListener('mouseup', () => {
 
     const popupConfigs = [
         { selector: '.font-size-popup', left: isToolboxOnLeft ? '25%' : '74%' },
-        { selector: '.settings-popup', left: isToolboxOnLeft ? '28%' : '72%' },
+        { selector: '.settings-popup', left: isToolboxOnLeft ? '28%' : '71%' },
         { selector: '.contrast-popup', left: isToolboxOnLeft ? '30%' : '70%' },
     ];
 
@@ -912,7 +983,9 @@ YourInclusion.prototype.addFontSizePopup = function () {
 
             // Save original font sizes
             const originalFontSizes = new Map();
-            const allElements = document.body.querySelectorAll('*:not(.yi-toolbox):not(.yi-toolbox *)');
+            const allElements = document.body.querySelectorAll(
+                '*:not(.yi-toolbox):not(.yi-toolbox *):not(.font-size-popup):not(.font-size-popup *)'
+            );
             allElements.forEach((element) => {
                 const computedStyle = window.getComputedStyle(element);
                 originalFontSizes.set(element, computedStyle.fontSize);
@@ -964,7 +1037,7 @@ YourInclusion.prototype.addFontSizePopup = function () {
         // Toggle popup visibility
         if (fontSizePopup.style.display === 'block') {
             fontSizePopup.style.display = 'none';
-            this.isFontSizePopupActive = false; 
+            this.isFontSizePopupActive = false;
         } else {
             this.closeAllPopups(); // Close other popups
             fontSizePopup.style.display = 'block'; // Show font size popup
@@ -972,14 +1045,6 @@ YourInclusion.prototype.addFontSizePopup = function () {
         }
     });
 };
-
-
-
-
-
-
-
-
 
 // HightLight Functions
 YourInclusion.prototype.initHighlightButtons = function () {
@@ -1679,6 +1744,7 @@ YourInclusion.prototype.initResetFeature = function () {
 
 
 YourInclusion.prototype.resetToolbox = function () {
+    this.closeAllPopups();
     // Remove highlights added by the toolbox
     document.querySelectorAll('.highlight-links, .highlight-headers, .highlight-images').forEach(el => {
         el.classList.remove('highlight-links', 'highlight-headers', 'highlight-images');
@@ -1843,22 +1909,21 @@ YourInclusion.prototype.createContrastPopup = function () {
         return;
     }
 
-    const toolboxRect = toolbox.getBoundingClientRect(); // Get the position of the toolbox
-    const popupWidth = 400; // Match the width defined in your CSS
-
+    const toolboxRect = toolbox.getBoundingClientRect();
+    const popupWidth = 400; 
      
 
     // Position the popup to the right or left of the toolbox
-    popup.style.position = 'absolute';
-    popup.style.top = `${toolboxRect.top + window.scrollY}px`; // Account for scrolling
+    
+    popup.style.top = `${toolboxRect.top + window.scrollY}px`;
     if (toolboxRect.left < window.innerWidth / 2) {
         // Place popup to the right of the toolbox
-        popup.style.left = `${toolboxRect.right + 10}px`; // Add spacing
+        popup.style.left = `${toolboxRect.right + 10}px`; //
     } else {
         // Place popup to the left of the toolbox
-        popup.style.left = `${toolboxRect.left - popupWidth - 10}px`; // Subtract width and spacing
+        popup.style.left = `${toolboxRect.left - popupWidth - 10}px`; 
     }
-    
+
 
     // Add the popup to the document body
     document.body.appendChild(popup);
@@ -1877,8 +1942,6 @@ YourInclusion.prototype.createPopupHeader = function (titleText, closeCallback) 
     title.className = 'contrast-popup-title'; // Ensure this class is styled in your CSS
     title.textContent = titleText;
     header.appendChild(title);
-
-
 
     // Create the close button
     const closeButton = document.createElement('button');
@@ -2401,249 +2464,169 @@ YourInclusion.prototype.addSettingsButtonListener = function () {
 
 YourInclusion.prototype.createSettingsPopup = function () {
     this.closeAllPopups();
-    // Check if the popup already exists
+
     if (document.querySelector('.settings-popup')) return;
 
-    // Create the popup container
-    const popup = document.createElement('div');
-    popup.className = 'settings-popup';
+    const popup = this.createPopupContainer();
+    const header = this.createPopupHeader('Settings');
+    const languageSelector = this.createLanguageSelector();
+    const colorPicker = this.createColorPicker(header);
+    const resetButton = this.createPopupResetButton(header, colorPicker);
+    const closeButton = this.createPopupCloseButton(popup);
 
-    // Set popup default position
+    // Append sections to the popup
+    popup.appendChild(header);
+    popup.appendChild(languageSelector);
+    popup.appendChild(colorPicker);
+    popup.appendChild(resetButton);
+    popup.appendChild(closeButton);
+
+    document.body.appendChild(popup);
+
+    const isToolboxOnLeft = this.determineToolboxPosition(popup);
+    this.updatePopupPositions(isToolboxOnLeft);
+};
+
+// Function to create the popup container
+YourInclusion.prototype.createPopupContainer = function () {
+    const popup = this.createDiv('settings-popup');
     popup.style.position = 'absolute';
     popup.style.top = '19%';
+    return popup;
+};
 
-    // Dynamically determine if the toolbox is on the left
-    const toolbox = document.querySelector('.yi-toolbox');
-    const toolboxRect = toolbox.getBoundingClientRect();
-    const windowWidth = window.innerWidth;
-    const isToolboxOnLeft = toolboxRect.left < windowWidth / 2;
-
-    // Set the initial left position based on toolbox location
-    popup.style.left = isToolboxOnLeft ? '28%' : '72%';
-
-        // Create the popup header
-    const header = document.createElement('div');
-    header.className = 'settings-popup-header';
-  
-
-    const headerTitle = document.createElement('h3');
-    headerTitle.textContent = 'Settings';
-    headerTitle.className = 'settings-popup-title'; // Add class for styling if needed
+// Function to create the popup header
+YourInclusion.prototype.createPopupHeader = function (titleText) {
+    const header = this.createDiv('settings-popup-header');
+    const headerTitle = this.createHeading(3, titleText, 'settings-popup-title');
     header.appendChild(headerTitle);
+    return header;
+};
 
-    // Append the header element to the popup
-    const popup2 = document.querySelector('.settings-popup');
-    if (popup2) {
-        popup.appendChild(header);
-    }
+// Function to create the language selector
+YourInclusion.prototype.createLanguageSelector = function () {
+    const languageSelector = this.createDiv('popup-section');
 
-    // Add the header to the popup
-    popup.appendChild(header);
-
-    // Create language selector
-    const languageSelector = document.createElement('div');
-    languageSelector.className = 'popup-section';
-    const languageLabel = document.createElement('label');
-    languageLabel.textContent = 'Select Language: ';
-    languageLabel.for = 'language-select';
-    const languageDropdown = document.createElement('select');
-    languageDropdown.id = 'language-select';
+    const languageLabel = this.createEle('label', { for: 'language-select' }, 'Select Language: ');
+    const languageDropdown = this.createEle('select', { id: 'language-select' });
     languageDropdown.innerHTML = `
         <option value="en">English</option>
         <option value="de">German</option>
     `;
+
     languageSelector.appendChild(languageLabel);
     languageSelector.appendChild(languageDropdown);
+    return languageSelector;
+};
 
-    // Create color picker
-    const colorPicker = document.createElement('div');
-    colorPicker.className = 'popup-section';
-    const colorLabel = document.createElement('label');
-    colorLabel.textContent = 'Pick a Color: ';
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
-    colorInput.id = 'color-picker';
-    colorInput.value = '#007bff'; // Default color
+// Function to create the color picker
+YourInclusion.prototype.createColorPicker = function (header) {
+    const colorPicker = this.createDiv('popup-section');
+
+    const colorLabel = this.createEle('label', {}, 'Pick a Color: ');
+    const colorInput = this.createEle('input', { type: 'color', id: 'color-picker', value: '#007bff' });
+
+    colorInput.addEventListener('input', (event) => {
+        this.updateToolboxColor(header, event.target.value);
+    });
+
     colorPicker.appendChild(colorLabel);
     colorPicker.appendChild(colorInput);
+    return colorPicker;
+};
 
-    // Default settings
-    const defaultSettings = {
-        color: '#393636',
-        language: 'en',
-    };
+// Function to create the reset button
+YourInclusion.prototype.createPopupResetButton = function (header, colorPicker) {
+    const resetButton = this.createEle('button', { class: 'popup-reset' }, 'Reset');
+    resetButton.style.color = 'white';
 
-   // Handle color changes
-   colorInput.addEventListener('input', (event) => {
-    const selectedColor = event.target.value;
-
-    // Change popup header background color
-    header.style.backgroundColor = selectedColor;
-
-    // Change toolbox header background color
-    const toolboxHeaders = document.querySelectorAll('.yi-toolbox-header, .settings-popup-header');
-
-    // Iterate over the NodeList and apply the background color with !important
-    toolboxHeaders.forEach(header => {
-        header.style.setProperty('background-color', selectedColor, 'important');
+    resetButton.addEventListener('click', () => {
+        this.resetPopupSettings(header, colorPicker);
     });
-    
-    // Change SVG and inner elements' fill and stroke color
+
+    return resetButton;
+};
+
+// Function to reset the popup settings
+YourInclusion.prototype.resetPopupSettings = function (header, colorPicker) {
+    const defaultSettings = { color: '#393636', language: 'en' };
+
+    header.style.backgroundColor = defaultSettings.color;
+    colorPicker.querySelector('#color-picker').value = defaultSettings.color;
+
+    const toolboxHeader = document.querySelector('.yi-toolbox-header');
+    if (toolboxHeader) toolboxHeader.style.backgroundColor = defaultSettings.color;
+
     const toolboxIcons = document.querySelectorAll('.yi-toolbox-body svg');
     toolboxIcons.forEach(svg => {
-        svg.style.fill = selectedColor;
-        svg.style.stroke = selectedColor;
+        svg.style.fill = defaultSettings.color;
+        svg.style.stroke = defaultSettings.color;
 
-        // Update inner elements (e.g., paths)
         const innerElements = svg.querySelectorAll('*');
         innerElements.forEach(inner => {
-            inner.style.fill = selectedColor;
-            inner.style.stroke = selectedColor;
+            inner.style.fill = defaultSettings.color;
+            inner.style.stroke = defaultSettings.color;
         });
     });
 
-    // Change background color of toolbox buttons
-    const toolboxButtons = document.querySelectorAll(
-        '.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button, .font-popup-btn, ' +
-        ' #font-popup-reset'
-    );
+    const toolboxButtons = document.querySelectorAll('.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button');
     toolboxButtons.forEach(button => {
-        button.style.backgroundColor = selectedColor;
-        button.style.borderColor = selectedColor;
+        button.style.backgroundColor = defaultSettings.color;
+        button.style.borderColor = defaultSettings.color;
+        button.style.color = defaultSettings.color;
     });
-    const root = document.documentElement;
-    root.style.setProperty('--bg-color', selectedColor, 'important');
 
-    // Dynamically update the CSS for .font-popup-btn and .reset-popup-btn
-const styleSheet = document.styleSheets[0]; // Use the first stylesheet or dynamically create one
-
-const updateCSSRule = (selector, property, value) => {
-    let ruleFound = false;
-
-    // Check if the rule exists and update it
-    for (let i = 0; i < styleSheet.cssRules.length; i++) {
-        const rule = styleSheet.cssRules[i];
-        if (rule.selectorText === selector) {
-            rule.style.setProperty(property, value, 'important');
-            ruleFound = true;
-            break;
-        }
-    }
-
-    // If the rule doesn't exist, add it dynamically
-    if (!ruleFound) {
-        styleSheet.insertRule(
-            `${selector} { ${property}: ${value} !important; }`,
-            styleSheet.cssRules.length
-        );
-    }
+    document.getElementById('language-select').value = defaultSettings.language;
+    document.documentElement.style.setProperty('--bg-color', defaultSettings.color, 'important');
 };
 
-// Update background color for .font-popup-btn and .reset-popup-btn
-updateCSSRule('.font-popup-btn', 'background-color', selectedColor);
-updateCSSRule('.reset-popup-btn', 'background-color', selectedColor);
-
-    
-
-    // Ensure elements using the variable have the important class
-    const elementsToUpdate = document.querySelectorAll('.uses-bg-color');
-    elementsToUpdate.forEach(element => {
-        element.style.setProperty('background-color', `var(--bg-color)`, 'important');
-    });
-   
-});
-
-    // Add a Reset button
-    const resetButton = document.createElement('button');
-    resetButton.textContent = 'Reset';
-    resetButton.className = 'popup-reset';
-    resetButton.style.color = "white";
-    resetButton.addEventListener('click', () => {
-        // Reset to default settings
-        header.style.backgroundColor = defaultSettings.color;
-        headerTitle.style.color = 'white';
-        colorInput.value = defaultSettings.color;
-
-        const toolboxHeader = document.querySelector('.yi-toolbox-header');
-        if (toolboxHeader) toolboxHeader.style.backgroundColor = defaultSettings.color;
-
-        const toolboxIcons = document.querySelectorAll('.yi-toolbox-body svg');
-        toolboxIcons.forEach(svg => {
-            svg.style.fill = defaultSettings.color;
-            svg.style.stroke = defaultSettings.color;
-
-            const innerElements = svg.querySelectorAll('*');
-            innerElements.forEach(inner => {
-                inner.style.fill = defaultSettings.color;
-                inner.style.stroke = defaultSettings.color;
-            });
-             // Reset buttons in toolbox and popups to default color
-            const buttonsToReset = document.querySelectorAll(
-                '.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button, .font-popup-btn, .reset-popup-btn'
-            );
-
-            buttonsToReset.forEach(button => {
-                button.style.setProperty('background-color', defaultSettings.color, 'important');
-                button.style.setProperty('border-color', defaultSettings.color, 'important');
-                button.style.setProperty('color', 'white', 'important'); // Set text color to white
-            });
-        });
-
-        
-
-        const toolboxButtons = document.querySelectorAll('.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button');
-        toolboxButtons.forEach(button => {
-            button.style.backgroundColor = defaultSettings.color;
-            button.style.borderColor = defaultSettings.color;
-            button.style.color = defaultSettings.color;
-        });
-
-        languageDropdown.value = defaultSettings.language; // Reset language
-        document.documentElement.style.setProperty('--bg-color', defaultSettings.color, 'important');
-    });
-
-    // Add a close button
-    const closeButton = document.createElement('button');
-    closeButton.textContent = 'X';
-    closeButton.className = 'popup-close';
-    closeButton.addEventListener('click', () => {
-        popup.remove(); // Remove the popup when close is clicked
-    });
-
-    // Append sections to the popup
-    popup.appendChild(languageSelector);
-    popup.appendChild(colorPicker);
-    popup.appendChild(resetButton); // Add Reset button to the popup
-    popup.appendChild(closeButton);
-
-    // Add the popup to the document body
-    document.body.appendChild(popup);
-
-    // Dynamically update position based on toolbox location
-    this.updatePopupPositions(isToolboxOnLeft);
-    if (settingsPopup) {
-        if (settingsPopup.style.display === 'block') {
-            settingsPopup.style.display = 'none';
-            this.isSettingsPopupActive = false; // Update flag
-        } else {
-            settingsPopup.style.display = 'block';
-            this.isSettingsPopupActive = true; // Update flag
-        }
-        return;
-    }
-    this.isSettingsPopupActive = true;
-
-    // Toggle visibility dynamically (click handler for the popup itself)
-    settingsPopup.addEventListener('click', () => {
-        if (settingsPopup.style.display === 'block') {
-            settingsPopup.style.display = 'none';
-            this.isSettingsPopupActive = false; // Update flag
-        } else {
-            settingsPopup.style.display = 'block';
-            this.isSettingsPopupActive = true; // Update flag
-        }
-    });
+// Function to create the close button
+YourInclusion.prototype.createPopupCloseButton = function (popup) {
+    const closeButton = this.createEle('button', { class: 'popup-close' }, 'X');
+    closeButton.addEventListener('click', () => popup.remove());
+    return closeButton;
 };
+
+// Function to update toolbox and popup colors dynamically
+YourInclusion.prototype.updateToolboxColor = function (header, color) {
+    header.style.backgroundColor = color;
+
+    const toolboxHeaders = document.querySelectorAll('.yi-toolbox-header, .settings-popup-header');
+    toolboxHeaders.forEach(header => {
+        header.style.setProperty('background-color', color, 'important');
+    });
+
+    const toolboxIcons = document.querySelectorAll('.yi-toolbox-body svg');
+    toolboxIcons.forEach(svg => {
+        svg.style.fill = color;
+        svg.style.stroke = color;
+
+        const innerElements = svg.querySelectorAll('*');
+        innerElements.forEach(inner => {
+            inner.style.fill = color;
+            inner.style.stroke = color;
+        });
+    });
+
+    const toolboxButtons = document.querySelectorAll('.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button');
+    toolboxButtons.forEach(button => {
+        button.style.backgroundColor = color;
+        button.style.borderColor = color;
+    });
+
+    document.documentElement.style.setProperty('--bg-color', color, 'important');
+};
+
+// Function to determine toolbox position
+YourInclusion.prototype.determineToolboxPosition = function (popup) {
+    const toolbox = document.querySelector('.yi-toolbox');
+    const toolboxRect = toolbox.getBoundingClientRect();
+    const isToolboxOnLeft = toolboxRect.left < window.innerWidth / 2;
+
+    popup.style.left = isToolboxOnLeft ? '28%' : '71%';
+    return isToolboxOnLeft;
+};
+
 
 
 // Popup Close

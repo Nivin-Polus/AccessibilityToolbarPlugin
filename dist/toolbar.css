@@ -45,7 +45,7 @@
     transition: opacity 0.3s ease, visibility 0.3s ease;
     z-index: 1000;
     overflow: hidden; /* Prevent scrolling sideways */
-    padding: 10px;
+    /* padding: 10px; */
 }
 
 /* Toolbox Visible State */
@@ -121,7 +121,7 @@
     cursor: pointer;
     transition: transform 0.2s, background-color 0.3s;
     width: 100%; /* Takes full grid cell width */
-    max-width: 90px; /* Standardizes button width */
+    /* max-width: 90px; */
     height: 94px; /* Standardizes button height */
 }
 
