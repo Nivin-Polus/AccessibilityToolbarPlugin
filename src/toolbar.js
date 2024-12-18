@@ -1,4 +1,3 @@
-
 'use strict';
 
 function YourInclusion(init) {
@@ -43,9 +42,9 @@ function loadScript() {
     document.head.appendChild(link);
 }
 
-// Generic Element Creator
+/***  Generic Element Creator */
 
-    YourInclusion.prototype.createEle = function (tag, attributes = {}, innerText = '') {
+YourInclusion.prototype.createEle = function (tag, attributes = {}, innerText = '') {
     const element = document.createElement(tag);
 
     for (const [key, value] of Object.entries(attributes)) {
@@ -59,7 +58,7 @@ function loadScript() {
     return element;
 }
 
-// Specific Element Creators
+/***  Specific Element Creators */
 
 YourInclusion.prototype.createButton = function (id, text, icon = '') {
     const button = this.createBaseButton(id);
@@ -80,7 +79,7 @@ YourInclusion.prototype.createButton = function (id, text, icon = '') {
 // Function to create a base button
 YourInclusion.prototype.createBaseButton = function (id) {
     const button = document.createElement('button');
-    button.className = 'yi-toolbox-button';
+    button.className = 'syi-toolbox-button';
     button.id = id;
     return button;
 };
@@ -180,10 +179,27 @@ YourInclusion.prototype.createButtonWithIcon = function (id, iconClass) {
     return this.createEle(`h${level}`, { class: className }, text);
 }
 
-// Create Toolbox
-// Function to initialize the toolbox
+
+    YourInclusion.prototype.createDiv = function(className, id = ''){
+    const attributes = { class: className };
+    if (id) attributes.id = id;
+    return this.createEle('div', attributes);
+}
+
+
+    YourInclusion.prototype.createImage = function (src, alt, className) {
+    return this.createEle('img', { src: src, alt: alt, class: className });
+}
+
+
+    YourInclusion.prototype.createHeading = function (level, text, className = '') {
+    return this.createEle(`h${level}`, { class: className }, text);
+}
+
+
+/***  Create Toolbox */
 YourInclusion.prototype.createToolbox = function () {
-    const toolbox = this.createDiv('yi-toolbox hidden', 'yi-toolbox');
+    const toolbox = this.createDiv('syi-toolbox hidden', 'syi-toolbox');
 
     // Create toolbox sections
     const header = this.createToolboxHeader(); // Header Section
@@ -203,7 +219,7 @@ YourInclusion.prototype.createToolbox = function () {
 
 // Function to create the toolbox header
 YourInclusion.prototype.createToolboxHeader = function () {
-    const header = this.createDiv('yi-toolbox-header');
+    const header = this.createDiv('syi-toolbox-header');
 
     // Left Buttons (Settings and Reset)
     const headerLeft = this.createHeaderLeftSection();
@@ -226,7 +242,7 @@ YourInclusion.prototype.createToolboxHeader = function () {
 
 // Function to create the left section of the header
 YourInclusion.prototype.createHeaderLeftSection = function () {
-    const headerLeft = this.createDiv('yi-toolbox-header-left');
+    const headerLeft = this.createDiv('syi-toolbox-header-left');
     headerLeft.style.position = 'relative';
     headerLeft.style.bottom = '28%';
 
@@ -244,7 +260,7 @@ YourInclusion.prototype.createHeaderLeftSection = function () {
 };
 
 YourInclusion.prototype.createHeaderRightSection = function () {
-    const headerRight = this.createDiv('yi-toolbox-header-right');
+    const headerRight = this.createDiv('syi-toolbox-header-right');
     headerRight.style.position = 'relative';
     headerRight.style.bottom = '28%';
 
@@ -260,7 +276,7 @@ YourInclusion.prototype.createHeaderRightSection = function () {
     return headerRight;
 };
 YourInclusion.prototype.closeToolboxFromButton = function () {
-    const toolbox = document.querySelector('.yi-toolbox');
+    const toolbox = document.querySelector('.syi-toolbox');
     if (toolbox) {
         toolbox.classList.remove('visible'); // Hide toolbox by removing the 'visible' class
         console.log('Toolbox has been closed.');
@@ -273,21 +289,21 @@ YourInclusion.prototype.createLogo = function () {
     const logo = document.createElement('img');
     logo.src = 'https://your-inclusion.s3.ap-south-1.amazonaws.com/Your_Inclusion/icons/image.png';
     logo.alt = 'Logo';
-    logo.className = 'yi-toolbox-logo';
+    logo.className = 'syi-toolbox-logo';
     return logo;
 };
 
 // Function to create the toolbox title
 YourInclusion.prototype.createTitle = function (text) {
     const title = document.createElement('h2');
-    title.className = 'yi-toolbox-title';
+    title.className = 'syi-toolbox-title';
     title.textContent = text;
     return title;
 };
 
 // Function to create the toolbox body with all buttons
 YourInclusion.prototype.createToolboxBody = function () {
-    const body = this.createDiv('yi-toolbox-body');
+    const body = this.createDiv('syi-toolbox-body');
 
     const buttons = [
         { id: 'blue-filter-btn', text: 'Blue Filter', iconClass: './assests/BlueFilter-1.svg' },
@@ -320,7 +336,6 @@ YourInclusion.prototype.createToolboxBody = function () {
 };
 
 
-
 YourInclusion.prototype.arePopupsInactive = function () {
     // Check the status of each popup flag
     const allInactive = !this.isFontSizePopupActive && !this.isSettingsPopupActive && !this.isContrastPopupActive;
@@ -335,7 +350,7 @@ YourInclusion.prototype.initializeAccessibilityToolbox = function () {
     this.createToolbox();
     this.createSideButton();
 
-    const toolbox = document.getElementById('yi-toolbox');
+    const toolbox = document.getElementById('syi-toolbox');
     const sideButton = document.getElementById('openToolboxButton');
 
     // Open/close toolbox on side button click
@@ -367,7 +382,16 @@ YourInclusion.prototype.initializeAccessibilityToolbox = function () {
 };
 
 
+/***
+ * Create Side Button
+ */
 YourInclusion.prototype.createSideButton = function () {
+    const sideButton = this.createSideButtonElement();
+    this.makeSideButtonDraggable(sideButton);
+    document.body.appendChild(sideButton);
+};
+
+YourInclusion.prototype.createSideButtonElement = function () {
     const sideButton = this.createDiv('side-button', 'openToolboxButton');
     const buttonImage = this.createImage(
         'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmaznO2w-h9n4bz-pEGtsiqy0J1JGh-wlMCw&s',
@@ -375,84 +399,73 @@ YourInclusion.prototype.createSideButton = function () {
         'side-button-image'
     );
     sideButton.appendChild(buttonImage);
+    return sideButton;
+};
 
+YourInclusion.prototype.makeSideButtonDraggable = function (sideButton) {
+    let isDragging = false;
+    let offsetX, offsetY;
 
- // Make the side button draggable
-let isDragging = false;
-let offsetX, offsetY;
+    sideButton.addEventListener('mousedown', (e) => this.startDragging(e, sideButton));
+    document.addEventListener('mousemove', (e) => this.dragSideButton(e, sideButton));
+    document.addEventListener('mouseup', () => this.stopDragging());
+};
 
-sideButton.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    offsetX = e.clientX - sideButton.offsetLeft;
-    offsetY = e.clientY - sideButton.offsetTop;
+YourInclusion.prototype.startDragging = function (event, sideButton) {
+    this.isDragging = true;
+    this.offsetX = event.clientX - sideButton.offsetLeft;
+    this.offsetY = event.clientY - sideButton.offsetTop;
     document.body.style.cursor = 'move';
-});
+};
 
-document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-        let x = e.clientX - offsetX;
-        let y = e.clientY - offsetY;
+YourInclusion.prototype.dragSideButton = function (event, sideButton) {
+    if (!this.isDragging) return;
 
-        const windowWidth = window.innerWidth;
+    let x = event.clientX - this.offsetX;
+    let y = event.clientY - this.offsetY;
+    const windowWidth = window.innerWidth;
 
-        // Snap side button to left or right based on the screen center
-        if (x + sideButton.offsetWidth / 2 < windowWidth / 2) {
-            x = 10; // Align to the left edge
-        } else {
-            x = windowWidth - sideButton.offsetWidth - 20; // Align to the right edge
-        }
+    // Snap side button to left or right based on the screen center
+    x = x + sideButton.offsetWidth / 2 < windowWidth / 2
+        ? 10 // Align to the left edge
+        : windowWidth - sideButton.offsetWidth - 20; // Align to the right edge
 
-        // Apply the position to the side button
-        sideButton.style.left = `${x}px`;
-        sideButton.style.top = `${y}px`;
+    // Apply the position to the side button
+    sideButton.style.left = `${x}px`;
+    sideButton.style.top = `${y}px`;
 
-        const toolbox = document.getElementById('yi-toolbox');
+    // Update the toolbox position
+    this.updateToolboxPosition(x, y, sideButton);
+};
 
-        // Toolbox should follow the side button
-        let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
-        let toolboxTop = y - toolbox.offsetHeight - 60;
+YourInclusion.prototype.stopDragging = function () {
+    this.isDragging = false;
+    document.body.style.cursor = 'default';
+};
 
-        // Ensure toolbox stays within the screen bounds horizontally
-        if (toolboxLeft + toolbox.offsetWidth > windowWidth) {
-            toolboxLeft = windowWidth - toolbox.offsetWidth - 10;
-        }
-        if (toolboxLeft < 10) {
-            toolboxLeft = 10;
-        }
+YourInclusion.prototype.updateToolboxPosition = function (x, y, sideButton) {
+    const toolbox = document.getElementById('syi-toolbox');
+    if (!toolbox) return;
 
-        // Get window height to ensure it stays within screen vertically
-        const windowHeight = window.innerHeight;
+    let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
+    let toolboxTop = y - toolbox.offsetHeight - 60;
 
-        // Ensure toolbox stays within vertical bounds
-        if (toolboxTop < 10) {
-            toolboxTop = 10;
-        }
+    // Adjust toolbox position to stay within screen bounds
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
 
-        if (toolboxTop + toolbox.offsetHeight > windowHeight) {
-            toolboxTop = windowHeight - toolbox.offsetHeight - 10;
-        }
+    toolboxLeft = Math.max(10, Math.min(toolboxLeft, windowWidth - toolbox.offsetWidth - 10));
+    toolboxTop = Math.max(10, Math.min(toolboxTop, windowHeight - toolbox.offsetHeight - 10));
 
-        // Apply the final position to the toolbox
-        toolbox.style.left = `${toolboxLeft}px`;
-        toolbox.style.top = `${toolboxTop}px`;
+    toolbox.style.left = `${toolboxLeft}px`;
+    toolbox.style.top = `${toolboxTop}px`;
 
-        // Check if toolbox is on the left side of the screen
-        const isToolboxOnLeft = toolboxLeft < windowWidth / 2;
-        
+    // Adjust side button to stay below the toolbox
+    sideButton.style.top = `${toolboxTop + toolbox.offsetHeight + 10}px`;
 
-         // Update popup positions
-         this.updatePopupPositions(isToolboxOnLeft);
-        }
-    });
-document.addEventListener('mouseup', () => {
-    if (isDragging) {
-        isDragging = false;
-        document.body.style.cursor = 'default';
-    }
-});
-
-
-    document.body.appendChild(sideButton);
+    // Update popup positions if needed
+    const isToolboxOnLeft = toolboxLeft < windowWidth / 2;
+    this.updatePopupPositions(isToolboxOnLeft);
 };
 
 /**
@@ -516,7 +529,7 @@ YourInclusion.prototype.initRemoveImages = function () {
 
 YourInclusion.prototype.toggleImages = function () {
     // Select all images except the toolbar-related side image
-    const images = document.querySelectorAll('img:not(.yi-toolbox-image):not(.side-button-image):not(.yi-toolbox-logo)');
+    const images = document.querySelectorAll('img:not(.syi-toolbox-image):not(.side-button-image):not(.syi-toolbox-logo)');
 
     // Toggle visibility based on the state
     if (this.imagesHidden) {
@@ -916,7 +929,7 @@ YourInclusion.prototype.stopReadAloud = function () {
 
 document.addEventListener('DOMContentLoaded', () => {
    
-    const buttons = document.querySelectorAll('.yi-toolbox-button');
+    const buttons = document.querySelectorAll('.syi-toolbox-button');
 
     buttons.forEach(button => {
         button.addEventListener('click', () => {
@@ -931,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Font size setting PopuP
 YourInclusion.prototype.addFontSizePopup = function () {
     const fontSizeDiv = document.querySelector('.font-size-btn'); // Font Size button
-    const toolbox = document.querySelector('.yi-toolbox-body'); // Toolbox container
+    const toolbox = document.querySelector('.syi-toolbox-body'); // Toolbox container
 
     if (!fontSizeDiv || !toolbox) {
         console.error('Font Size button or toolbox not found.');
@@ -984,7 +997,7 @@ YourInclusion.prototype.addFontSizePopup = function () {
             // Save original font sizes
             const originalFontSizes = new Map();
             const allElements = document.body.querySelectorAll(
-                '*:not(.yi-toolbox):not(.yi-toolbox *):not(.font-size-popup):not(.font-size-popup *)'
+                '*:not(.syi-toolbox):not(.syi-toolbox *):not(.font-size-popup):not(.font-size-popup *)'
             );
             allElements.forEach((element) => {
                 const computedStyle = window.getComputedStyle(element);
@@ -1209,7 +1222,7 @@ YourInclusion.prototype.toggleZoom = function () {
 
 // Apply Zoom Function
 YourInclusion.prototype.applyZoom = function (zoomLevel) {
-    const elementsToZoom = document.querySelectorAll('body > *:not(#yi-toolbox):not(#openToolboxButton):not(img)');
+    const elementsToZoom = document.querySelectorAll('body > *:not(#syi-toolbox):not(#openToolboxButton):not(img)');
 
     elementsToZoom.forEach(element => {
         element.style.transform = `scale(${zoomLevel})`;
@@ -1262,7 +1275,7 @@ YourInclusion.prototype.initNightModeFeature = function () {
 
 YourInclusion.prototype.toggleNightMode = function () {
     // Select all elements on the page except buttons, inputs, and the toolbar (including its children)
-    const allElements = document.querySelectorAll(':not(button):not(input):not(.yi-toolbox):not(.yi-toolbox *)');
+    const allElements = document.querySelectorAll(':not(button):not(input):not(.syi-toolbox):not(.syi-toolbox *)');
 
     // Toggle night mode state
     const isNightModeEnabled = document.body.classList.toggle('night-mode');
@@ -1300,7 +1313,7 @@ YourInclusion.prototype.initTextSpacingFeature = function () {
 
 // Toggle Text Spacing with Active State Management
 YourInclusion.prototype.toggleTextSpacing = function (buttonId) {
-    const elementsToAdjust = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *)');
+    const elementsToAdjust = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *)');
     const spacingStates = ['normal', '0.1em', '0.2em', '0.3em'];
 
     // Initialize the spacing index if not already set
@@ -1337,7 +1350,7 @@ YourInclusion.prototype.initLineHeightFeature = function () {
 
 // Toggle Line Height with Active State Management
 YourInclusion.prototype.toggleLineHeight = function (buttonId) {
-    const elementsToAdjust = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *)');
+    const elementsToAdjust = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *)');
     const lineHeightStates = ['normal', '1.5', '2', '2.5'];
 
     // Initialize the line height index if not already set
@@ -1691,7 +1704,7 @@ YourInclusion.prototype.setActiveButton = function (activeButtonId, isActive = n
 
 
 YourInclusion.prototype.resetButtonStates = function () {
-    const buttons = document.querySelectorAll('.yi-toolbox-button');
+    const buttons = document.querySelectorAll('.syi-toolbox-button');
     buttons.forEach((button) => {
         button.style.backgroundColor = 'rgba(255, 255, 255, 0.3)'; 
         button.dataset.active = 'false'; 
@@ -1752,7 +1765,7 @@ YourInclusion.prototype.resetToolbox = function () {
 
     // Restore only toolbox-specific font size, spacing, and transforms, excluding popups and toolbox
     document.querySelectorAll('[data-toolbox-modified]').forEach(el => {
-        if (!el.closest('.font-size-popup') && !el.closest('.yi-toolbox')) { // Exclude popups and toolbox
+        if (!el.closest('.font-size-popup') && !el.closest('.syi-toolbox')) { // Exclude popups and toolbox
             el.style.fontSize = ''; 
             el.style.letterSpacing = '';
             el.style.lineHeight = ''; 
@@ -1825,7 +1838,7 @@ if (fontSizeResetButton) {
    this.applyZoom(1);
 
    // Reset text spacing, excluding toolbox and popups
-   const elementsToAdjust = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *):not(.font-size-popup):not(.font-size-popup *)');
+   const elementsToAdjust = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *):not(.font-size-popup):not(.font-size-popup *)');
    elementsToAdjust.forEach(element => {
        element.style.letterSpacing = 'normal';
        element.style.lineHeight = 'normal';
@@ -1902,8 +1915,19 @@ YourInclusion.prototype.createContrastPopup = function () {
 
     popup.appendChild(body);
 
+     // Add a close button to the body
+     const closeButton = document.createElement('button');
+    closeButton.className = 'contrast-close-button';
+    closeButton.textContent = 'X';
+    closeButton.addEventListener('click', () => { 
+        popup.remove();       
+    });
+     body.appendChild(closeButton);
+ 
+     popup.appendChild(body);
+
     // Position the popup dynamically relative to the toolbox
-    const toolbox = document.querySelector('.yi-toolbox');
+    const toolbox = document.querySelector('.syi-toolbox');
     if (!toolbox) {
         console.error('Toolbox element not found!');
         return;
@@ -1942,18 +1966,6 @@ YourInclusion.prototype.createPopupHeader = function (titleText, closeCallback) 
     title.className = 'contrast-popup-title'; // Ensure this class is styled in your CSS
     title.textContent = titleText;
     header.appendChild(title);
-
-    // Create the close button
-    const closeButton = document.createElement('button');
-    closeButton.className = 'contrast-popup-close'; // Ensure this class is styled in your CSS
-    closeButton.textContent = '✖'; // Close icon
-    closeButton.setAttribute('aria-label', 'Close'); // Accessibility: screen reader-friendly
-    closeButton.addEventListener('click', () => {
-        if (typeof closeCallback === 'function') {
-            closeCallback(); // Call the callback to handle the close action
-        }
-    });
-    header.appendChild(closeButton);
 
     return header;
 };
@@ -2038,7 +2050,7 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
 YourInclusion.prototype.applyBackgroundColor = function (color) {
     // Select all elements except buttons, inputs, toolbox, and popups
     const elements = document.querySelectorAll(
-        '*:not(button):not(input):not(.yi-toolbox):not(.yi-toolbox *):not(.contrast-popup):not(.contrast-popup *)'
+        '*:not(button):not(input):not(.syi-toolbox):not(.syi-toolbox *):not(.contrast-popup):not(.contrast-popup *)'
     );
 
     elements.forEach((element) => {
@@ -2055,7 +2067,7 @@ YourInclusion.prototype.applyCustomTextColor = function (color) {
         // Dynamically exclude elements inside toolbox and popup
         const excludeToolbarAndPopup = (element) => {
             return (
-                !element.closest('.yi-toolbox') && // Exclude if the element or its ancestors are inside toolbox
+                !element.closest('.syi-toolbox') && // Exclude if the element or its ancestors are inside toolbox
                 !element.closest('.contrast-popup') // Exclude if the element or its ancestors are inside contrast-popup
             );
         };
@@ -2090,7 +2102,7 @@ YourInclusion.prototype.resetContrast = function () {
 
     // Reset all elements' background and text color styles
     const allElements = document.querySelectorAll(
-        '*:not(.yi-toolbox):not(.yi-toolbox *):not(.contrast-popup):not(.contrast-popup *)'
+        '*:not(.syi-toolbox):not(.syi-toolbox *):not(.contrast-popup):not(.contrast-popup *)'
     );
     allElements.forEach((element) => {
         // Reset background properties
@@ -2384,7 +2396,7 @@ if (savedState.customBackgroundColor) {
 
 // Helper Functions
 YourInclusion.prototype.getCurrentFontSize = function () {
-    const allElements = document.querySelectorAll('body *:not(.yi-toolbox):not(.yi-toolbox *)');
+    const allElements = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *)');
     let totalFontSize = 0;
     let count = 0;
 
@@ -2411,7 +2423,7 @@ YourInclusion.prototype.getContrastMode = function () {
 };
 
 YourInclusion.prototype.getActiveButtons = function () {
-    const buttons = Array.from(document.querySelectorAll('.yi-toolbox-button[data-active="true"]'));
+    const buttons = Array.from(document.querySelectorAll('.syi-toolbox-button[data-active="true"]'));
     return buttons.map(button => button.id);
 };
 
@@ -2554,10 +2566,10 @@ YourInclusion.prototype.resetPopupSettings = function (header, colorPicker) {
     header.style.backgroundColor = defaultSettings.color;
     colorPicker.querySelector('#color-picker').value = defaultSettings.color;
 
-    const toolboxHeader = document.querySelector('.yi-toolbox-header');
+    const toolboxHeader = document.querySelector('.syi-toolbox-header');
     if (toolboxHeader) toolboxHeader.style.backgroundColor = defaultSettings.color;
 
-    const toolboxIcons = document.querySelectorAll('.yi-toolbox-body svg');
+    const toolboxIcons = document.querySelectorAll('.syi-toolbox-body svg');
     toolboxIcons.forEach(svg => {
         svg.style.fill = defaultSettings.color;
         svg.style.stroke = defaultSettings.color;
@@ -2569,7 +2581,7 @@ YourInclusion.prototype.resetPopupSettings = function (header, colorPicker) {
         });
     });
 
-    const toolboxButtons = document.querySelectorAll('.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button');
+    const toolboxButtons = document.querySelectorAll('.syi-toolbox-body .syi-toolbox-btn, .syi-toolbox-button');
     toolboxButtons.forEach(button => {
         button.style.backgroundColor = defaultSettings.color;
         button.style.borderColor = defaultSettings.color;
@@ -2591,12 +2603,12 @@ YourInclusion.prototype.createPopupCloseButton = function (popup) {
 YourInclusion.prototype.updateToolboxColor = function (header, color) {
     header.style.backgroundColor = color;
 
-    const toolboxHeaders = document.querySelectorAll('.yi-toolbox-header, .settings-popup-header');
+    const toolboxHeaders = document.querySelectorAll('.syi-toolbox-header, .settings-popup-header');
     toolboxHeaders.forEach(header => {
         header.style.setProperty('background-color', color, 'important');
     });
 
-    const toolboxIcons = document.querySelectorAll('.yi-toolbox-body svg');
+    const toolboxIcons = document.querySelectorAll('.syi-toolbox-body svg');
     toolboxIcons.forEach(svg => {
         svg.style.fill = color;
         svg.style.stroke = color;
@@ -2608,7 +2620,7 @@ YourInclusion.prototype.updateToolboxColor = function (header, color) {
         });
     });
 
-    const toolboxButtons = document.querySelectorAll('.yi-toolbox-body .yi-toolbox-btn, .yi-toolbox-button');
+    const toolboxButtons = document.querySelectorAll('.syi-toolbox-body .syi-toolbox-btn, .syi-toolbox-button');
     toolboxButtons.forEach(button => {
         button.style.backgroundColor = color;
         button.style.borderColor = color;
@@ -2619,7 +2631,7 @@ YourInclusion.prototype.updateToolboxColor = function (header, color) {
 
 // Function to determine toolbox position
 YourInclusion.prototype.determineToolboxPosition = function (popup) {
-    const toolbox = document.querySelector('.yi-toolbox');
+    const toolbox = document.querySelector('.syi-toolbox');
     const toolboxRect = toolbox.getBoundingClientRect();
     const isToolboxOnLeft = toolboxRect.left < window.innerWidth / 2;
 
@@ -2637,7 +2649,7 @@ YourInclusion.prototype.closeAllPopups = function (excludeSelector) {
             const popup = document.querySelector(selector);
             if (popup) {
                 // Prevent affecting the toolbox explicitly
-                if (!popup.matches('.yi-toolbox-body') && !popup.closest('.yi-toolbox-body')) {
+                if (!popup.matches('.syi-toolbox-body') && !popup.closest('.syi-toolbox-body')) {
                     if (selector === '.font-size-popup') {
                         // Special handling for font-size popup
                         const closeButton = popup.querySelector('#close-font-popup');
