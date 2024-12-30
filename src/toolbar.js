@@ -28,6 +28,8 @@ function YourInclusion(init) {
     this.initAccessibleFontToggle();
     this.initCursorSizeAdjustment();
     this.initSaveFeature(); 
+    this.initReadAloud();
+    this.initKeyboardNavigation();
     // this.addDevelopmentAlerts();
 
 }
@@ -2224,6 +2226,608 @@ YourInclusion.prototype.toggleCursorSize = function (buttonId) {
 
     console.log(`Cursor size set to: ${selectedCursor.size}`);
 };
+
+// Keyboard Navigation
+
+// Keyboard Navigation Initialization
+YourInclusion.prototype.initKeyboardNavigation = function () {
+    const keyboardNavButton = document.getElementById('keyboard-navigation-btn');
+    if (keyboardNavButton) {
+        keyboardNavButton.addEventListener('click', () => {
+            this.keyboardNavigationActive = !this.keyboardNavigationActive;
+            this.setActiveButton('keyboard-navigation-btn', this.keyboardNavigationActive);
+
+            if (this.keyboardNavigationActive) {
+                this.enableKeyboardNavigation();
+                this.showKeyboardNavigationPopup();
+            } else {
+                this.disableKeyboardNavigation();
+                this.hideKeyboardNavigationPopup();
+            }
+        });
+    }
+};
+
+
+// Enable Keyboard Navigation
+YourInclusion.prototype.enableKeyboardNavigation = function () {
+    console.log('Keyboard Navigation Enabled');
+    document.addEventListener('keydown', this.handleKeyboardNavigation.bind(this));
+    document.body.classList.add('keyboard-navigation-active');
+};
+
+// Disable Keyboard Navigation
+YourInclusion.prototype.disableKeyboardNavigation = function () {
+    console.log('Keyboard Navigation Disabled');
+    document.removeEventListener('keydown', this.handleKeyboardNavigation.bind(this));
+    document.body.classList.remove('keyboard-navigation-active');
+    this.clearSelectionHighlight();
+};
+
+// Handle Keyboard Navigation
+YourInclusion.prototype.handleKeyboardNavigation = function (event) {
+    const focusableSelectors = 'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
+    const focusableElements = Array.from(document.querySelectorAll(focusableSelectors)).filter(
+        (el) => !el.disabled && el.offsetParent !== null
+    );
+
+    let currentIndex = focusableElements.indexOf(document.activeElement);
+
+    const keyFunctionMap = {
+        ArrowDown: () => {
+            event.preventDefault();
+            currentIndex = (currentIndex + 1) % focusableElements.length;
+            focusableElements[currentIndex].focus();
+            this.highlightSelection(focusableElements[currentIndex]);
+        },
+        ArrowUp: () => {
+            event.preventDefault();
+            currentIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+            focusableElements[currentIndex].focus();
+            this.highlightSelection(focusableElements[currentIndex]);
+        },
+        Enter: () => {
+            if (document.activeElement) {
+                document.activeElement.click();
+            }
+        },
+        Escape: () => {
+            this.disableKeyboardNavigation();
+            this.hideKeyboardNavigationPopup();
+            this.setActiveButton('keyboard-navigation-btn', false);
+        },
+        F2: () => this.showKeyboardNavigationPopup(),
+        F3: () => this.toggleSpeechOutput(),
+        KeyW: () => document.getElementById('blue-filter-btn')?.click(),
+        KeyI: () => document.getElementById('remove-images-btn')?.click(),
+        KeyA: () => document.getElementById('remove-audio-btn')?.click(),
+        KeyR: () => document.getElementById('read-aloud-btn')?.click(),
+        KeyP: () => document.getElementById('increase-text-btn')?.click(),
+        KeyM: () => document.getElementById('decrease-text-btn')?.click(),
+        KeyH: () => this.navigateToNext('heading'),
+        KeyS: () => this.navigateToStart(),
+        KeyZ: () => document.getElementById('zoom-toggle-btn')?.click(),
+        KeyN: () => document.getElementById('night-mode-btn')?.click(),
+        KeyT: () => document.getElementById('text-spacing-btn')?.click(),
+        KeyL: () => this.navigateToNext('list'),
+        KeyC: () => document.getElementById('cursor-size-btn')?.click(),
+        KeyG: () => this.navigateToNext('image'),
+        KeyK: () => this.navigateToNext('link'),
+        KeyD: () => this.navigateToNext('jump-tag'),
+        KeyF: () => this.navigateToNext('form-field'),
+        KeyE: () => this.navigateToNext('input-field'),
+        KeyB: () => this.navigateToNext('button'),
+    };
+
+    if (keyFunctionMap[event.code]) {
+        keyFunctionMap[event.code]();
+    }
+};
+
+
+
+// Focus on an Element
+YourInclusion.prototype.focusElement = function (element) {
+    if (element) {
+        element.focus();
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+};
+
+// Scroll the Page
+YourInclusion.prototype.scrollPage = function (direction) {
+    const scrollAmount = 70; // Amount to scroll per action
+    const scrollMap = {
+        up: () => window.scrollBy({ top: -scrollAmount, behavior: 'smooth' }),
+        down: () => window.scrollBy({ top: scrollAmount, behavior: 'smooth' }),
+        left: () => window.scrollBy({ left: -scrollAmount, behavior: 'smooth' }),
+        right: () => window.scrollBy({ left: scrollAmount, behavior: 'smooth' }),
+    };
+
+    if (scrollMap[direction]) {
+        scrollMap[direction]();
+    }
+};
+
+// Show Keyboard Shortcuts Popup
+YourInclusion.prototype.showKeyboardNavigationPopup = function () {
+    const existingPopup = document.getElementById('keyboard-navigation-popup');
+    if (existingPopup) return;
+
+    const popup = document.createElement('div');
+    popup.id = 'keyboard-navigation-popup';
+    popup.className = 'keyboard-popup';
+
+    const header = document.createElement('div');
+    header.className = 'popup-header';
+    header.innerHTML = '<h3>Instructions for the use of keyboard shortcuts</h3><button class="close-popup-btn">✖</button>';
+    header.querySelector('.close-popup-btn').addEventListener('click', () => popup.remove());
+    popup.appendChild(header);
+
+    const shortcuts = [
+        { key: 'Esc', action: 'Exit web page navigation' },
+        { key: 'F2', action: 'Show this guide' },
+        { key: 'F3', action: 'Toggle speech output' },
+        { key: 'Tab', action: 'Select next item' },
+        { key: 'Shift + Tab', action: 'Select previous item' },
+        { key: 'S', action: 'Reset focus to start' },
+        { key: 'H', action: 'Next heading' },
+        { key: 'G', action: 'Next image/graphic' },
+        { key: 'K', action: 'Next link' },
+        { key: 'D', action: 'Next jump tag' },
+        { key: 'L', action: 'Next list' },
+        { key: 'F', action: 'Next form field' },
+        { key: 'E', action: 'Next input field' },
+        { key: 'W', action: 'Blue Filter' },
+        { key: 'I', action: 'Remove Images' },
+        { key: 'A', action: 'Remove Audio' },
+        { key: 'R', action: 'Read Aloud' },
+        { key: 'P', action: 'Increase Text Font Size' },
+        { key: 'M', action: 'Decrease Text Font Size' },
+        { key: 'Z', action: 'Zoom Toggle' },
+        { key: 'N', action: 'Night Mode' },
+        { key: 'T', action: 'Text Spacing' },
+        { key: 'C', action: 'Cursor Size ' },
+
+    ];
+
+    const body = document.createElement('div');
+    body.className = 'popup-body';
+
+    shortcuts.forEach(({ key, action }) => {
+        const item = document.createElement('div');
+        item.className = 'shortcut-item';
+        item.innerHTML = `<span class="shortcut-key">${key}</span>: ${action}`;
+        body.appendChild(item);
+    });
+
+    popup.appendChild(body);
+    document.body.appendChild(popup);
+};
+
+// Hide Keyboard Shortcuts Popup
+YourInclusion.prototype.hideKeyboardNavigationPopup = function () {
+    const popup = document.getElementById('keyboard-navigation-popup');
+    if (popup) {
+        popup.remove();
+    }
+};
+
+// Highlight Selection
+YourInclusion.prototype.highlightSelection = function (element) {
+    this.clearSelectionHighlight();
+    if (element) {
+        element.classList.add('keyboard-focus');
+    }
+};
+YourInclusion.prototype.clearSelectionHighlight = function () {
+    document.querySelectorAll('.keyboard-focus').forEach((el) => el.classList.remove('keyboard-focus'));
+};
+
+
+// Navigate to Specific Elements
+YourInclusion.prototype.navigateToNext = function (type) {
+    const selectors = {
+        heading: 'h1, h2, h3, h4, h5, h6',
+        list: 'ul, ol',
+        'list-entry': 'li',
+        'form-field': 'form',
+        'input-field': 'input, textarea, select',
+        button: 'button',
+        link: 'a',
+        image: 'img',
+        'jump-tag': '[id]',
+    };
+    const elements = document.querySelectorAll(selectors[type]);
+    const current = document.activeElement;
+    const currentIndex = Array.from(elements).indexOf(current);
+    const nextIndex = (currentIndex + 1) % elements.length;
+
+    if (elements[nextIndex]) {
+        elements[nextIndex].focus();
+        this.highlightSelection(elements[nextIndex]);
+    }
+};
+
+// Navigate to Start
+YourInclusion.prototype.navigateToStart = function () {
+    const firstFocusable = document.querySelector('a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) {
+        firstFocusable.focus();
+        this.highlightSelection(firstFocusable);
+    }
+};
+
+// Read Aloud
+// Initialize Read Aloud Feature
+YourInclusion.prototype.initReadAloud = function () {
+    const readAloudBtn = document.getElementById('read-aloud-btn');
+    if (readAloudBtn) {
+        readAloudBtn.addEventListener('click', () => {
+            this.toggleReadAloud('read-aloud-btn');
+        });
+    }
+
+    // Check if Read Aloud was previously active (e.g., stored state)
+    const isReadAloudActive = localStorage.getItem('readAloudActive') === 'true';
+    if (isReadAloudActive) {
+        this.enableDefaultClickToRead();
+        this.createReadAloudToolbar(); 
+        this.setActiveButton('read-aloud-btn', true);
+    }
+};
+
+YourInclusion.prototype.toggleReadAloud = function (buttonId) {
+    const toolbar = document.getElementById('read-aloud-toolbar');
+    const isActive = this.isReadAloudActive || false; 
+
+    if (isActive) {
+        // Deactivate Read Aloud
+        this.disableDefaultClickToRead();
+        this.stopReadAloud();
+        if (toolbar) toolbar.classList.add('hidden'); 
+        this.setActiveButton(buttonId, false); 
+        this.isReadAloudActive = false; 
+        localStorage.setItem('readAloudActive', false);
+        console.log('Read Aloud deactivated.');
+    } else {
+        // Activate Read Aloud
+        if (!toolbar) {
+            this.createReadAloudToolbar();
+        } else {
+            toolbar.classList.remove('hidden'); 
+        }
+        this.enableDefaultClickToRead();
+        this.setActiveButton(buttonId, true); 
+        this.isReadAloudActive = true; 
+        localStorage.setItem('readAloudActive', true);
+        console.log('Read Aloud activated.');
+    }
+};
+
+
+// Create the Read Aloud Toolbar
+YourInclusion.prototype.createReadAloudToolbar = function () {
+    const toolbar = this.createDiv('read-aloud-toolbar', 'read-aloud-toolbar');
+
+    // Toolbar Header
+    const header = this.createDiv('toolbar-header');
+    const title = this.createHeading(2, 'Read Aloud Settings', 'toolbar-title');
+    const closeButton = this.createButton('close-toolbar', '✖');
+    closeButton.addEventListener('click', () => {
+        toolbar.remove();
+        this.disableDefaultClickToRead();
+    });
+    header.appendChild(title);
+    header.appendChild(closeButton);
+    toolbar.appendChild(header);
+
+    // Toolbar Controls
+    const controls = this.createDiv('toolbar-controls');
+
+    // Cursor Read Aloud Button
+    const cursorButton = this.createButton('cursor-read-btn', 'Cursor Read Aloud');
+    cursorButton.innerHTML = `<i class="fas fa-mouse-pointer"></i> Cursor Read Aloud`;
+    cursorButton.addEventListener('click', this.enableCursorReadAloud.bind(this));
+
+    // Previous Line Button
+     const previousButton = this.createButton('previous-line-btn', 'Previous Line');
+     previousButton.innerHTML = `<i class="fas fa-arrow-left"></i> `;
+     previousButton.addEventListener('click', this.readPreviousLine.bind(this));
+
+    // Play Button
+    const playButton = this.createButton('play-read-btn', '▶');
+    playButton.innerHTML = `<i class="fas fa-play"></i>`;
+    playButton.addEventListener('click', this.playReadAloud.bind(this));
+
+    // Stop Button
+    const stopButton = this.createButton('stop-read-btn', '⏹');
+    stopButton.innerHTML = `<i class="fas fa-stop"></i>`;
+    stopButton.addEventListener('click', this.stopReadAloud.bind(this));
+ 
+// Next Line Button
+const nextButton = this.createButton('next-line-btn', 'Next Line');
+nextButton.innerHTML = `<i class="fas fa-arrow-right"></i> `;
+nextButton.addEventListener('click', this.readNextLine.bind(this));
+
+// Create Volume and Speed Container
+const slidersContainer = document.createElement('div');
+slidersContainer.className = 'sliders-container';
+
+// Create Volume Slider
+const volumeWrapper = document.createElement('div');
+volumeWrapper.className = 'slider-wrapper';
+
+const volumeLabel = document.createElement('label');
+volumeLabel.setAttribute('for', 'volume-slider');
+volumeLabel.textContent = 'Volume:';
+volumeWrapper.appendChild(volumeLabel);
+
+const volumeSlider = document.createElement('input');
+volumeSlider.type = 'range';
+volumeSlider.id = 'volume-slider';
+volumeSlider.min = '0';
+volumeSlider.max = '1';
+volumeSlider.step = '0.1';
+volumeSlider.value = this.currentVolume || 1;
+
+volumeSlider.addEventListener('input', (e) => {
+this.currentVolume = parseFloat(e.target.value);
+console.log(`Volume updated to: ${this.currentVolume}`);
+});
+volumeWrapper.appendChild(volumeSlider);
+
+// Create Speed Slider
+const speedWrapper = document.createElement('div');
+speedWrapper.className = 'slider-wrapper';
+
+const speedLabel = document.createElement('label');
+speedLabel.setAttribute('for', 'speed-slider');
+speedLabel.textContent = 'Speed:';
+speedWrapper.appendChild(speedLabel);
+
+const speedSlider = document.createElement('input');
+speedSlider.type = 'range';
+speedSlider.id = 'speed-slider';
+speedSlider.min = '0.5';
+speedSlider.max = '2';
+speedSlider.step = '0.1';
+speedSlider.value = this.currentSpeed || 1;
+
+speedSlider.addEventListener('input', (e) => {
+this.currentSpeed = parseFloat(e.target.value);
+console.log(`Speed updated to: ${this.currentSpeed}`);
+});
+speedWrapper.appendChild(speedSlider);
+
+// Add sliders to sliders container
+slidersContainer.appendChild(volumeWrapper);
+slidersContainer.appendChild(speedWrapper);
+
+speedWrapper.appendChild(speedSlider);
+    // Append Buttons and Controls
+    controls.appendChild(cursorButton);
+    controls.appendChild(previousButton);
+    controls.appendChild(playButton);
+    controls.appendChild(stopButton);
+    controls.appendChild(nextButton);
+    controls.appendChild(slidersContainer);
+    toolbar.appendChild(controls);
+
+    // Add Toolbar to Document Body
+    document.body.appendChild(toolbar);
+};
+
+// Helper Function to Highlight Text
+YourInclusion.prototype.highlightText = function (element, start, length) {
+    const text = element.dataset.originalText || element.innerText || '';
+    const before = text.slice(0, start);
+    const highlight = text.slice(start, start + length);
+    const after = text.slice(start + length);
+
+    element.innerHTML = `${before}<span style="background-color: yellow;">${highlight}</span>${after}`;
+};
+
+
+// Enable Default Click-to-Read
+YourInclusion.prototype.enableDefaultClickToRead = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
+    elements.forEach(element => {
+        element.addEventListener('click', this.readElementContent.bind(this));
+    });
+};
+
+// Disable Default Click-to-Read
+YourInclusion.prototype.disableDefaultClickToRead = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
+    elements.forEach(element => {
+        element.removeEventListener('click', this.readElementContent.bind(this));
+    });
+};
+
+// Read Element Content with Highlighting
+YourInclusion.prototype.readElementContent = function (event) {
+    const element = event.target;
+    const text = element.innerText || element.value || '';
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.volume = this.currentVolume || 1;
+    msg.rate = this.currentSpeed || 1;
+
+    const words = text.split(' ');
+    let wordIndex = 0;
+
+    msg.onboundary = (boundaryEvent) => {
+        if (boundaryEvent.name === 'word') {
+            const wordStart = boundaryEvent.charIndex;
+            const wordLength = words[wordIndex]?.length || 0;
+            this.highlightText(element, wordStart, wordLength);
+            wordIndex++;
+        }
+    };
+
+    msg.onend = () => {
+        this.clearHighlight(element); 
+    };
+
+    speechSynthesis.speak(msg);
+};
+
+YourInclusion.prototype.clearHighlight = function (element) {
+    if (element.dataset.originalText) {
+        element.innerHTML = element.dataset.originalText;
+    }
+};
+
+
+
+// Play Entire Page Read Aloud with Highlighting
+YourInclusion.prototype.playReadAloud = function () {
+    if (!this.isReadAloudActive) {
+        console.log('Read Aloud is not active. Please enable it first.');
+        return;
+    }
+
+    const paragraphs = document.querySelectorAll('p');
+
+    if (!paragraphs.length) {
+        console.log('No paragraphs found to read.');
+        return;
+    }
+
+    // Initialize paragraph index and start reading
+    this.currentParagraphIndex = 0;
+    this.readCurrentLine();
+};
+
+
+
+
+// Enable Cursor Read Aloud
+YourInclusion.prototype.enableCursorReadAloud = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
+    elements.forEach(element => {
+        let timeoutId;
+        element.addEventListener('mouseenter', () => {
+            timeoutId = setTimeout(() => {
+                const msg = new SpeechSynthesisUtterance(element.innerText || element.value || '');
+                msg.volume = this.currentVolume || 1;
+                msg.rate = this.currentSpeed || 1;
+                this.highlightText(element, 0, element.innerText.length); 
+                speechSynthesis.speak(msg);
+            }, 1000);
+        });
+        element.addEventListener('mouseleave', () => {
+            clearTimeout(timeoutId);
+            speechSynthesis.cancel();
+        });
+    });
+};
+
+YourInclusion.prototype.readPreviousLine = function () {
+    if (this.currentParagraphIndex > 0) {
+        this.currentParagraphIndex--;
+        this.readCurrentLine();
+    } else {
+        console.log('Already at the first paragraph.');
+    }
+};
+
+
+
+YourInclusion.prototype.readNextLine = function () {
+    const paragraphs = document.querySelectorAll('p');
+
+    if (this.currentParagraphIndex === undefined) this.currentParagraphIndex = 0;
+
+    if (this.currentParagraphIndex < paragraphs.length - 1) {
+        this.currentParagraphIndex++;
+        this.readCurrentLine();
+    } else {
+        console.log('No more paragraphs to read.');
+    }
+};
+
+
+
+YourInclusion.prototype.speakText = function (element) {
+    const text = element.innerText || '';
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.volume = this.currentVolume || 1;
+    msg.rate = this.currentSpeed || 1;
+
+    // Save original text for restoration
+    if (!element.dataset.originalText) {
+        element.dataset.originalText = text;
+    }
+
+    // Highlight words as they are spoken
+    const words = text.split(' ');
+    let wordIndex = 0;
+
+    msg.onboundary = (event) => {
+        if (event.name === 'word') {
+            const wordStart = event.charIndex;
+            const wordLength = words[wordIndex]?.length || 0;
+            this.highlightText(element, wordStart, wordLength);
+            wordIndex++;
+        }
+    };
+
+    msg.onend = () => {
+        this.clearHighlight(element); 
+    };
+
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(msg);
+};
+
+
+
+YourInclusion.prototype.readCurrentLine = function () {
+    const paragraphs = document.querySelectorAll('h1,h2,h3,h4,h5,h6,p');
+
+    if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= paragraphs.length) {
+        console.log('No more paragraphs to read.');
+        return;
+    }
+
+    const currentParagraph = paragraphs[this.currentParagraphIndex];
+    this.speakText(currentParagraph);
+};
+
+
+
+// Stop Read Aloud
+YourInclusion.prototype.stopReadAloud = function () {
+    speechSynthesis.cancel(); 
+    this.currentParagraphIndex = undefined; 
+
+    // Clear highlights for all paragraphs
+    document.querySelectorAll('[data-original-text]').forEach((element) => {
+        this.clearHighlight(element);
+    });
+
+    console.log('Read Aloud stopped, and all highlights cleared.');
+};
+
+//Button Click Color change
+
+document.addEventListener('DOMContentLoaded', () => {
+   
+    const buttons = document.querySelectorAll('.syi-toolbox-button');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            
+            buttons.forEach(btn => (btn.style.backgroundColor = "rgba(255, 255, 255, 0.3)"));
+
+            button.style.backgroundColor = "rgba(52, 88, 185, 1)";
+        });
+    });
+});
+
+
 
 // Initialize on Page Load
 document.addEventListener('DOMContentLoaded', () => {
