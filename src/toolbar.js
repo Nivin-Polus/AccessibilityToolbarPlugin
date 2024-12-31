@@ -71,13 +71,45 @@ YourInclusion.prototype.createButton = function (id, text, icon = '') {
         button.appendChild(iconWrapper); 
     }
 
+    // Add the checkmark SVG from your local path
+    const checkmark = this.createCheckmarkFromLocal('./assests/check.svg'); 
+    button.appendChild(checkmark);
+
     if (text) {
         const textWrapper = this.createTextWrapper(text);
         button.appendChild(textWrapper); 
     }
-
+    
     return button;
 };
+
+// Function to create a checkmark from a local SVG file
+YourInclusion.prototype.createCheckmarkFromLocal = function (svgPath) {
+    // Create a wrapper for the checkmark inside a circle
+    const wrapper = document.createElement('div');
+    wrapper.className = 'checkmark-wrapper';
+
+    // Style the wrapper to make it a circle
+    wrapper.style.position = 'absolute';
+    wrapper.style.top = '5px';
+    wrapper.style.right = '5px';
+    wrapper.style.width = '20px';
+    wrapper.style.height = '20px'; 
+    wrapper.style.borderRadius = '50%';
+    wrapper.style.backgroundColor = '#EDEDED'; 
+    wrapper.style.display = 'none'; 
+    wrapper.style.alignItems = 'center';
+    wrapper.style.justifyContent = 'center';
+    
+    
+
+    // Fetch and append the SVG inside the circle
+    this.fetchAndAppendSVG(svgPath, wrapper);
+
+    return wrapper;
+};
+
+
 
 
 YourInclusion.prototype.createBaseButton = function (id) {
@@ -385,16 +417,88 @@ YourInclusion.prototype.initializeAccessibilityToolbox = function () {
  * Create Side Button
  */
 YourInclusion.prototype.createSideButton = function () {
-
     const existingSideButton = document.getElementById('openToolboxButton'); 
 
+    // Remove existing side button if it exists
     if (existingSideButton) {
         existingSideButton.remove(); 
     }
+
+    // Create a new side button element
     const sideButton = this.createSideButtonElement();
+
+  // Add a custom checkmark for the side button
+  const checkmark = this.createSideButtonCheckmark('./assests/tick-white.svg');
+  sideButton.appendChild(checkmark);
+
+    // Make the side button draggable
     this.makeSideButtonDraggable(sideButton);
+
+    // Append the new side button to the body
     document.body.appendChild(sideButton);
 };
+
+YourInclusion.prototype.createSideButtonCheckmark = function (svgPath) {
+    // Create a wrapper specifically for the side button's checkmark
+    const wrapper = document.createElement('div');
+    wrapper.className = 'side-button-checkmark';
+
+    // Style the wrapper for the side button's checkmark
+    wrapper.style.position = 'absolute';
+    wrapper.style.top = '-4px';
+    wrapper.style.right = '-3px'; 
+    wrapper.style.width = '24px'; 
+    wrapper.style.height = '24px';
+    wrapper.style.borderRadius = '50%';
+    wrapper.style.backgroundColor = 'rgb(0, 190, 86)';
+    wrapper.style.display = 'flex'; 
+    wrapper.style.visibility ="hidden"
+    wrapper.style.alignItems = 'center';
+    wrapper.style.justifyContent = 'center';
+    wrapper.style.boxShadow = "-1px 4px 7px 0px rgb(0 0 0 / 35%)";
+
+    // Fetch and append the SVG for the side button's checkmark
+
+    this.fetchAndAppendSVG(svgPath, wrapper);
+    return wrapper;
+};
+
+/***
+ * Checkmart for Sidebutton
+ */
+
+YourInclusion.prototype.updateSideButtonState = function () {
+    const sideButton = document.getElementById('openToolboxButton');
+
+    if (!sideButton) {
+        console.error('Side button not found.');
+        return;
+    }
+
+    // Check if any button is active
+    const isActive = Array.from(document.querySelectorAll('.syi-toolbox-button'))
+        .some(button => button.dataset.active === 'true');
+
+    // Get the side button's checkmark
+    const checkmark = sideButton.querySelector('.side-button-checkmark');
+
+    if (isActive) {
+        // If any button is active, show the tick mark and add a green border
+        if (checkmark) {
+            checkmark.style.visibility = 'visible'; // Show the tick mark
+        }
+        sideButton.style.border = '2px solid #28a745'; // Add green border
+    } else {
+        // If no buttons are active, hide the tick mark and remove the border
+        if (checkmark) {
+            checkmark.style.visibility = 'hidden'; // Hide the tick mark
+        }
+        sideButton.style.border = 'none'; // Remove the border
+    }
+};
+
+
+
 
 YourInclusion.prototype.createSideButtonElement = function () {
     const sideButton = this.createDiv('side-button', 'openToolboxButton');
@@ -789,18 +893,35 @@ YourInclusion.prototype.setActiveButton = function (activeButtonId, isActive = n
     const button = document.getElementById(activeButtonId);
 
     if (button) {
-        
+        // Determine the new state
         const newState = isActive !== null ? isActive : button.dataset.active !== 'true';
 
         if (newState) {
-            button.classList.add('active-button'); 
-            button.dataset.active = 'true'; 
+            button.classList.add('active-button');
+            button.dataset.active = 'true';
+
+            // Show the checkmark for the button
+            const checkmark = button.querySelector('.checkmark-wrapper');
+            if (checkmark) {
+                checkmark.style.display = 'block';
+            }
         } else {
-            button.classList.remove('active-button'); 
-            button.dataset.active = 'false'; 
+            button.classList.remove('active-button');
+            button.dataset.active = 'false';
+
+            // Hide the checkmark for the button
+            const checkmark = button.querySelector('.checkmark-wrapper');
+            if (checkmark) {
+                checkmark.style.display = 'none';
+            }
         }
     }
+
+    // Update the state of the side button
+    this.updateSideButtonState();
 };
+
+
 /***
  * Reset Active button
  */
@@ -950,7 +1071,7 @@ YourInclusion.prototype.initContrastFeature = function () {
     if (contrastButton) {
         contrastButton.addEventListener('click', () => {
             this.createContrastPopup();
-            this.setActiveButton('contrast-btn');
+            this.checkContrastFeaturesState();
         });
     }
 };
@@ -1050,7 +1171,7 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     const customColorsSection = document.createElement('div');
     customColorsSection.className = 'syi-contrast-custom-colors';
 
-    const predefinedColors = ['#FFFFFF', '#000000', '#F0E68C', '#ADD8E6', '#FFB6C1'];
+    const predefinedColors = ['#F0F0F0', '#000000', '#F0E68C', '#ADD8E6', '#FFB6C1'];
 
     const bgLabel = document.createElement('label');
     bgLabel.textContent = language[CONFIG.LANGUAGE]['BACKGROUND'];
@@ -1073,6 +1194,9 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     const bgColorPicker = document.createElement('input');
     bgColorPicker.type = 'color';
     bgColorPicker.id = 'bg-color-picker';
+    bgColorPicker.style.padding = "0";
+    bgColorPicker.style.width = "revert";
+    
 
     bgColorPicker.addEventListener('input', () => {
         const selectedColor = bgColorPicker.value;
@@ -1100,6 +1224,8 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     const textColorPicker = document.createElement('input');
     textColorPicker.type = 'color';
     textColorPicker.id = 'text-color-picker';
+    textColorPicker.style.padding = "0";
+    textColorPicker.style.width = "revert";
 
     textColorPicker.addEventListener('input', () => this.applyCustomTextColor(textColorPicker.value));
     textColorContainer.appendChild(textColorPicker);
@@ -1236,6 +1362,52 @@ YourInclusion.prototype.setContrastMode = function (savedState) {
     }
 };
 
+YourInclusion.prototype.checkContrastFeaturesState = function () {
+    let isActive = false;
+
+    // Check if any contrast mode is active
+    const contrastModes = ['bright-contrast', 'reverse-contrast', 'grayscale'];
+    contrastModes.forEach((mode) => {
+        if (document.body.classList.contains(mode)) {
+            isActive = true;
+        }
+    });
+
+    // Dynamically check if custom background color is applied
+    const bodyColors = this.getDynamicColors(document.body);
+    const defaultBgColors = ['rgba(0, 0, 0, 0)', 'transparent', 'rgb(255, 255, 255)'];
+    if (!defaultBgColors.includes(bodyColors.backgroundColor)) {
+        isActive = true;
+    }
+
+    // Dynamically check if custom text color is applied
+    const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, li, a, div');
+    for (const element of textElements) {
+        const { textColor } = this.getDynamicColors(element);
+        const defaultTextColors = ['rgb(0, 0, 0)', 'rgb(255, 255, 255)'];
+        if (!defaultTextColors.includes(textColor)) {
+            isActive = true;
+            break;
+        }
+    }
+
+    // Dynamically update the active state of the contrast button
+    this.setActiveButton('contrast-btn', isActive);
+};
+
+YourInclusion.prototype.getDynamicColors = function (element) {
+    if (!element) return { backgroundColor: null, textColor: null };
+
+    const computedStyle = window.getComputedStyle(element);
+
+    return {
+        backgroundColor: computedStyle.backgroundColor,
+        textColor: computedStyle.color,
+    };
+};
+
+
+
 
 // Save Function
 
@@ -1253,10 +1425,12 @@ YourInclusion.prototype.initSaveFeature = function () {
 };
 YourInclusion.prototype.saveToolbarState = function () {
     const state = {
-        blueFilterActive: document.querySelector('.blue-overlay')?.classList.contains('active') || false,
+        blueFilterActive: document.querySelector('.syi-blue-overlay')?.classList.contains('active') || false,
         imagesHidden: this.imagesHidden || false,
         isMuted: this.isMuted || false,
         currentFontSize: this.getCurrentFontSize(),
+        originalFontSize: this.originalFontSize || this.getCurrentFontSize(),
+        fontSizeChangeCount: this.fontSizeChangeCount || 0,
         nightModeActive: document.body.classList.contains('night-mode') || false,
         zoomLevel: parseFloat(localStorage.getItem('zoomLevel')) || 1,
         textSpacingIndex: this.currentTextSpacingIndex || 0,
@@ -1272,16 +1446,12 @@ YourInclusion.prototype.saveToolbarState = function () {
         highlightedHeaders: document.querySelector('.highlight-headers') !== null,
         selectedHeaderColor: localStorage.getItem('popupHeaderColor') || null,
         popupLanguage: CONFIG.LANGUAGE || 'en',
-        popupColor: document.getElementById('color-picker')?.value || '#007bff'
+        popupColor: document.getElementById('color-picker')?.value || '#393636'
     };
 
     localStorage.setItem('toolbarState', JSON.stringify(state));
     console.log('Toolbar state saved:', state);
 };
-
-
-
-
 
 // Load Toolbar State
 YourInclusion.prototype.loadToolbarState = function () {
@@ -1388,17 +1558,24 @@ YourInclusion.prototype.loadToolbarState = function () {
     }
     
        // Restore Font Size
-    //    if (savedState.currentFontSize) {
-    //     const currentFontSize = parseFloat(savedState.currentFontSize);
-    //     const calculatedFontSize = this.getCurrentFontSize();
-    //     const adjustment = currentFontSize - calculatedFontSize;
+        // Restore Original Font Size
+    this.originalFontSize = parseFloat(savedState.originalFontSize) || this.getCurrentFontSize();
+    this.fontSizeChangeCount = parseInt(savedState.fontSizeChangeCount, 10) || 0;
 
-    //     if (adjustment > 0) {
-    //         for (let i = 0; i < adjustment; i++) this.adjustFontSize('increase');
-    //     } else if (adjustment < 0) {
-    //         for (let i = 0; i < -adjustment; i++) this.adjustFontSize('decrease');
-    //     }
-    // }
+    // Calculate the current font size based on the original and change count
+    const currentFontSize = this.originalFontSize + this.fontSizeChangeCount;
+
+    // Apply the current font size
+    document.body.style.fontSize = `${currentFontSize}px`;
+    console.log(`Font size restored to: ${currentFontSize}px (Original: ${this.originalFontSize}px, Change Count: ${this.fontSizeChangeCount})`);
+
+    // Update the font size display
+    const fontSizeDisplay = document.querySelector('#font-size-display');
+    if (fontSizeDisplay) {
+        fontSizeDisplay.textContent = this.fontSizeChangeCount > 0
+            ? `+${this.fontSizeChangeCount}`
+            : `${this.fontSizeChangeCount}`;
+    }
 
 
     // Restore Animations
@@ -1720,18 +1897,43 @@ YourInclusion.prototype.createLanguageSelector = function () {
 YourInclusion.prototype.createColorPicker = function (header) {
     const colorPicker = this.createDiv('popup-section');
 
+    // Create label for color picker
     const colorLabel = this.createEle('label', { class: 'color-picker-label' }, language[CONFIG.LANGUAGE]['PICK_COLOR']);
-    const colorInput = this.createEle('input', { type: 'color', id: 'color-picker', value: '#007bff' });
+    
+    // Create container for color picker and color code display
+    const colorPickerContainer = this.createDiv('color-picker-container');
 
-    colorInput.addEventListener('input', (event) => {
-        this.updateToolboxColor(header, event.target.value);
-        this.saveToolbarState();
+    // Create color input (color picker)
+    const colorInput = this.createEle('input', { type: 'color', id: 'color-picker', value: '#393636' });
+
+    // Create text input to display the hex code
+    const colorCodeInput = this.createEle('input', { 
+        type: 'text', 
+        id: 'color-code', 
+        value: '#393636', 
+        readonly: true, 
+        class: 'color-code-input' 
     });
 
+    // Add event listener to update both the toolbox and the hex code display
+    colorInput.addEventListener('input', (event) => {
+        const selectedColor = event.target.value;
+        this.updateToolboxColor(header, selectedColor); // Update the toolbox color
+        colorCodeInput.value = selectedColor; // Update the hex code display
+        this.saveToolbarState(); // Save the state
+    });
+
+    // Append color input and color code input to the container
+    colorPickerContainer.appendChild(colorInput);
+    colorPickerContainer.appendChild(colorCodeInput);
+
+    // Append the label and container to the colorPicker section
     colorPicker.appendChild(colorLabel);
-    colorPicker.appendChild(colorInput);
+    colorPicker.appendChild(colorPickerContainer);
+
     return colorPicker;
 };
+
 
 // Function to create the reset button
 YourInclusion.prototype.createPopupResetButton = function (header, colorPicker) {
@@ -2226,6 +2428,378 @@ YourInclusion.prototype.toggleCursorSize = function (buttonId) {
 
     console.log(`Cursor size set to: ${selectedCursor.size}`);
 };
+// Read Aloud
+// Initialize Read Aloud Feature
+YourInclusion.prototype.initReadAloud = function () {
+    const readAloudBtn = document.getElementById('read-aloud-btn');
+    if (readAloudBtn) {
+        readAloudBtn.addEventListener('click', () => {
+            this.toggleReadAloud('read-aloud-btn');
+        });
+    }
+
+    // Check if Read Aloud was previously active (e.g., stored state)
+    const isReadAloudActive = localStorage.getItem('readAloudActive') === 'true';
+    if (isReadAloudActive) {
+        this.enableDefaultClickToRead();
+        this.createReadAloudToolbar(); 
+        this.setActiveButton('read-aloud-btn', true);
+    }
+};
+
+YourInclusion.prototype.toggleReadAloud = function (buttonId) {
+    const toolbar = document.getElementById('read-aloud-toolbar');
+    const isActive = this.isReadAloudActive || false; 
+
+    if (isActive) {
+        // Deactivate Read Aloud
+        this.disableDefaultClickToRead();
+        this.stopReadAloud();
+        if (toolbar) toolbar.classList.add('hidden'); 
+        this.setActiveButton(buttonId, false); 
+        this.isReadAloudActive = false; 
+        localStorage.setItem('readAloudActive', false);
+        console.log('Read Aloud deactivated.');
+    } else {
+        // Activate Read Aloud
+        if (!toolbar) {
+            this.createReadAloudToolbar();
+        } else {
+            toolbar.classList.remove('hidden'); 
+        }
+        this.enableDefaultClickToRead();
+        this.setActiveButton(buttonId, true); 
+        this.isReadAloudActive = true; 
+        localStorage.setItem('readAloudActive', true);
+        console.log('Read Aloud activated.');
+    }
+};
+
+
+// Create the Read Aloud Toolbar
+YourInclusion.prototype.createReadAloudToolbar = function () {
+    const toolbar = this.createDiv('read-aloud-toolbar', 'read-aloud-toolbar');
+
+    // Toolbar Header
+    const header = this.createDiv('toolbar-header');
+    const title = this.createHeading(2, 'Read Aloud Settings', 'toolbar-title');
+    const closeButton = this.createButton('close-toolbar', '✖');
+    closeButton.addEventListener('click', () => {
+        toolbar.remove();
+        this.disableDefaultClickToRead();
+    });
+    header.appendChild(title);
+    header.appendChild(closeButton);
+    toolbar.appendChild(header);
+
+    // Toolbar Controls
+    const controls = this.createDiv('toolbar-controls');
+
+    // Cursor Read Aloud Button
+    const cursorButton = this.createButton('cursor-read-btn', 'Cursor Read Aloud');
+    cursorButton.innerHTML = `<i class="fas fa-mouse-pointer"></i> Cursor Read Aloud`;
+    cursorButton.addEventListener('click', this.enableCursorReadAloud.bind(this));
+
+    // Previous Line Button
+     const previousButton = this.createButton('previous-line-btn', 'Previous Line');
+     previousButton.innerHTML = `<i class="fas fa-arrow-left"></i> `;
+     previousButton.addEventListener('click', this.readPreviousLine.bind(this));
+
+    // Play Button
+    const playButton = this.createButton('play-read-btn', '▶');
+    playButton.innerHTML = `<i class="fas fa-play"></i>`;
+    playButton.addEventListener('click', this.playReadAloud.bind(this));
+
+    // Stop Button
+    const stopButton = this.createButton('stop-read-btn', '⏹');
+    stopButton.innerHTML = `<i class="fas fa-stop"></i>`;
+    stopButton.addEventListener('click', this.stopReadAloud.bind(this));
+ 
+// Next Line Button
+const nextButton = this.createButton('next-line-btn', 'Next Line');
+nextButton.innerHTML = `<i class="fas fa-arrow-right"></i> `;
+nextButton.addEventListener('click', this.readNextLine.bind(this));
+
+// Create Volume and Speed Container
+const slidersContainer = document.createElement('div');
+slidersContainer.className = 'sliders-container';
+
+// Create Volume Slider
+const volumeWrapper = document.createElement('div');
+volumeWrapper.className = 'slider-wrapper';
+
+const volumeLabel = document.createElement('label');
+volumeLabel.setAttribute('for', 'volume-slider');
+volumeLabel.textContent = 'Volume:';
+volumeWrapper.appendChild(volumeLabel);
+
+const volumeSlider = document.createElement('input');
+volumeSlider.type = 'range';
+volumeSlider.id = 'volume-slider';
+volumeSlider.min = '0';
+volumeSlider.max = '1';
+volumeSlider.step = '0.1';
+volumeSlider.value = this.currentVolume || 1;
+
+volumeSlider.addEventListener('input', (e) => {
+this.currentVolume = parseFloat(e.target.value);
+console.log(`Volume updated to: ${this.currentVolume}`);
+});
+volumeWrapper.appendChild(volumeSlider);
+
+// Create Speed Slider
+const speedWrapper = document.createElement('div');
+speedWrapper.className = 'slider-wrapper';
+
+const speedLabel = document.createElement('label');
+speedLabel.setAttribute('for', 'speed-slider');
+speedLabel.textContent = 'Speed:';
+speedWrapper.appendChild(speedLabel);
+
+const speedSlider = document.createElement('input');
+speedSlider.type = 'range';
+speedSlider.id = 'speed-slider';
+speedSlider.min = '0.5';
+speedSlider.max = '2';
+speedSlider.step = '0.1';
+speedSlider.value = this.currentSpeed || 1;
+
+speedSlider.addEventListener('input', (e) => {
+this.currentSpeed = parseFloat(e.target.value);
+console.log(`Speed updated to: ${this.currentSpeed}`);
+});
+speedWrapper.appendChild(speedSlider);
+
+// Add sliders to sliders container
+slidersContainer.appendChild(volumeWrapper);
+slidersContainer.appendChild(speedWrapper);
+
+speedWrapper.appendChild(speedSlider);
+    // Append Buttons and Controls
+    controls.appendChild(cursorButton);
+    controls.appendChild(previousButton);
+    controls.appendChild(playButton);
+    controls.appendChild(stopButton);
+    controls.appendChild(nextButton);
+    controls.appendChild(slidersContainer);
+    toolbar.appendChild(controls);
+
+    // Add Toolbar to Document Body
+    document.body.appendChild(toolbar);
+};
+
+// Helper Function to Highlight Text
+YourInclusion.prototype.highlightText = function (element, start, length) {
+    const text = element.dataset.originalText || element.innerText || '';
+    const before = text.slice(0, start);
+    const highlight = text.slice(start, start + length);
+    const after = text.slice(start + length);
+
+    element.innerHTML = `${before}<span style="background-color: yellow;">${highlight}</span>${after}`;
+};
+
+
+// Enable Default Click-to-Read
+YourInclusion.prototype.enableDefaultClickToRead = function () {
+    this.readElementContentBound = this.readElementContent.bind(this);
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
+    elements.forEach(element => {
+        element.addEventListener('click', this.readElementContentBound);
+    });
+};
+
+
+// Disable Default Click-to-Read
+YourInclusion.prototype.disableDefaultClickToRead = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
+    elements.forEach(element => {
+        element.removeEventListener('click', this.readElementContentBound);
+    });
+};
+
+// Read Element Content with Highlighting
+YourInclusion.prototype.readElementContent = function (event) {
+    const element = event.target;
+    const text = element.innerText || element.value || '';
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.volume = this.currentVolume || 1;
+    msg.rate = this.currentSpeed || 1;
+
+    const words = text.split(' ');
+    let wordIndex = 0;
+
+    msg.onboundary = (boundaryEvent) => {
+        if (boundaryEvent.name === 'word') {
+            const wordStart = boundaryEvent.charIndex;
+            const wordLength = words[wordIndex]?.length || 0;
+            this.highlightText(element, wordStart, wordLength);
+            wordIndex++;
+        }
+    };
+
+    msg.onend = () => {
+        this.clearHighlight(element); 
+    };
+
+    speechSynthesis.speak(msg);
+};
+
+YourInclusion.prototype.clearHighlight = function (element) {
+    if (element.dataset.originalText) {
+        element.innerHTML = element.dataset.originalText;
+    }
+};
+
+
+
+// Play Entire Page Read Aloud with Highlighting
+YourInclusion.prototype.playReadAloud = function () {
+    if (!this.isReadAloudActive) {
+        console.log('Read Aloud is not active. Please enable it first.');
+        return;
+    }
+
+    const paragraphs = document.querySelectorAll('p');
+
+    if (!paragraphs.length) {
+        console.log('No paragraphs found to read.');
+        return;
+    }
+
+    // Initialize paragraph index and start reading
+    this.currentParagraphIndex = 0;
+    this.readCurrentLine();
+};
+
+
+
+
+// Enable Cursor Read Aloud
+YourInclusion.prototype.enableCursorReadAloud = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
+    elements.forEach(element => {
+        let timeoutId;
+        element.addEventListener('mouseenter', () => {
+            timeoutId = setTimeout(() => {
+                const msg = new SpeechSynthesisUtterance(element.innerText || element.value || '');
+                msg.volume = this.currentVolume || 1;
+                msg.rate = this.currentSpeed || 1;
+                this.highlightText(element, 0, element.innerText.length); 
+                speechSynthesis.speak(msg);
+            }, 1000);
+        });
+        element.addEventListener('mouseleave', () => {
+            clearTimeout(timeoutId);
+            speechSynthesis.cancel();
+        });
+    });
+};
+
+YourInclusion.prototype.readPreviousLine = function () {
+    if (this.currentParagraphIndex > 0) {
+        this.currentParagraphIndex--;
+        this.readCurrentLine();
+    } else {
+        console.log('Already at the first paragraph.');
+    }
+};
+
+
+
+YourInclusion.prototype.readNextLine = function () {
+    const paragraphs = document.querySelectorAll('p');
+
+    if (this.currentParagraphIndex === undefined) this.currentParagraphIndex = 0;
+
+    if (this.currentParagraphIndex < paragraphs.length - 1) {
+        this.currentParagraphIndex++;
+        this.readCurrentLine();
+    } else {
+        console.log('No more paragraphs to read.');
+    }
+};
+
+
+
+YourInclusion.prototype.speakText = function (element) {
+    const text = element.innerText || '';
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.volume = this.currentVolume || 1;
+    msg.rate = this.currentSpeed || 1;
+
+    // Save original text for restoration
+    if (!element.dataset.originalText) {
+        element.dataset.originalText = text;
+    }
+
+    // Highlight words as they are spoken
+    const words = text.split(' ');
+    let wordIndex = 0;
+
+    msg.onboundary = (event) => {
+        if (event.name === 'word') {
+            const wordStart = event.charIndex;
+            const wordLength = words[wordIndex]?.length || 0;
+            this.highlightText(element, wordStart, wordLength);
+            wordIndex++;
+        }
+    };
+
+    msg.onend = () => {
+        this.clearHighlight(element); 
+    };
+
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(msg);
+};
+
+
+
+YourInclusion.prototype.readCurrentLine = function () {
+    const paragraphs = document.querySelectorAll('h1,h2,h3,h4,h5,h6,p');
+
+    if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= paragraphs.length) {
+        console.log('No more paragraphs to read.');
+        return;
+    }
+
+    const currentParagraph = paragraphs[this.currentParagraphIndex];
+    this.speakText(currentParagraph);
+};
+
+
+
+// Stop Read Aloud
+YourInclusion.prototype.stopReadAloud = function () {
+    speechSynthesis.cancel(); 
+    this.currentParagraphIndex = undefined; 
+
+    // Clear highlights for all paragraphs
+    document.querySelectorAll('[data-original-text]').forEach((element) => {
+        this.clearHighlight(element);
+    });
+
+    console.log('Read Aloud stopped, and all highlights cleared.');
+};
+
+
+//Button Click Color change
+
+document.addEventListener('DOMContentLoaded', () => {
+   
+    const buttons = document.querySelectorAll('.syi-toolbox-button');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            
+            buttons.forEach(btn => (btn.style.backgroundColor = "rgba(255, 255, 255, 0.3)"));
+
+            button.style.backgroundColor = "rgba(52, 88, 185, 1)";
+        });
+    });
+});
+
 
 // Keyboard Navigation
 
@@ -2457,375 +3031,6 @@ YourInclusion.prototype.navigateToStart = function () {
         this.highlightSelection(firstFocusable);
     }
 };
-
-// Read Aloud
-// Initialize Read Aloud Feature
-YourInclusion.prototype.initReadAloud = function () {
-    const readAloudBtn = document.getElementById('read-aloud-btn');
-    if (readAloudBtn) {
-        readAloudBtn.addEventListener('click', () => {
-            this.toggleReadAloud('read-aloud-btn');
-        });
-    }
-
-    // Check if Read Aloud was previously active (e.g., stored state)
-    const isReadAloudActive = localStorage.getItem('readAloudActive') === 'true';
-    if (isReadAloudActive) {
-        this.enableDefaultClickToRead();
-        this.createReadAloudToolbar(); 
-        this.setActiveButton('read-aloud-btn', true);
-    }
-};
-
-YourInclusion.prototype.toggleReadAloud = function (buttonId) {
-    const toolbar = document.getElementById('read-aloud-toolbar');
-    const isActive = this.isReadAloudActive || false; 
-
-    if (isActive) {
-        // Deactivate Read Aloud
-        this.disableDefaultClickToRead();
-        this.stopReadAloud();
-        if (toolbar) toolbar.classList.add('hidden'); 
-        this.setActiveButton(buttonId, false); 
-        this.isReadAloudActive = false; 
-        localStorage.setItem('readAloudActive', false);
-        console.log('Read Aloud deactivated.');
-    } else {
-        // Activate Read Aloud
-        if (!toolbar) {
-            this.createReadAloudToolbar();
-        } else {
-            toolbar.classList.remove('hidden'); 
-        }
-        this.enableDefaultClickToRead();
-        this.setActiveButton(buttonId, true); 
-        this.isReadAloudActive = true; 
-        localStorage.setItem('readAloudActive', true);
-        console.log('Read Aloud activated.');
-    }
-};
-
-
-// Create the Read Aloud Toolbar
-YourInclusion.prototype.createReadAloudToolbar = function () {
-    const toolbar = this.createDiv('read-aloud-toolbar', 'read-aloud-toolbar');
-
-    // Toolbar Header
-    const header = this.createDiv('toolbar-header');
-    const title = this.createHeading(2, 'Read Aloud Settings', 'toolbar-title');
-    const closeButton = this.createButton('close-toolbar', '✖');
-    closeButton.addEventListener('click', () => {
-        toolbar.remove();
-        this.disableDefaultClickToRead();
-    });
-    header.appendChild(title);
-    header.appendChild(closeButton);
-    toolbar.appendChild(header);
-
-    // Toolbar Controls
-    const controls = this.createDiv('toolbar-controls');
-
-    // Cursor Read Aloud Button
-    const cursorButton = this.createButton('cursor-read-btn', 'Cursor Read Aloud');
-    cursorButton.innerHTML = `<i class="fas fa-mouse-pointer"></i> Cursor Read Aloud`;
-    cursorButton.addEventListener('click', this.enableCursorReadAloud.bind(this));
-
-    // Previous Line Button
-     const previousButton = this.createButton('previous-line-btn', 'Previous Line');
-     previousButton.innerHTML = `<i class="fas fa-arrow-left"></i> `;
-     previousButton.addEventListener('click', this.readPreviousLine.bind(this));
-
-    // Play Button
-    const playButton = this.createButton('play-read-btn', '▶');
-    playButton.innerHTML = `<i class="fas fa-play"></i>`;
-    playButton.addEventListener('click', this.playReadAloud.bind(this));
-
-    // Stop Button
-    const stopButton = this.createButton('stop-read-btn', '⏹');
-    stopButton.innerHTML = `<i class="fas fa-stop"></i>`;
-    stopButton.addEventListener('click', this.stopReadAloud.bind(this));
- 
-// Next Line Button
-const nextButton = this.createButton('next-line-btn', 'Next Line');
-nextButton.innerHTML = `<i class="fas fa-arrow-right"></i> `;
-nextButton.addEventListener('click', this.readNextLine.bind(this));
-
-// Create Volume and Speed Container
-const slidersContainer = document.createElement('div');
-slidersContainer.className = 'sliders-container';
-
-// Create Volume Slider
-const volumeWrapper = document.createElement('div');
-volumeWrapper.className = 'slider-wrapper';
-
-const volumeLabel = document.createElement('label');
-volumeLabel.setAttribute('for', 'volume-slider');
-volumeLabel.textContent = 'Volume:';
-volumeWrapper.appendChild(volumeLabel);
-
-const volumeSlider = document.createElement('input');
-volumeSlider.type = 'range';
-volumeSlider.id = 'volume-slider';
-volumeSlider.min = '0';
-volumeSlider.max = '1';
-volumeSlider.step = '0.1';
-volumeSlider.value = this.currentVolume || 1;
-
-volumeSlider.addEventListener('input', (e) => {
-this.currentVolume = parseFloat(e.target.value);
-console.log(`Volume updated to: ${this.currentVolume}`);
-});
-volumeWrapper.appendChild(volumeSlider);
-
-// Create Speed Slider
-const speedWrapper = document.createElement('div');
-speedWrapper.className = 'slider-wrapper';
-
-const speedLabel = document.createElement('label');
-speedLabel.setAttribute('for', 'speed-slider');
-speedLabel.textContent = 'Speed:';
-speedWrapper.appendChild(speedLabel);
-
-const speedSlider = document.createElement('input');
-speedSlider.type = 'range';
-speedSlider.id = 'speed-slider';
-speedSlider.min = '0.5';
-speedSlider.max = '2';
-speedSlider.step = '0.1';
-speedSlider.value = this.currentSpeed || 1;
-
-speedSlider.addEventListener('input', (e) => {
-this.currentSpeed = parseFloat(e.target.value);
-console.log(`Speed updated to: ${this.currentSpeed}`);
-});
-speedWrapper.appendChild(speedSlider);
-
-// Add sliders to sliders container
-slidersContainer.appendChild(volumeWrapper);
-slidersContainer.appendChild(speedWrapper);
-
-speedWrapper.appendChild(speedSlider);
-    // Append Buttons and Controls
-    controls.appendChild(cursorButton);
-    controls.appendChild(previousButton);
-    controls.appendChild(playButton);
-    controls.appendChild(stopButton);
-    controls.appendChild(nextButton);
-    controls.appendChild(slidersContainer);
-    toolbar.appendChild(controls);
-
-    // Add Toolbar to Document Body
-    document.body.appendChild(toolbar);
-};
-
-// Helper Function to Highlight Text
-YourInclusion.prototype.highlightText = function (element, start, length) {
-    const text = element.dataset.originalText || element.innerText || '';
-    const before = text.slice(0, start);
-    const highlight = text.slice(start, start + length);
-    const after = text.slice(start + length);
-
-    element.innerHTML = `${before}<span style="background-color: yellow;">${highlight}</span>${after}`;
-};
-
-
-// Enable Default Click-to-Read
-YourInclusion.prototype.enableDefaultClickToRead = function () {
-    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
-    elements.forEach(element => {
-        element.addEventListener('click', this.readElementContent.bind(this));
-    });
-};
-
-// Disable Default Click-to-Read
-YourInclusion.prototype.disableDefaultClickToRead = function () {
-    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
-    elements.forEach(element => {
-        element.removeEventListener('click', this.readElementContent.bind(this));
-    });
-};
-
-// Read Element Content with Highlighting
-YourInclusion.prototype.readElementContent = function (event) {
-    const element = event.target;
-    const text = element.innerText || element.value || '';
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.volume = this.currentVolume || 1;
-    msg.rate = this.currentSpeed || 1;
-
-    const words = text.split(' ');
-    let wordIndex = 0;
-
-    msg.onboundary = (boundaryEvent) => {
-        if (boundaryEvent.name === 'word') {
-            const wordStart = boundaryEvent.charIndex;
-            const wordLength = words[wordIndex]?.length || 0;
-            this.highlightText(element, wordStart, wordLength);
-            wordIndex++;
-        }
-    };
-
-    msg.onend = () => {
-        this.clearHighlight(element); 
-    };
-
-    speechSynthesis.speak(msg);
-};
-
-YourInclusion.prototype.clearHighlight = function (element) {
-    if (element.dataset.originalText) {
-        element.innerHTML = element.dataset.originalText;
-    }
-};
-
-
-
-// Play Entire Page Read Aloud with Highlighting
-YourInclusion.prototype.playReadAloud = function () {
-    if (!this.isReadAloudActive) {
-        console.log('Read Aloud is not active. Please enable it first.');
-        return;
-    }
-
-    const paragraphs = document.querySelectorAll('p');
-
-    if (!paragraphs.length) {
-        console.log('No paragraphs found to read.');
-        return;
-    }
-
-    // Initialize paragraph index and start reading
-    this.currentParagraphIndex = 0;
-    this.readCurrentLine();
-};
-
-
-
-
-// Enable Cursor Read Aloud
-YourInclusion.prototype.enableCursorReadAloud = function () {
-    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
-    elements.forEach(element => {
-        let timeoutId;
-        element.addEventListener('mouseenter', () => {
-            timeoutId = setTimeout(() => {
-                const msg = new SpeechSynthesisUtterance(element.innerText || element.value || '');
-                msg.volume = this.currentVolume || 1;
-                msg.rate = this.currentSpeed || 1;
-                this.highlightText(element, 0, element.innerText.length); 
-                speechSynthesis.speak(msg);
-            }, 1000);
-        });
-        element.addEventListener('mouseleave', () => {
-            clearTimeout(timeoutId);
-            speechSynthesis.cancel();
-        });
-    });
-};
-
-YourInclusion.prototype.readPreviousLine = function () {
-    if (this.currentParagraphIndex > 0) {
-        this.currentParagraphIndex--;
-        this.readCurrentLine();
-    } else {
-        console.log('Already at the first paragraph.');
-    }
-};
-
-
-
-YourInclusion.prototype.readNextLine = function () {
-    const paragraphs = document.querySelectorAll('p');
-
-    if (this.currentParagraphIndex === undefined) this.currentParagraphIndex = 0;
-
-    if (this.currentParagraphIndex < paragraphs.length - 1) {
-        this.currentParagraphIndex++;
-        this.readCurrentLine();
-    } else {
-        console.log('No more paragraphs to read.');
-    }
-};
-
-
-
-YourInclusion.prototype.speakText = function (element) {
-    const text = element.innerText || '';
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.volume = this.currentVolume || 1;
-    msg.rate = this.currentSpeed || 1;
-
-    // Save original text for restoration
-    if (!element.dataset.originalText) {
-        element.dataset.originalText = text;
-    }
-
-    // Highlight words as they are spoken
-    const words = text.split(' ');
-    let wordIndex = 0;
-
-    msg.onboundary = (event) => {
-        if (event.name === 'word') {
-            const wordStart = event.charIndex;
-            const wordLength = words[wordIndex]?.length || 0;
-            this.highlightText(element, wordStart, wordLength);
-            wordIndex++;
-        }
-    };
-
-    msg.onend = () => {
-        this.clearHighlight(element); 
-    };
-
-
-    speechSynthesis.cancel();
-    speechSynthesis.speak(msg);
-};
-
-
-
-YourInclusion.prototype.readCurrentLine = function () {
-    const paragraphs = document.querySelectorAll('h1,h2,h3,h4,h5,h6,p');
-
-    if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= paragraphs.length) {
-        console.log('No more paragraphs to read.');
-        return;
-    }
-
-    const currentParagraph = paragraphs[this.currentParagraphIndex];
-    this.speakText(currentParagraph);
-};
-
-
-
-// Stop Read Aloud
-YourInclusion.prototype.stopReadAloud = function () {
-    speechSynthesis.cancel(); 
-    this.currentParagraphIndex = undefined; 
-
-    // Clear highlights for all paragraphs
-    document.querySelectorAll('[data-original-text]').forEach((element) => {
-        this.clearHighlight(element);
-    });
-
-    console.log('Read Aloud stopped, and all highlights cleared.');
-};
-
-//Button Click Color change
-
-document.addEventListener('DOMContentLoaded', () => {
-   
-    const buttons = document.querySelectorAll('.syi-toolbox-button');
-
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            
-            buttons.forEach(btn => (btn.style.backgroundColor = "rgba(255, 255, 255, 0.3)"));
-
-            button.style.backgroundColor = "rgba(52, 88, 185, 1)";
-        });
-    });
-});
 
 
 
