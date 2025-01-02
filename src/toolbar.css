@@ -66,6 +66,10 @@
     height: 12%;
     position: relative;
 }
+.syi-toolbox-header .header-btn{
+    background: black;
+    margin: 2px;   
+}
 
 .syi-toolbox-logo {
     height: 30px;
@@ -93,6 +97,7 @@
     text-align: center;
     overflow-y: auto;
     max-height: calc(80vh - 60px); /* Updated height for scrolling */
+    overflow-x: hidden;
 }
 
 .syi-toolbox-body::-webkit-scrollbar {
@@ -386,6 +391,7 @@ button:hover {
     border-radius: 4px;
     cursor: pointer;
     transition: transform 0.2s;
+    border: solid black 1px;
 }
 
 .color-button:hover {
@@ -423,6 +429,13 @@ button:hover {
     font-size: 1rem;
     cursor: pointer;
     transition: transform 0.2s, border 0.2s;
+    background: black;
+    margin: 4px;
+    border: solid rgba(255, 255, 255, 0.5) 1px;
+    border-radius: 8px;
+    padding: 8px;
+    width: 35px;
+    height: 35px;
 }
 
 .syi-toolbox-header-left .header-btn:hover,
@@ -531,8 +544,9 @@ button:hover {
     font-size: 14px; 
     cursor: pointer; 
     position: relative;
-    left: 76%;
+    float: right;
     bottom: 5px;
+    margin-right: 10px;
 }
 
 .popup-reset:hover {

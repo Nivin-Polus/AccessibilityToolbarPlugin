@@ -29,7 +29,6 @@ function YourInclusion(init) {
     this.initCursorSizeAdjustment();
     this.initSaveFeature(); 
     this.initReadAloud();
-    this.initKeyboardNavigation();
     // this.addDevelopmentAlerts();
 
 }
@@ -272,11 +271,13 @@ YourInclusion.prototype.createHeaderLeftSection = function () {
 
     
     const settingsButton = this.createButtonWithIcon('settings-btn', 'fas fa-cog');
+    settingsButton.style.fontSize = '14px';
     settingsButton.addEventListener('click', () => createSettingsPopup());
     headerLeft.appendChild(settingsButton);
 
     
     const resetButton = this.createButtonWithIcon('reset-btn', 'fas fa-undo');
+    resetButton.style.fontSize = '14px';
     resetButton.addEventListener('click', () => initResetFeature());
     headerLeft.appendChild(resetButton);
 
@@ -290,10 +291,12 @@ YourInclusion.prototype.createHeaderRightSection = function () {
 
      
     const infoButton = this.createButtonWithIcon('info-btn', 'fas fa-info-circle');
+    infoButton.style.fontSize = '14px'
     headerRight.appendChild(infoButton);
 
    
     const closeButton = this.createButtonWithIcon('close-btn', 'fas fa-times');
+    closeButton.style.fontSize = '14px';
     closeButton.addEventListener('click', () => this.closeToolboxFromButton());
     headerRight.appendChild(closeButton);
 
@@ -681,6 +684,7 @@ YourInclusion.prototype.addFontSizePopup = function () {
         console.error('Font Size button or toolbox not found.');
         return;
     }
+    this.isFontSizeChanged = false;
 
   
     fontSizeDiv.addEventListener('click', () => {
@@ -740,12 +744,20 @@ YourInclusion.prototype.addFontSizePopup = function () {
 
             const updateFontSizeDisplay = () => {
                 fontSizeDisplay.textContent = fontSizeChange > 0 ? `+${fontSizeChange}` : `${fontSizeChange}`;
+              
+                 if (fontSizeChange === 0) {
+                    this.isFontSizeChanged = false;
+                } else {
+                    this.isFontSizeChanged = true;
+                }
+                this.checkFontSizeChangeFlag();
             };
 
             decreaseButton.addEventListener('click', () => {
                 if (fontSizeChange > -6) {
                     fontSizeChange -= 1;
                     applyFontSizeChange(fontSizeChange);
+                    this.isFontSizeChanged = true;
                     updateFontSizeDisplay();
                 }
             });
@@ -754,16 +766,19 @@ YourInclusion.prototype.addFontSizePopup = function () {
                 if (fontSizeChange < 6) {
                     fontSizeChange += 1;
                     applyFontSizeChange(fontSizeChange);
+                    this.isFontSizeChanged = true;
                     updateFontSizeDisplay();
                 }
             });
+            
 
             resetButton.addEventListener('click', () => {
                 
                 allElements.forEach((element) => {
                     element.style.fontSize = originalFontSizes.get(element);
                 });
-                fontSizeChange = 0; 
+                fontSizeChange = 0;
+                this.isFontSizeChanged = false; 
                 updateFontSizeDisplay();
             });
 
@@ -782,7 +797,10 @@ YourInclusion.prototype.addFontSizePopup = function () {
         }
     });
 };
-
+/*** Function to check the flag and set the button state  */
+YourInclusion.prototype.checkFontSizeChangeFlag = function () {
+    this.setActiveButton('font-size-btn', this.isFontSizeChanged);
+};
 
 /*** Night Mode Feature */
 YourInclusion.prototype.initNightModeFeature = function () {
@@ -1071,7 +1089,7 @@ YourInclusion.prototype.initContrastFeature = function () {
     if (contrastButton) {
         contrastButton.addEventListener('click', () => {
             this.createContrastPopup();
-            this.checkContrastFeaturesState();
+           
         });
     }
 };
@@ -1167,6 +1185,8 @@ YourInclusion.prototype.addPresetModes = function (container) {
         container.appendChild(modeButton);
     });
 };
+YourInclusion.prototype.contrastModeActive = false;
+
 YourInclusion.prototype.addCustomColorControls = function (container) {
     const customColorsSection = document.createElement('div');
     customColorsSection.className = 'syi-contrast-custom-colors';
@@ -1186,6 +1206,7 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
 
         colorButton.addEventListener('click', () => {
             this.applyBackgroundColor(color);
+            this.updateContrastFlag(true);
         });
 
         bgColorContainer.appendChild(colorButton);
@@ -1196,11 +1217,11 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     bgColorPicker.id = 'bg-color-picker';
     bgColorPicker.style.padding = "0";
     bgColorPicker.style.width = "revert";
-    
 
     bgColorPicker.addEventListener('input', () => {
         const selectedColor = bgColorPicker.value;
         this.applyBackgroundColor(selectedColor);
+        this.updateContrastFlag(true);
     });
 
     bgColorContainer.appendChild(bgColorPicker);
@@ -1217,7 +1238,10 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
         const colorButton = document.createElement('button');
         colorButton.className = 'color-button';
         colorButton.style.backgroundColor = color;
-        colorButton.addEventListener('click', () => this.applyCustomTextColor(color));
+        colorButton.addEventListener('click', () => {
+            this.applyCustomTextColor(color);
+            this.updateContrastFlag(true);
+        });
         textColorContainer.appendChild(colorButton);
     });
 
@@ -1227,7 +1251,11 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     textColorPicker.style.padding = "0";
     textColorPicker.style.width = "revert";
 
-    textColorPicker.addEventListener('input', () => this.applyCustomTextColor(textColorPicker.value));
+    textColorPicker.addEventListener('input', () => {
+        this.applyCustomTextColor(textColorPicker.value);
+        this.updateContrastFlag(true);
+    });
+
     textColorContainer.appendChild(textColorPicker);
 
     customColorsSection.appendChild(textLabel);
@@ -1235,6 +1263,7 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
 
     container.appendChild(customColorsSection);
 };
+
 YourInclusion.prototype.applyBackgroundColor = function (color) {
     const elements = document.querySelectorAll(
         '*:not(button):not(input):not(.syi-toolbox):not(.syi-toolbox *):not(.syi-contrast-popup):not(.syi-contrast-popup *)'
@@ -1274,56 +1303,46 @@ YourInclusion.prototype.applyCustomTextColor = function (color) {
     }
 };
 
-
-// Reset Contrast
 YourInclusion.prototype.resetContrast = function () {
-    
     document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
-
-   
     document.body.style.background = '';
     document.body.style.backgroundColor = '';
     document.body.style.color = '';
 
-  
     const allElements = document.querySelectorAll(
         '*:not(.syi-toolbox):not(.syi-toolbox *):not(.syi-contrast-popup):not(.syi-contrast-popup *)'
     );
     allElements.forEach((element) => {
-        
         element.style.background = '';
         element.style.backgroundColor = '';
-        
-       
-        element.style.color = '';  
-        
-        element.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
+        element.style.color = '';
     });
 
+    this.updateContrastFlag(false);
     console.log('Contrast settings reset to original.');
 };
 
-
-// Toggle Contrast Modes
 YourInclusion.prototype.toggleContrastMode = function (mode, button) {
-    const bodyClassList = document.body.classList;
+    const isActive = document.body.classList.contains(mode);
 
-  
-    const isActive = bodyClassList.contains(mode);
+    // Remove all contrast modes
+    document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
 
-    
-    bodyClassList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
-
-    
     if (!isActive) {
-        bodyClassList.add(mode);
+        // Activate the selected mode
+        document.body.classList.add(mode);
+        this.updateContrastFlag(true); // Set the contrast flag to active
         console.log(`${mode} mode activated.`);
     } else {
+        // All contrast modes are deactivated
+        this.updateContrastFlag(false); // Set the contrast flag to inactive
         console.log(`${mode} mode deactivated.`);
     }
 
-    this.updateContrastButtonStates(button, isActive);
+    // Update the button states after the mode change
+    this.updateContrastButtonStates(button, !isActive);
 };
+
 
 YourInclusion.prototype.updateContrastButtonStates = function (clickedButton, isActive) {
     const buttons = document.querySelectorAll('.syi-contrast-mode-button');
@@ -1335,6 +1354,16 @@ YourInclusion.prototype.updateContrastButtonStates = function (clickedButton, is
         }
     });
 };
+
+YourInclusion.prototype.updateContrastFlag = function (state) {
+    this.contrastModeActive = state;
+    this.checkContrastFlagAndSetButton();
+};
+
+YourInclusion.prototype.checkContrastFlagAndSetButton = function () {
+    this.setActiveButton('contrast-btn', this.contrastModeActive);
+};
+
 
 YourInclusion.prototype.setContrastMode = function (savedState) {
     if (!savedState) return;
@@ -1361,51 +1390,6 @@ YourInclusion.prototype.setContrastMode = function (savedState) {
         console.log(`Restored text color: ${textColor}`);
     }
 };
-
-YourInclusion.prototype.checkContrastFeaturesState = function () {
-    let isActive = false;
-
-    // Check if any contrast mode is active
-    const contrastModes = ['bright-contrast', 'reverse-contrast', 'grayscale'];
-    contrastModes.forEach((mode) => {
-        if (document.body.classList.contains(mode)) {
-            isActive = true;
-        }
-    });
-
-    // Dynamically check if custom background color is applied
-    const bodyColors = this.getDynamicColors(document.body);
-    const defaultBgColors = ['rgba(0, 0, 0, 0)', 'transparent', 'rgb(255, 255, 255)'];
-    if (!defaultBgColors.includes(bodyColors.backgroundColor)) {
-        isActive = true;
-    }
-
-    // Dynamically check if custom text color is applied
-    const textElements = document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, li, a, div');
-    for (const element of textElements) {
-        const { textColor } = this.getDynamicColors(element);
-        const defaultTextColors = ['rgb(0, 0, 0)', 'rgb(255, 255, 255)'];
-        if (!defaultTextColors.includes(textColor)) {
-            isActive = true;
-            break;
-        }
-    }
-
-    // Dynamically update the active state of the contrast button
-    this.setActiveButton('contrast-btn', isActive);
-};
-
-YourInclusion.prototype.getDynamicColors = function (element) {
-    if (!element) return { backgroundColor: null, textColor: null };
-
-    const computedStyle = window.getComputedStyle(element);
-
-    return {
-        backgroundColor: computedStyle.backgroundColor,
-        textColor: computedStyle.color,
-    };
-};
-
 
 
 
@@ -1903,14 +1887,17 @@ YourInclusion.prototype.createColorPicker = function (header) {
     // Create container for color picker and color code display
     const colorPickerContainer = this.createDiv('color-picker-container');
 
+    // Retrieve the saved color from your storage or fallback to default
+    const savedColor = this.getSavedColor() || '#393636';
+
     // Create color input (color picker)
-    const colorInput = this.createEle('input', { type: 'color', id: 'color-picker', value: '#393636' });
+    const colorInput = this.createEle('input', { type: 'color', id: 'color-picker', value: savedColor });
 
     // Create text input to display the hex code
     const colorCodeInput = this.createEle('input', { 
         type: 'text', 
         id: 'color-code', 
-        value: '#393636', 
+        value: savedColor, 
         readonly: true, 
         class: 'color-code-input' 
     });
@@ -1918,9 +1905,9 @@ YourInclusion.prototype.createColorPicker = function (header) {
     // Add event listener to update both the toolbox and the hex code display
     colorInput.addEventListener('input', (event) => {
         const selectedColor = event.target.value;
-        this.updateToolboxColor(header, selectedColor); // Update the toolbox color
-        colorCodeInput.value = selectedColor; // Update the hex code display
-        this.saveToolbarState(); // Save the state
+        this.updateToolboxColor(header, selectedColor); 
+        colorCodeInput.value = selectedColor; 
+        this.saveColor(selectedColor); // Save the selected color
     });
 
     // Append color input and color code input to the container
@@ -1933,6 +1920,17 @@ YourInclusion.prototype.createColorPicker = function (header) {
 
     return colorPicker;
 };
+
+
+YourInclusion.prototype.getSavedColor = function () {
+    return localStorage.getItem('selectedColor'); 
+};
+
+// Method to save the selected color
+YourInclusion.prototype.saveColor = function (color) {
+    localStorage.setItem('selectedColor', color); 
+};
+
 
 
 // Function to create the reset button
@@ -2012,19 +2010,19 @@ YourInclusion.prototype.createPopupCloseButton = function (popup) {
 
 // Function to update toolbox and popup colors dynamically
 YourInclusion.prototype.updateToolboxColor = function (header, color) {
-    if (header) { // Added null check for `header`
-        header.style.backgroundColor = color; // Update header color if it exists
+    if (header) { 
+        header.style.backgroundColor = color;
     }
 
     const toolboxHeaders = document.querySelectorAll('.syi-toolbox-header, .syi-settings-popup-header');
-    if (toolboxHeaders.length > 0) { // Check if elements exist
+    if (toolboxHeaders.length > 0) { 
         toolboxHeaders.forEach(header => {
             header.style.setProperty('background-color', color, 'important');
         });
     }
 
     const toolboxIcons = document.querySelectorAll('.syi-toolbox-body svg');
-    if (toolboxIcons.length > 0) { // Check if elements exist
+    if (toolboxIcons.length > 0) { 
         toolboxIcons.forEach(svg => {
             svg.style.fill = color;
             svg.style.stroke = color;
@@ -2038,7 +2036,7 @@ YourInclusion.prototype.updateToolboxColor = function (header, color) {
     }
 
     const toolboxButtons = document.querySelectorAll('.syi-toolbox-body .syi-toolbox-btn, .syi-toolbox-button');
-    if (toolboxButtons.length > 0) { // Check if elements exist
+    if (toolboxButtons.length > 0) { 
         toolboxButtons.forEach(button => {
             button.style.backgroundColor = color;
             button.style.borderColor = color;
@@ -2800,7 +2798,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
 // Keyboard Navigation
 
 // Keyboard Navigation Initialization
@@ -3031,6 +3028,8 @@ YourInclusion.prototype.navigateToStart = function () {
         this.highlightSelection(firstFocusable);
     }
 };
+
+
 
 
 
