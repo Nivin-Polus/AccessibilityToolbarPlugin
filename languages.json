@@ -1,5 +1,5 @@
 {
-  "en": {
+  "en-US": {
     "BLUE_FILTER": "Blue Filter",
     "CONTRAST_MODES": "Contrast Modes",
     "REMOVE_IMAGES": "Remove Images",
@@ -26,11 +26,43 @@
     "BACKGROUND" : "Background: ",
     "TEXT_COLOR" : "Text Color: ",
     "RESET_CONTRAST" : "Reset Contrast: ",
-    "FONT_SIZE_SETTINGS" : "Font Size Settings"
- 
-    
+    "FONT_SIZE_SETTINGS" : "Font Size Settings",
+    "READ-ALOUD" : "Read Aloud Settings",
+    "CURSOR-READ-ALOUD": "Cursor Read Aloud",
+    "WEBSITE-READ-ALOUD" : "Website Read Aloud",
+    "SPEED" : "Speed",
+    "VOLUME" : "Volume",
+    "KEYBOARD-NAVIGATION": "Keyboard Navigation",
+    "EXIT_WEB_PAGE_NAVIGATION": "Exit web page navigation",
+    "SHOW_THIS_GUIDE" : "Show This Guide",
+    "TOGGLE_SPEECH_OUTPUT": "Toggle speech output",
+    "RESET_FOCUS_TO_START" : "Reset Focus To Start",
+    "SELECT_NEXT_ITEM" : "Select next item",
+    "SELECT_PREVIOUS_ITEM" : "Select previous item",
+    "RESET FOCUS_TO_START": "Reset focus to start",
+    "NEXT_HEADING": "Next heading",
+    "NEXT_IMAGE_GRAPHIC": "Next image/graphic",
+    "NEXT_LINK": "Next link",
+    "NEXT_LIST": "Next list",
+    "NEXT_INPUT_FIELD": "Next input field",
+    "NEXT_LIST_ENTRY": "Next list entry",
+    "NEXT_COMBOBOX": "Next combobox",
+    "NEXT_EMBEDDED_OBJECT": "Next embedded object",
+    "INCREASE_FONT_SIZE": "Increase Font Size",
+    "DECREASE_FONT_SIZE": "Decrease Font Size",
+    "HEADING_1": "Heading 1",
+    "HEADING_2": "Heading 2",
+    "HEADING_3": "Heading 3",
+    "HEADING_4": "Heading 4",
+    "HEADING_5": "Heading 5",
+    "HEADING_6": "Heading 6",
+    "START_KEYBOARD_NAVIGATION": "Start Keyboard Navigation",
+    "NEXT_JUMP_TAG": "Next jump tag",
+    "NEXT_FORM_FIELD": "Next form field",
+    "INSTRUCTIONS FOR THE USE OF KEYBOARD SHORTCUTS": "Instructions For The Use Of Keyboard Shortcuts"
   },
-  "de": {
+
+  "de-DE": {
     "BLUE_FILTER": "Blaufilter",
     "CONTRAST_MODES": "Kontrastmodi",
     "REMOVE_IMAGES": "Bilder entfernen",
@@ -57,8 +89,38 @@
     "BACKGROUND": "Hintergrund: ",
     "TEXT_COLOR": "Textfarbe: ",
     "RESET_CONTRAST": "Kontrast zurücksetzen: ",
-    "FONT_SIZE_SETTINGS": "Schriftgrößeneinstellungen"
-
-
+    "FONT_SIZE_SETTINGS": "Schriftgrößeneinstellungen",
+    "READ-ALOUD" : "Einstellungen für Vorlesen",
+    "CURSOR-READ-ALOUD": "Vorlesen beim Zeiger",
+    "WEBSITE-READ-ALOUD" :"Website Vorlesen",
+    "SPEED" : "Geschwindigkeit",
+    "VOLUME" : "Lautstärke",
+    "KEYBOARD-NAVIGATION": "Tastatur navigation",
+    "EXIT_WEB_PAGE_NAVIGATION": "Webseiten-Navigation beenden",
+    "SHOW_THIS_GUIDE": "Zeige diesen Leitfaden",
+    "TOGGLE_SPEECH_OUTPUT": "Sprachausgabe umschalten",
+    "SELECT_NEXT_ITEM": "Nächstes Element auswählen",
+    "SELECT_PREVIOUS_ITEM": "Vorheriges Element auswählen",
+    "RESET_FOCUS_TO_START": "Fokus auf den Anfang zurücksetzen",
+    "NEXT_HEADING": "Nächste Überschrift",
+    "NEXT_IMAGE_GRAPHIC": "Nächstes Bild/Grafik",
+    "NEXT_LINK": "Nächster Link",
+    "NEXT_LIST": "Nächste Liste",
+    "NEXT_INPUT_FIELD": "Nächstes Eingabefeld",
+    "NEXT_LIST_ENTRY": "Nächster Listeneintrag",
+    "NEXT_COMBOBOX": "Nächste Kombobox",
+    "NEXT_EMBEDDED_OBJECT": "Nächstes eingebettetes Objekt",
+    "INCREASE_FONT_SIZE": "Schriftgröße erhöhen",
+    "DECREASE_FONT_SIZE": "Schriftgröße verringern",
+    "HEADING_1": "Überschrift 1",
+    "HEADING_2": "Überschrift 2",
+    "HEADING_3": "Überschrift 3",
+    "HEADING_4": "Überschrift 4",
+    "HEADING_5": "Überschrift 5",
+    "HEADING_6": "Überschrift 6",
+    "START_KEYBOARD_NAVIGATION": "Tastaturnavigation starten",
+    "NEXT_JUMP_TAG": "Nächstes Sprungmarke",
+    "NEXT_FORM_FIELD": "Nächstes Formularfeld",
+    "INSTRUCTIONS FOR THE USE OF KEYBOARD SHORTCUTS" : "Anleitung zur Verwendung von Tastenkürzeln"
   }
 }

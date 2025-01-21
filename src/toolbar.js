@@ -8,10 +8,7 @@ function YourInclusion(init) {
     this.removedImages = [];
     this.imagesHidden = false;
     this.isMuted = false;
-    this.selectedHeaderColor = CONFIG.SETTINGS.BACKGROUND_COLOR;
     
-    
-    this.initializeAccessibilityToolbox();
     this.initBlueFilter();
     this.initRemoveImages();
     this.addFontSizePopup();
@@ -27,9 +24,10 @@ function YourInclusion(init) {
     this.initZoomToggleFeature();
     this.initAccessibleFontToggle();
     this.initCursorSizeAdjustment();
+    this.initKeyboardNavigation();
     this.initSaveFeature(); 
     this.initReadAloud();
-    // this.addDevelopmentAlerts();
+    this.addStylesForHighlight();
 
 }
 
@@ -37,7 +35,7 @@ function YourInclusion(init) {
 function loadScript() {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = CONFIG.URLS.ICONS;;
+    link.href = CONFIG.URLS.ICONS;
     link.type = 'text/css';
 
 
@@ -70,21 +68,139 @@ YourInclusion.prototype.createButton = function (id, text, icon = '') {
         button.appendChild(iconWrapper); 
     }
 
-    // Add the checkmark SVG from your local path
-    const checkmark = this.createCheckmarkFromLocal('./assests/check.svg'); 
+
+    const checkmark = this.createCheckmarkFromLocal(`${CONFIG.URLS.BASE_URL}/assets/check.svg`); 
     button.appendChild(checkmark);
 
     if (text) {
         const textWrapper = this.createTextWrapper(text);
         button.appendChild(textWrapper); 
     }
+
+    this.addProgressBar(button, id);
     
     return button;
 };
 
+YourInclusion.prototype.addProgressBar = function (button, id) {
+    const { filledDashes, totalDashes } = this.getDashesForButton(id);
+
+    if (totalDashes > 0) {
+        const progressBar = this.createProgressBar(filledDashes, totalDashes);
+        button.appendChild(progressBar);
+    }
+};
+YourInclusion.prototype.getDashesForButton = function (id) {
+    let filledDashes = 0;
+    let totalDashes = 0;
+
+    const stateManager = this.createStateManager('AppState'); 
+    const state = stateManager.getState(); 
+
+    switch (id) {
+        case 'text-spacing-btn':
+            filledDashes = state.textSpacingIncrement || 0;
+            totalDashes = 3;
+            break;
+        case 'line-height-btn':
+            filledDashes = state.lineHeightIncrement || 0;
+            totalDashes = 3;
+            break;
+        case 'zoom-toggle-btn':
+            filledDashes = state.zoomIncrement || 0;
+            totalDashes = 3;
+            break;
+        case 'cursor-size-btn':
+            filledDashes = state.cursorSizeIncrement || 0;
+            totalDashes = 4;
+            break;
+        default:
+            filledDashes = 0;
+            totalDashes = 0;
+            break;
+    }
+
+    return { filledDashes, totalDashes };
+};
+YourInclusion.prototype.createProgressBar = function (filledDashes, totalDashes) {
+    const progressBarContainer = document.createElement('div');
+    progressBarContainer.classList.add('syi-progress-bar-container');
+    const progressBar = document.createElement('div');
+    progressBar.classList.add('syi-progress-bar', 'dashed');
+
+    for (let i = 0; i < totalDashes; i++) {
+        const dash = document.createElement('div');
+        dash.classList.add('dash');
+        if (i < filledDashes) {
+            dash.classList.add('active'); 
+        }
+        progressBar.appendChild(dash);
+    }
+
+    progressBarContainer.appendChild(progressBar);
+    return progressBarContainer;
+};
+YourInclusion.prototype.updateZoomButtonProgressBar = function (id) {
+    const zoomButton = document.getElementById(id);
+    if (zoomButton) {
+        // Remove the existing progress bar if it exists
+        const existingProgressBar = zoomButton.querySelector('.syi-progress-bar-container');
+        if (existingProgressBar) {
+            existingProgressBar.remove();
+        }
+
+        // Get the updated progress bar data
+        const { filledDashes, totalDashes } = this.getDashesForButton(id);
+        const progressBar = this.createProgressBar(Math.min(filledDashes, totalDashes), totalDashes);
+        zoomButton.appendChild(progressBar);
+    }
+};
+YourInclusion.prototype.updateTextSpacingProgressBar = function (buttonId, incrementCount) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+        const existingProgressBar = button.querySelector('.syi-progress-bar-container');
+        if (existingProgressBar) {
+            existingProgressBar.remove();
+        }
+
+        const totalDashes = 3; 
+
+        const progressBar = this.createProgressBar(Math.min(incrementCount, totalDashes), totalDashes);
+        button.appendChild(progressBar);
+    }
+};
+YourInclusion.prototype.updateLineHeightProgressBar = function (buttonId, incrementCount) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+     
+        const existingProgressBar = button.querySelector('.syi-progress-bar-container');
+        if (existingProgressBar) {
+            existingProgressBar.remove();
+        }
+
+        const totalDashes = 3; 
+
+        const progressBar = this.createProgressBar(Math.min(incrementCount, totalDashes), totalDashes);
+        button.appendChild(progressBar);
+    }
+};
+YourInclusion.prototype.updateCursorSizeProgressBar = function (buttonId, incrementCount) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+        const existingProgressBar = button.querySelector('.syi-progress-bar-container');
+        if (existingProgressBar) {
+            existingProgressBar.remove();
+        }
+        const totalDashes = 4;  
+
+        const progressBar = this.createProgressBar(Math.min(incrementCount, totalDashes), totalDashes);
+        button.appendChild(progressBar) 
+    }
+};
+
+
 // Function to create a checkmark from a local SVG file
 YourInclusion.prototype.createCheckmarkFromLocal = function (svgPath) {
-    // Create a wrapper for the checkmark inside a circle
     const wrapper = document.createElement('div');
     wrapper.className = 'checkmark-wrapper';
 
@@ -272,7 +388,7 @@ YourInclusion.prototype.createHeaderLeftSection = function () {
     
     const settingsButton = this.createButtonWithIcon('settings-btn', 'fas fa-cog');
     settingsButton.style.fontSize = '14px';
-    settingsButton.addEventListener('click', () => createSettingsPopup());
+    settingsButton.addEventListener('click', () => this.createSettingsPopup());
     headerLeft.appendChild(settingsButton);
 
     
@@ -307,8 +423,12 @@ YourInclusion.prototype.closeToolboxFromButton = function () {
     if (toolbox) {
         toolbox.classList.remove('visible'); 
         this.closeAllPopups();
-
     }
+    const popup = document.getElementById('read-aloud-toolbar');
+    if (popup) {
+        popup.remove(); 
+    }
+    
 };
 
 
@@ -336,28 +456,30 @@ YourInclusion.prototype.createToolboxBody = function (selectedLanguage = CONFIG.
     const body = this.createDiv('syi-toolbox-body');
 
     const buttons = [
-        { id: 'blue-filter-btn', textKey: 'BLUE_FILTER', iconClass: './assests/BlueFilter-1.svg' },
-        { id: 'contrast-btn', textKey: 'CONTRAST_MODES', iconClass: './assests/contrast.svg' },
-        { id: 'remove-images-btn', textKey: 'REMOVE_IMAGES', iconClass: './assests/image-off.svg' },
-        { id: 'font-size-btn', textKey: 'FONT_SIZE', iconClass: './assests/fontsize.svg' },
-        { id: 'night-mode-btn', textKey: 'NIGHT_MODE', iconClass: './assests/mode-night.svg' },
-        { id: 'text-spacing-btn', textKey: 'TEXT_SPACING', iconClass: './assests/ri_text-spacing 2.svg' },
-        { id: 'line-height-btn', textKey: 'LINE_HEIGHT', iconClass: './assests/ri_line-height 1.svg' },
-        { id: 'remove-audio-btn', textKey: 'REMOVE_AUDIO', iconClass: './assests/mdi_mute 1.svg' },
-        { id: 'highlight-links-btn', textKey: 'HIGHLIGHT_LINKS', iconClass: './assests/link 1.svg' },
-        { id: 'highlight-headers-btn', textKey: 'HIGHLIGHT_HEADERS', iconClass: './assests/cil_header 1.svg' },
-        { id: 'stop-animations-btn', textKey: 'STOP_ANIMATIONS', iconClass: './assests/stop 1.svg' },
-        { id: 'zoom-toggle-btn', textKey: 'ZOOM_TOGGLE', iconClass: './assests/zoom 1.svg' },
-        { id: 'cursor-size-btn', textKey: 'CURSOR_SIZE', iconClass: './assests/cursor 1.svg' },
-        { id: 'accessible-font-btn', textKey: 'ACCESSIBLE_FONT', iconClass: './assests/font 1.svg' },
-        { id: 'read-aloud-btn', textKey: 'READ_ALOUD', iconClass: './assests/read-aloud.svg' },
-        { id: 'reset-btn1', textKey: 'RESET', iconClass: './assests/reset 1.svg' },
-        { id: 'save-settings-btn', textKey: 'SAVE_SETTINGS', iconClass: './assests/save 1.svg' },
+        { id: 'blue-filter-btn', textKey: 'BLUE_FILTER', iconClass: `${CONFIG.URLS.BASE_URL}/assets/BlueFilter-1.svg` },
+        { id: 'contrast-btn', textKey: 'CONTRAST_MODES', iconClass: `${CONFIG.URLS.BASE_URL}/assets/contrast.svg` },
+        { id: 'remove-images-btn', textKey: 'REMOVE_IMAGES', iconClass: `${CONFIG.URLS.BASE_URL}/assets/image-off.svg` },
+        { id: 'font-size-btn', textKey: 'FONT_SIZE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/fontsize.svg` },
+        { id: 'night-mode-btn', textKey: 'NIGHT_MODE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/mode-night.svg` },
+        { id: 'text-spacing-btn', textKey: 'TEXT_SPACING', iconClass: `${CONFIG.URLS.BASE_URL}/assets/ri_text-spacing-2.svg` },
+        { id: 'line-height-btn', textKey: 'LINE_HEIGHT', iconClass: `${CONFIG.URLS.BASE_URL}/assets/ri_line-height-1.svg` },
+        { id: 'remove-audio-btn', textKey: 'REMOVE_AUDIO', iconClass: `${CONFIG.URLS.BASE_URL}/assets/mdi_mute-1.svg` },
+        { id: 'highlight-links-btn', textKey: 'HIGHLIGHT_LINKS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/link-1.svg` },
+        { id: 'highlight-headers-btn', textKey: 'HIGHLIGHT_HEADERS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/cil_header-1.svg` },
+        { id: 'stop-animations-btn', textKey: 'STOP_ANIMATIONS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/stop-1.svg` },
+        { id: 'zoom-toggle-btn', textKey: 'ZOOM_TOGGLE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/zoom-1.svg` },
+        { id: 'cursor-size-btn', textKey: 'CURSOR_SIZE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/cursor-1.svg` },
+        { id: 'accessible-font-btn', textKey: 'ACCESSIBLE_FONT', iconClass: `${CONFIG.URLS.BASE_URL}/assets/font-1.svg` },
+        { id: 'read-aloud-btn', textKey: 'READ_ALOUD', iconClass: `${CONFIG.URLS.BASE_URL}/assets/read-aloud.svg` },
+        { id: 'keyboard-navigation-btn', textKey: 'KEYBOARD-NAVIGATION', iconClass: `${CONFIG.URLS.BASE_URL}/assets/save-1.svg` },
+        { id: 'reset-btn1', textKey: 'RESET', iconClass: `${CONFIG.URLS.BASE_URL}/assets/reset-1.svg` },
+        { id: 'save-settings-btn', textKey: 'SAVE_SETTINGS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/save-1.svg` },
+        
     ];
 
     buttons.forEach(({ id, textKey, iconClass }) => {
         const buttonDiv = this.createDiv(id || textKey.toLowerCase());
-        const buttonText = language[selectedLanguage][textKey] || textKey; // Get text from the language JSON
+        const buttonText = language[selectedLanguage][textKey] || textKey; 
         const button = this.createButton(id, buttonText, iconClass);
         buttonDiv.appendChild(button);
         body.appendChild(buttonDiv);
@@ -366,54 +488,112 @@ YourInclusion.prototype.createToolboxBody = function (selectedLanguage = CONFIG.
     return body;
 };
 
-  /*** Check the status of each popup flag */
-YourInclusion.prototype.arePopupsInactive = function () {
-   
-    const allInactive = !this.isFontSizePopupActive && !this.isSettingsPopupActive && !this.isContrastPopupActive;
-
-    console.log(`Are all popups inactive? ${allInactive}`);
-    return allInactive; 
+YourInclusion.prototype.initializeProperties = function () {
+    this.isFontSizePopupActive = false;
+    this.isSettingsPopupActive = false;
+    this.isContrastPopupActive = false;
 };
+
+
+  /*** Check the status of each popup flag */
+  YourInclusion.prototype.areAllPopupsInactive = function () {
+    const stateManager = this.createStateManager('AppState'); 
+    const state = stateManager.getState(); 
+
+    const anyPopupActive = state.isFontSizePopupActive || state.isSettingsPopupActive || state.isContrastPopupActive;
+    return !anyPopupActive;
+};
+
+
 
 
 /***  Initialize Toolbox */
 YourInclusion.prototype.initializeAccessibilityToolbox = function () {
     this.createToolbox();
-    sideButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        toolbox.classList.toggle('visible');
-    });
-
+    this.createSideButton();
+    const toolboxdiv = this.createDiv('syi-toolboxdiv');
+    const toolboxdiv1 = this.createDiv('syi-toolboxdiv1');
+    const toolboxdiv2 = this.createDiv('syi-toolboxdiv2');
     const toolbox = document.getElementById('syi-toolbox');
     const sideButton = document.getElementById('openToolboxButton');
-
-   
+    let visibilityCounter = 0; 
     sideButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        toolbox.classList.toggle('visible');
-
-    });
-
-    document.addEventListener('click', (event) => {
-        const isToolboxActive = toolbox.classList.contains('visible');
-    
-      
-        if (isToolboxActive) {
-            if (this.arePopupsInactive()) {
-            
-                if (!toolbox.contains(event.target) && !sideButton.contains(event.target)) {
-                    toolbox.classList.remove('visible');
-                    console.log('Toolbox closed as all popups are inactive.');
-                }
-            } else {
-                console.log('Toolbox remains open because a popup is active.');
+        const isVisible = toolbox.classList.toggle('visible'); 
+        if (isVisible) {
+            visibilityCounter++;
+            if (visibilityCounter === 1) {
+                this.updateToolboxColor();
             }
         }
     });
-    
-    // Load saved state
+    document.addEventListener('click', (event) => {
+        const isToolboxActive = toolbox.classList.contains('visible');
+        const popupsInactive = this.areAllPopupsInactive();
+
+        if (isToolboxActive && popupsInactive) {
+            if (!toolbox.contains(event.target) && !sideButton.contains(event.target)) {
+                toolbox.classList.remove('visible');
+            }
+        } else if (!popupsInactive) {
+        }
+    });
+    toolboxdiv.appendChild(toolbox);
+    toolboxdiv.appendChild(sideButton)
+    toolboxdiv1.appendChild(toolboxdiv);
+    toolboxdiv2.appendChild(toolboxdiv1);
+    document.body.appendChild(toolboxdiv2);
     this.loadToolbarState();
+    this.initializeProperties();
+    this.createStateManager();
+    this.listenForControlOne(sideButton);
 };
+YourInclusion.prototype.listenForControlOne = function (sideButton) {
+    document.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === '1') {
+            event.preventDefault(); 
+            sideButton.click(); 
+        }
+    });
+};
+ YourInclusion.prototype.createStateManager= function(storageKey = 'AppState') {
+    const defaultState = {
+        isFontSizePopupActive: false,
+        isSettingsPopupActive: false,
+        isContrastPopupActive: false,
+        zoomLevel: 1,
+        zoomIncrement: 0, 
+        textSpacing:0
+    };
+    if (!localStorage.getItem(storageKey)) {
+        localStorage.setItem(storageKey, JSON.stringify(defaultState));
+    }
+
+    return {
+        storageKey, 
+        saveState(state) {
+            localStorage.setItem(this.storageKey, JSON.stringify(state));
+            console.log('State saved to localStorage:', state);
+        },
+        getState() {
+            const state = JSON.parse(localStorage.getItem(this.storageKey)) || {};
+            console.log('State retrieved from localStorage:', state);
+            return state;
+        },
+        updateState(updates) {
+            const currentState = this.getState();
+            const updatedState = { ...currentState, ...updates };
+            this.saveState(updatedState);
+            console.log('State updated:', updatedState);
+        },
+        clearState() {
+            localStorage.removeItem(this.storageKey);
+            console.log('State cleared from localStorage');
+        }
+    };
+}
+
+
 
 
 /***
@@ -421,32 +601,20 @@ YourInclusion.prototype.initializeAccessibilityToolbox = function () {
  */
 YourInclusion.prototype.createSideButton = function () {
     const existingSideButton = document.getElementById('openToolboxButton'); 
-
-    // Remove existing side button if it exists
     if (existingSideButton) {
         existingSideButton.remove(); 
     }
-
-    // Create a new side button element
     const sideButton = this.createSideButtonElement();
-
-  // Add a custom checkmark for the side button
-  const checkmark = this.createSideButtonCheckmark('./assests/tick-white.svg');
+  const checkmark = this.createSideButtonCheckmark(`${CONFIG.URLS.BASE_URL}/assets/tick-white.svg`);
   sideButton.appendChild(checkmark);
-
-    // Make the side button draggable
     this.makeSideButtonDraggable(sideButton);
-
-    // Append the new side button to the body
     document.body.appendChild(sideButton);
+    
 };
 
 YourInclusion.prototype.createSideButtonCheckmark = function (svgPath) {
-    // Create a wrapper specifically for the side button's checkmark
     const wrapper = document.createElement('div');
-    wrapper.className = 'side-button-checkmark';
-
-    // Style the wrapper for the side button's checkmark
+    wrapper.className = 'syi-side-button-checkmark';
     wrapper.style.position = 'absolute';
     wrapper.style.top = '-4px';
     wrapper.style.right = '-3px'; 
@@ -459,9 +627,6 @@ YourInclusion.prototype.createSideButtonCheckmark = function (svgPath) {
     wrapper.style.alignItems = 'center';
     wrapper.style.justifyContent = 'center';
     wrapper.style.boxShadow = "-1px 4px 7px 0px rgb(0 0 0 / 35%)";
-
-    // Fetch and append the SVG for the side button's checkmark
-
     this.fetchAndAppendSVG(svgPath, wrapper);
     return wrapper;
 };
@@ -477,26 +642,23 @@ YourInclusion.prototype.updateSideButtonState = function () {
         console.error('Side button not found.');
         return;
     }
-
-    // Check if any button is active
     const isActive = Array.from(document.querySelectorAll('.syi-toolbox-button'))
         .some(button => button.dataset.active === 'true');
 
-    // Get the side button's checkmark
-    const checkmark = sideButton.querySelector('.side-button-checkmark');
+    const checkmark = sideButton.querySelector('.syi-side-button-checkmark');
 
     if (isActive) {
-        // If any button is active, show the tick mark and add a green border
+      
         if (checkmark) {
-            checkmark.style.visibility = 'visible'; // Show the tick mark
+            checkmark.style.visibility = 'visible';
         }
-        sideButton.style.border = '2px solid #28a745'; // Add green border
+        sideButton.style.border = '2px solid #28a745'; 
     } else {
-        // If no buttons are active, hide the tick mark and remove the border
+      
         if (checkmark) {
-            checkmark.style.visibility = 'hidden'; // Hide the tick mark
+            checkmark.style.visibility = 'hidden'; 
         }
-        sideButton.style.border = 'none'; // Remove the border
+        sideButton.style.border = 'none';
     }
 };
 
@@ -504,11 +666,11 @@ YourInclusion.prototype.updateSideButtonState = function () {
 
 
 YourInclusion.prototype.createSideButtonElement = function () {
-    const sideButton = this.createDiv('side-button', 'openToolboxButton');
+    const sideButton = this.createDiv('syi-side-button', 'openToolboxButton');
     const buttonImage = this.createImage(
         CONFIG.URLS.SIDE_BUTTON,
         'Open Toolbox',
-        'side-button-image'
+        'syi-side-button-image'
     );
     sideButton.appendChild(buttonImage);
     return sideButton;
@@ -532,17 +694,12 @@ YourInclusion.prototype.startDragging = function (event, sideButton) {
 
 YourInclusion.prototype.dragSideButton = function (event, sideButton) {
     if (!this.isDragging) return;
-
     let x = event.clientX - this.offsetX;
     let y = event.clientY - this.offsetY;
     const windowWidth = window.innerWidth;
-
-    // Snap side button to left or right based on the screen center
     x = x + sideButton.offsetWidth / 2 < windowWidth / 2
         ? 10 
         : windowWidth - sideButton.offsetWidth - 20; 
-
-    // Apply the position to the side button
     sideButton.style.left = `${x}px`;
     sideButton.style.top = `${y}px`;
 
@@ -562,35 +719,39 @@ YourInclusion.prototype.updateToolboxPosition = function (x, y, sideButton) {
     let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
     let toolboxTop = y - toolbox.offsetHeight - 60;
 
-    // Adjust toolbox position to stay within screen bounds
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
+    const scrollY = window.scrollY;
 
+    // Adjust for screen bounds and scrolling
     toolboxLeft = Math.max(10, Math.min(toolboxLeft, windowWidth - toolbox.offsetWidth - 10));
-    toolboxTop = Math.max(10, Math.min(toolboxTop, windowHeight - toolbox.offsetHeight - 10));
+    toolboxTop = Math.max(scrollY + 10, Math.min(toolboxTop, scrollY + windowHeight - toolbox.offsetHeight - 10));
 
     toolbox.style.left = `${toolboxLeft}px`;
     toolbox.style.top = `${toolboxTop}px`;
 
     // Adjust side button to stay below the toolbox
-    sideButton.style.top = `${toolboxTop + toolbox.offsetHeight + 10}px`;
+    const sideButtonTop = toolboxTop + toolbox.offsetHeight + 10;
+    sideButton.style.top = `${Math.min(sideButtonTop, scrollY + windowHeight - sideButton.offsetHeight - 10)}px`;
 
-    
+    // Check if toolbox is on the left or right side of the screen
     const isToolboxOnLeft = toolboxLeft < windowWidth / 2;
     this.updatePopupPositions(isToolboxOnLeft);
 };
+
+
 
 /**
  * Updates the positions of all popups dynamically based on the toolbox location.
  * @param {boolean} isToolboxOnLeft 
  */
 
-    YourInclusion.prototype.updatePopupPositions = function (isToolboxOnLeft) {
+YourInclusion.prototype.updatePopupPositions = function (isToolboxOnLeft) {
 
     const popupConfigs = [
-        { selector: '.syi-font-size-popup', left: isToolboxOnLeft ? '25%' : '74%' },
+        { selector: '.syi-font-size-popup', left: isToolboxOnLeft ? '25%' : '72%' },
         { selector: '.syi-settings-popup', left: isToolboxOnLeft ? '28%' : '72%' },
-        { selector: '.syi-contrast-popup', left: isToolboxOnLeft ? '30%' : '70%' },
+        { selector: '.syi-contrast-popup', left: isToolboxOnLeft ? '30%' : '69%' },
     ];
 
     popupConfigs.forEach(({ selector, left }) => {
@@ -639,7 +800,7 @@ YourInclusion.prototype.initRemoveImages = function () {
 
 YourInclusion.prototype.toggleImages = function () {
     
-    const images = document.querySelectorAll('img:not(.syi-toolbox-image):not(.side-button-image):not(.syi-toolbox-logo)');
+    const images = document.querySelectorAll('img:not(.syi-toolbox-image):not(.syi-side-button-image):not(.syi-toolbox-logo)');
 
     
     if (this.imagesHidden) {
@@ -684,34 +845,34 @@ YourInclusion.prototype.addFontSizePopup = function () {
         console.error('Font Size button or toolbox not found.');
         return;
     }
-    this.isFontSizeChanged = false;
 
-  
+    this.isFontSizeChanged = false;
+    this.isFontSizePopupActive = false;
+    const stateManager = this.createStateManager('AppState');
+   
+    this.fontSizeChange = this.fontSizeChange || 0; 
+
     fontSizeDiv.addEventListener('click', () => {
-        
         let fontSizePopup = document.querySelector('.syi-font-size-popup');
         if (!fontSizePopup) {
-            
             fontSizePopup = document.createElement('div');
             fontSizePopup.className = 'syi-font-size-popup';
 
-            
             fontSizePopup.innerHTML = `
                 <div class="syi-font-popup-header">
-                           <span class="font-popup-title">${language[CONFIG.LANGUAGE]['FONT_SIZE_SETTINGS']}</span>
+                    <span class="font-popup-title">${language[CONFIG.LANGUAGE]['FONT_SIZE_SETTINGS']}</span>
                     <button id="close-font-popup" class="close-popup-btn">✖</button>
                 </div>
                 <div class="syi-font-popup-content">
                     <button id="decrease-font-btn" class="syi-font-popup-btn">-</button>
-                    <span id="font-size-display" class="syi-font-popup-display">0</span>
+                    <span id="font-size-display" class="syi-font-popup-display">${this.fontSizeChange}</span>
                     <button id="increase-font-btn" class="syi-font-popup-btn">+</button>
                 </div>
-                <div class="syi-popup-reset">
+                <div class="syi-popup-reset" style="padding: 10px;">
                     <button id="reset-font-btn" class="reset-popup-btn">${language[CONFIG.LANGUAGE]['RESET']}</button>
                 </div>
             `;
 
-           
             document.body.appendChild(fontSizePopup);
 
             const toolboxRect = toolbox.getBoundingClientRect();
@@ -724,79 +885,73 @@ YourInclusion.prototype.addFontSizePopup = function () {
             const fontSizeDisplay = fontSizePopup.querySelector('#font-size-display');
             const closeButton = fontSizePopup.querySelector('#close-font-popup');
 
-            let fontSizeChange = 0;
-            const originalFontSizes = new Map();
             const allElements = document.body.querySelectorAll(
                 '*:not(.syi-toolbox):not(.syi-toolbox *):not(.font-size-popup):not(.syi-font-size-popup *)'
             );
-            allElements.forEach((element) => {
-                const computedStyle = window.getComputedStyle(element);
-                originalFontSizes.set(element, computedStyle.fontSize);
-            });
 
-            const applyFontSizeChange = (change) => {
+            if (!this.originalFontSizes) {
+                this.originalFontSizes = new Map();
                 allElements.forEach((element) => {
-                    const originalSize = parseFloat(originalFontSizes.get(element));
-                    const newSize = originalSize + change;
-                    element.style.fontSize = `${newSize}px`;
+                    const computedStyle = window.getComputedStyle(element);
+                    this.originalFontSizes.set(element, parseFloat(computedStyle.fontSize));
                 });
-            };
+            }
 
-            const updateFontSizeDisplay = () => {
-                fontSizeDisplay.textContent = fontSizeChange > 0 ? `+${fontSizeChange}` : `${fontSizeChange}`;
-              
-                 if (fontSizeChange === 0) {
-                    this.isFontSizeChanged = false;
-                } else {
-                    this.isFontSizeChanged = true;
-                }
-                this.checkFontSizeChangeFlag();
-            };
-
-            decreaseButton.addEventListener('click', () => {
-                if (fontSizeChange > -6) {
-                    fontSizeChange -= 1;
-                    applyFontSizeChange(fontSizeChange);
-                    this.isFontSizeChanged = true;
-                    updateFontSizeDisplay();
-                }
-            });
-
-            increaseButton.addEventListener('click', () => {
-                if (fontSizeChange < 6) {
-                    fontSizeChange += 1;
-                    applyFontSizeChange(fontSizeChange);
-                    this.isFontSizeChanged = true;
-                    updateFontSizeDisplay();
-                }
-            });
+            const applyFontSizeChange = () => {
+                allElements.forEach((element) => {
+                    const originalSize = this.originalFontSizes.get(element);
             
-
-            resetButton.addEventListener('click', () => {
-                
-                allElements.forEach((element) => {
-                    element.style.fontSize = originalFontSizes.get(element);
+                    if (originalSize) {
+                        const newSize = originalSize + this.fontSizeChange; 
+                        const clampedSize = Math.min(Math.max(newSize, originalSize - 6), originalSize + 6);
+                        element.style.fontSize = `${clampedSize}px`;
+                    }
                 });
-                fontSizeChange = 0;
-                this.isFontSizeChanged = false; 
-                updateFontSizeDisplay();
+            };
+            
+            const updateFontSizeDisplay = () => {
+                fontSizeDisplay.textContent = this.fontSizeChange > 0
+                    ? `+${this.fontSizeChange}`
+                    : `${this.fontSizeChange}`;
+                this.isFontSizeChanged = this.fontSizeChange !== 0;
+            };
+            decreaseButton.addEventListener('click', () => {
+                if (this.fontSizeChange > -6) { 
+                    this.fontSizeChange -= 1;
+                    applyFontSizeChange(); 
+                    updateFontSizeDisplay(); 
+                }
             });
-
-            closeButton.addEventListener('click', () => {
-                fontSizePopup.style.display = 'none';
+            increaseButton.addEventListener('click', () => {
+                if (this.fontSizeChange < 6) { 
+                    this.fontSizeChange += 1;
+                    applyFontSizeChange(); 
+                    updateFontSizeDisplay(); 
+                }
             });
-        }
-
-        if (fontSizePopup.style.display === 'block') {
-            fontSizePopup.style.display = 'none';
-            this.isFontSizePopupActive = false;
-        } else {
-            this.closeAllPopups(); 
-            fontSizePopup.style.display = 'block'; 
-            this.isFontSizePopupActive = true;
-        }
+            resetButton.addEventListener('click', () => {
+                allElements.forEach((element) => {
+                    element.style.fontSize = `${this.originalFontSizes.get(element)}px`;
+                });
+                this.fontSizeChange = 0; 
+                updateFontSizeDisplay(); 
+            });
+      closeButton.addEventListener('click', () => {
+        fontSizePopup.style.display = 'none';
+        stateManager.updateState({ isFontSizePopupActive: false });
     });
+}
+if (fontSizePopup.style.display === 'block') {
+    fontSizePopup.style.display = 'none';
+    stateManager.updateState({ isFontSizePopupActive: false });
+} else {
+    this.closeAllPopups(); 
+    fontSizePopup.style.display = 'block';
+    stateManager.updateState({ isFontSizePopupActive: true }); 
+}
+});
 };
+
 /*** Function to check the flag and set the button state  */
 YourInclusion.prototype.checkFontSizeChangeFlag = function () {
     this.setActiveButton('font-size-btn', this.isFontSizeChanged);
@@ -832,7 +987,6 @@ YourInclusion.prototype.toggleNightMode = function () {
         }
     });
     this.setActiveButton('night-mode-btn', isNightModeEnabled);
-    console.log(`Night Mode ${isNightModeEnabled ? 'enabled' : 'disabled'}.`);
 };
 
 /*** Text Spacing Feature */
@@ -859,10 +1013,21 @@ YourInclusion.prototype.toggleTextSpacing = function (buttonId) {
         element.style.letterSpacing = spacingLevel;
     });
 
+    const stateManager = this.createStateManager('AppState');
+    const currentState = stateManager.getState();
+
+    let newTextSpacingIncrement = currentState.textSpacingIncrement || 0;
+    if (spacingLevel === 'normal') {
+        newTextSpacingIncrement = 0;
+    } else {
+        newTextSpacingIncrement = Math.min(newTextSpacingIncrement + 1, 3);
+    }
+    stateManager.updateState({
+        textSpacingIncrement: newTextSpacingIncrement
+    });
+    this.updateTextSpacingProgressBar(buttonId, newTextSpacingIncrement);
   
     this.setActiveButton(buttonId, spacingLevel !== 'normal');
-
-    console.log(`Text spacing set to: ${spacingLevel}`);
 };
 
 
@@ -879,7 +1044,7 @@ YourInclusion.prototype.initLineHeightFeature = function () {
 
 
 YourInclusion.prototype.toggleLineHeight = function (buttonId) {
-    const elementsToAdjust = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *)');
+    const elementsToAdjust = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *):not(.keyboard-popup)');
     const lineHeightStates = ['normal', '1.5', '2', '2.5'];
 
    
@@ -895,6 +1060,20 @@ YourInclusion.prototype.toggleLineHeight = function (buttonId) {
     elementsToAdjust.forEach(element => {
         element.style.lineHeight = lineHeightLevel;
     });
+      const stateManager = this.createStateManager('AppState');
+      const currentState = stateManager.getState();
+      let newLineHeightIncrement = currentState.lineHeightIncrement || 0;
+
+      if (lineHeightLevel === 'normal') {
+          newLineHeightIncrement = 0;
+      } else {
+          newLineHeightIncrement += 1;
+      }
+      stateManager.updateState({
+          lineHeightIncrement: newLineHeightIncrement
+      });
+  
+      this.updateLineHeightProgressBar(buttonId, newLineHeightIncrement);
 
     if (lineHeightLevel === 'normal') {
         this.setActiveButton(buttonId, false); 
@@ -911,14 +1090,10 @@ YourInclusion.prototype.setActiveButton = function (activeButtonId, isActive = n
     const button = document.getElementById(activeButtonId);
 
     if (button) {
-        // Determine the new state
         const newState = isActive !== null ? isActive : button.dataset.active !== 'true';
-
         if (newState) {
             button.classList.add('active-button');
             button.dataset.active = 'true';
-
-            // Show the checkmark for the button
             const checkmark = button.querySelector('.checkmark-wrapper');
             if (checkmark) {
                 checkmark.style.display = 'block';
@@ -926,16 +1101,12 @@ YourInclusion.prototype.setActiveButton = function (activeButtonId, isActive = n
         } else {
             button.classList.remove('active-button');
             button.dataset.active = 'false';
-
-            // Hide the checkmark for the button
             const checkmark = button.querySelector('.checkmark-wrapper');
             if (checkmark) {
                 checkmark.style.display = 'none';
             }
         }
     }
-
-    // Update the state of the side button
     this.updateSideButtonState();
 };
 
@@ -951,131 +1122,291 @@ YourInclusion.prototype.resetButtonStates = function () {
         button.classList.remove('active-button'); 
         button.removeAttribute('data-active'); 
     });
-
-    console.log('All buttons have been reset to their default state.');
 };
-
-
-
 
 /*** Reset Function */
 
 YourInclusion.prototype.initResetFeature = function () {
-    
     const resetButtons = document.querySelectorAll('#reset-btn, #reset-btn1');
 
-  
     resetButtons.forEach((button) => {
         button.addEventListener('click', () => {
-            this.resetToolbox(); 
+            this.resetToolbox();
         });
     });
-}
-
+};
 
 YourInclusion.prototype.resetToolbox = function () {
     this.closeAllPopups();
+    this.removeAllHighlights();
+    this.restoreDefaultFontStyles();
+    this.removeBlueFilter();
+    this.restoreImages();
+    this.resetAudioSettings();
+    this.resetNightMode();
+    this.resetCursorSize();
+    this.resetAccessibleFont();
+    this.reEnableAnimations();
+    this.resetContrastSettings();
+    this.resetTextSpacing();
+    this.resetLineHeight();
+    this.resetZoomLevel();
+    this.resetKeyboardNavigation();
+    this.resetButtonStates();
+    this.resetPopupSettings();
+    this.clearStorage();
+    this.updateSideButtonState();
+    this.resetActiveButtons();
+    this.resetReadAloud();
+    this.validateAndStartPluginReset();
+    this.progressBarReset();
+};
 
-    /*** Remove highlights added by the toolbox */
+
+
+YourInclusion.prototype.removeAllHighlights = function () {
     document.querySelectorAll('.highlight-links, .highlight-headers, .highlight-images').forEach((el) => {
         el.classList.remove('highlight-links', 'highlight-headers', 'highlight-images');
     });
+};
 
-    /*** Restore only toolbox-specific font size, spacing, and transforms, excluding popups and toolbox */
-    document.querySelectorAll('[data-toolbox-modified]').forEach((el) => {
-        if (!el.closest('.syi-font-size-popup') && !el.closest('.syi-toolbox')) {
-            el.style.fontSize = '';
-            el.style.letterSpacing = 'normal'; 
-            el.style.lineHeight = 'normal';    
-            el.style.transform = '';
-            el.style.transformOrigin = '';
-            el.style.width = '';
-            el.removeAttribute('data-toolbox-modified');
-        }
-    });
+YourInclusion.prototype.restoreDefaultFontStyles = function () {
+    const fontPopup = document.querySelector('.syi-font-size-popup');
+    const resetButton = fontPopup ? fontPopup.querySelector('.reset-popup-btn') : null;
 
-    /*** Remove blue filter if applied by the toolbox */
+    if (fontPopup && resetButton) {
+        fontPopup.style.display = 'block';
+        fontPopup.classList.add('visible');
+        resetButton.click();
+        setTimeout(() => {
+            fontPopup.style.display = 'none';
+            fontPopup.classList.remove('visible');
+        }, 10); 
+        this.addFontSizePopup();
+    } else {
+        console.error('Font popup or reset button not found.');
+    }
+};
+
+
+YourInclusion.prototype.removeBlueFilter = function () {
     const blueOverlay = document.querySelector('.syi-blue-overlay');
     if (blueOverlay) blueOverlay.classList.remove('active');
     this.setActiveButton('blue-filter-btn', false);
+};
 
-    /*** Restore images hidden by the toolbox */
+YourInclusion.prototype.restoreImages = function () {
     const removeImageButton = document.getElementById('remove-images-btn');
     if (this.imagesHidden && removeImageButton) {
         removeImageButton.click();
-        console.log('Remove Images button triggered via reset.');
     }
+};
 
-    /*** Unmute audio/video elements muted by the toolbox */
+YourInclusion.prototype.resetAudioSettings = function () {
     const audioButton = document.getElementById('remove-audio-btn');
     if (audioButton) {
         const soundElements = document.querySelectorAll('audio, video');
         const isAlreadyMuted = Array.from(soundElements).every(el => el.muted);
-
+        const isAudioButtonActive = audioButton.classList.contains('active') || audioButton.dataset.active === 'true';
+        if (isAudioButtonActive) {
+            audioButton.classList.remove('active'); 
+            audioButton.dataset.active = 'false';  
+        }
         if (isAlreadyMuted) {
-            console.log('Audio is already muted. Simulating click to unmute...');
-            audioButton.click(); // Simulate button click
+            soundElements.forEach(el => el.muted = false);  
+        }
+
+    }
+};
+
+YourInclusion.prototype.resetNightMode = function () {
+    const nightModeButton = document.getElementById('night-mode-btn');
+    if (document.body.classList.contains('syi-night-mode') && nightModeButton) {
+        nightModeButton.click();
+    }
+};
+
+YourInclusion.prototype.resetCursorSize = function () {
+    document.documentElement.style.cursor = 'auto';
+};
+
+YourInclusion.prototype.resetAccessibleFont = function () {
+    document.body.classList.remove('syi-accessible-font');
+};
+
+YourInclusion.prototype.reEnableAnimations = function () {
+    document.body.classList.remove('disable-animations');
+    this.setActiveButton('stop-animations-btn', false);
+};
+
+YourInclusion.prototype.resetContrastSettings = function () {
+    this.resetContrast();
+    this.setActiveButton('contrast-btn', false);
+};
+
+YourInclusion.prototype.resetTextSpacing = function () {
+    const elements = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *)');
+    elements.forEach((element) => {
+        element.style.letterSpacing = 'normal';
+    });
+    this.currentTextSpacingIndex = 0;
+    this.setActiveButton('text-spacing-btn', false);
+};
+
+YourInclusion.prototype.resetLineHeight = function () {
+    const elements = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *)');
+    elements.forEach((element) => {
+        element.style.lineHeight = 'normal';
+    });
+    this.currentLineHeightIndex = 0;
+    this.setActiveButton('line-height-btn', false);
+};
+
+YourInclusion.prototype.resetZoomLevel = function () {
+    this.applyZoom(1);
+};
+
+YourInclusion.prototype.resetKeyboardNavigation = function () {
+    this.setActiveButton('keyboard-navigation-btn', false);
+    this.hideKeyboardNavigationPopup();
+};
+
+YourInclusion.prototype.resetButtonStates = function () {
+    const buttons = document.querySelectorAll('.syi-toolbox-button');
+    buttons.forEach((button) => {
+        
+        button.classList.remove('active-button'); 
+        button.removeAttribute('data-active'); 
+    });
+};
+
+YourInclusion.prototype.resetPopupSettings = function () {
+    const defaultSettings = { 
+        color: this.selectedHeaderColor, 
+        language: CONFIG.LANGUAGE 
+    };
+
+    // Reset the popup header color
+    if (header) {
+        header.style.backgroundColor = defaultSettings.color;
+    }
+
+    // Reset the color picker value
+    if (colorPicker) {
+        const colorPickerInput = colorPicker.querySelector('#color-picker');
+        if (colorPickerInput) {
+            colorPickerInput.value = defaultSettings.color;
         }
     }
 
-
-    /*** Disable night mode introduced by the toolbox */
-    const nightModeButton = document.getElementById('night-mode-btn');
-    if (document.body.classList.contains('syi-night-mode') && nightModeButton) {
-        nightModeButton.click(); 
+    // Reset the toolbox header color
+    const toolboxHeader = document.querySelector('.syi-toolbox-header');
+    if (toolboxHeader) {
+        toolboxHeader.style.backgroundColor = defaultSettings.color;
     }
 
-    /*** Reset cursor size to default */
-    document.documentElement.style.cursor = 'auto';
+    // Reset the icons' colors
+    const toolboxIcons = document.querySelectorAll('.syi-toolbox-body svg');
+    toolboxIcons.forEach(svg => {
+        svg.style.fill = defaultSettings.color;
+        svg.style.stroke = defaultSettings.color;
 
-    /*** Reset accessible font settings */
-    document.body.classList.remove('accessible-font');
-
-    /*** Re-enable animations if disabled by the toolbox */
-    document.body.classList.remove('disable-animations');
-    this.setActiveButton('stop-animations-btn', false);
-
-    /*** Trigger resetContrast function to handle contrast settings */
-    this.resetContrast();
-    this.setActiveButton('contrast-btn', false);
-
-    /*** Reset Text Spacing */
-    const elementsToAdjustTextSpacing = document.querySelectorAll(
-        'body *:not(.syi-toolbox):not(.syi-toolbox *)'
-    );
-    elementsToAdjustTextSpacing.forEach((element) => {
-        element.style.letterSpacing = 'normal'; 
+        const innerElements = svg.querySelectorAll('*');
+        innerElements.forEach(inner => {
+            inner.style.fill = defaultSettings.color;
+            inner.style.stroke = defaultSettings.color;
+        });
     });
-    this.currentTextSpacingIndex = 0; 
-    console.log('Text spacing reset to normal.');
-    this.setActiveButton('text-spacing-btn', false);
-    this.setActiveButton('line-height-btn', false);
 
-    /*** Reset Line Height */
-    const elementsToAdjustLineHeight = document.querySelectorAll(
-        'body *:not(.syi-toolbox):not(.syi-toolbox *)'
-    );
-    elementsToAdjustLineHeight.forEach((element) => {
-        element.style.lineHeight = 'normal'; 
+    // Reset the toolbox buttons
+    const toolboxButtons = document.querySelectorAll('.syi-toolbox-body .syi-toolbox-btn, .syi-toolbox-button');
+    toolboxButtons.forEach(button => {
+        button.style.backgroundColor = defaultSettings.color;
+        button.style.borderColor = defaultSettings.color;
+        button.style.color = defaultSettings.color;
     });
-    this.currentLineHeightIndex = 0; 
-    console.log('Line height reset to normal.');
 
-    /*** Clear toolbox-specific local storage settings */
-    localStorage.removeItem('animationsDisabled');
-    localStorage.removeItem('nightMode');
-    localStorage.removeItem('zoomLevel');
-    localStorage.removeItem('toolbarState');
+    // Reset the language selector
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        languageSelect.value = defaultSettings.language;
+    }
 
-    /*** Reset zoom level */
-    this.applyZoom(1);
+    // Reset the CSS variable
+    document.documentElement.style.setProperty('--bg-color', defaultSettings.color, 'important');
+};
 
-    /*** Reset button states controlled by the toolbox */
-    this.resetButtonStates();
-    this.resetPopupSettings();
-    console.log('All buttons reset.');
+YourInclusion.prototype.clearStorage = function () {
+    localStorage.clear();
+    sessionStorage.clear();
+};
+YourInclusion.prototype.resetReadAloud = function () {
+    this.disableDefaultClickToRead();
+    this.disableCursorReadAloud();
+    this.stopReadAloud();
 
-    console.log('Toolbox reset to the original state.');
+
+    const toolbar = document.getElementById('read-aloud-toolbar');
+    if (toolbar) {
+        toolbar.remove();
+    }
+
+    const readAloudButton = document.getElementById('read-aloud-btn'); 
+    if (readAloudButton) {
+        this.setActiveButton(readAloudButton.id, false);
+    }
+
+    this.isReadAloudActive = false;
+    this.isCursorReadAloudActive = false;
+    this.currentSpeed = 1; 
+    this.currentVolume = 1; 
+    localStorage.setItem('readAloudActive', false);
+};
+
+YourInclusion.prototype.resetActiveButtons = function () {
+    const buttons = document.querySelectorAll('.syi-toolbox-button');
+    buttons.forEach(button => {
+        button.classList.remove('active-button');
+        button.dataset.active = 'false';
+
+        const checkmark = button.querySelector('.checkmark-wrapper');
+        if (checkmark) {
+            checkmark.style.display = 'none';
+        }
+    });
+    this.updateSideButtonState();
+};
+YourInclusion.prototype.progressBarReset = function (){
+    this.updateZoomButtonProgressBar('zoom-toggle-btn');
+    this.updateTextSpacingProgressBar('text-spacing-btn', 0);
+    this.updateLineHeightProgressBar('line-height-btn', 0);
+    this.updateCursorSizeProgressBar('cursor-size-btn', 0);
+};
+
+YourInclusion.prototype.updateSideButtonState = function () {
+    const sideButton = document.getElementById('openToolboxButton');
+
+    if (!sideButton) {
+        console.error('Side button not found.');
+        return;
+    }
+
+    const isActive = Array.from(document.querySelectorAll('.syi-toolbox-button'))
+        .some(button => button.dataset.active === 'true');
+
+    const checkmark = sideButton.querySelector('.syi-side-button-checkmark');
+
+    if (isActive) {
+        if (checkmark) {
+            checkmark.style.visibility = 'visible';
+        }
+        sideButton.style.border = '2px solid #28a745'; 
+    } else {
+        if (checkmark) {
+            checkmark.style.visibility = 'hidden';
+        }
+        sideButton.style.border = 'none';
+    }
 };
 
 
@@ -1096,11 +1427,13 @@ YourInclusion.prototype.initContrastFeature = function () {
 
 YourInclusion.prototype.createContrastPopup = function () {
     this.closeAllPopups(); 
+    const stateManager = this.createStateManager('AppState');
 
     const existingPopup = document.getElementById('syi-contrast-popup');
     if (existingPopup) {
         existingPopup.remove();
         this.isContrastPopupActive = false;
+        stateManager.updateState({ isContrastPopupActive: false });
         return;
     }
 
@@ -1108,7 +1441,7 @@ YourInclusion.prototype.createContrastPopup = function () {
     popup.id = 'syi-contrast-popup';
     popup.className = 'syi-contrast-popup'; 
 
-    const header = this.createPopupHeader(language[CONFIG.LANGUAGE]['CONTRAST'], () => {
+    const header = this.createContrastPopupHeader(language[CONFIG.LANGUAGE]['CONTRAST'], () => {
         popup.remove(); 
         this.isContrastPopupActive = false;
     });
@@ -1132,7 +1465,9 @@ YourInclusion.prototype.createContrastPopup = function () {
     closeButton.className = 'syi-contrast-close-button';
     closeButton.textContent = 'X';
     closeButton.addEventListener('click', () => { 
-        popup.remove();       
+        event.stopPropagation(); 
+        popup.remove();
+        stateManager.updateState({ isContrastPopupActive: false });       
     });
      body.appendChild(closeButton);
  
@@ -1156,11 +1491,11 @@ YourInclusion.prototype.createContrastPopup = function () {
 
     document.body.appendChild(popup);
 
-    this.isContrastPopupActive = true; 
+    stateManager.updateState({ isContrastPopupActive: true });
 };
 
 
-YourInclusion.prototype.createPopupHeader = function (titleText, closeCallback) {
+YourInclusion.prototype.createContrastPopupHeader = function (titleText, closeCallback) {
     const header = document.createElement('div');
     header.className = 'syi-contrast-popup-header'; 
 
@@ -1174,17 +1509,31 @@ YourInclusion.prototype.createPopupHeader = function (titleText, closeCallback) 
 };
 
 YourInclusion.prototype.addPresetModes = function (container) {
-    const modes = [{ id: 'grayscale', text: language[CONFIG.LANGUAGE]['UNCOLORED_DISPLAY'] }];
+    const switchContainer = document.createElement('div');
+    switchContainer.className = 'switch-container';
+    const label = document.createElement('p');
+    label.textContent = label.textContent = language[CONFIG.LANGUAGE]['UNCOLORED_DISPLAY'];
+    label.style.color = "#333333";
+    label.style.fontWeight = 'bold';
+    switchContainer.appendChild(label);
 
-    modes.forEach(({ id, text }) => {
-        const modeButton = document.createElement('button');
-        modeButton.id = id;
-        modeButton.className = 'syi-contrast-mode-button';
-        modeButton.textContent = text;
-        modeButton.addEventListener('click', (e) => this.toggleContrastMode(id, e.target));
-        container.appendChild(modeButton);
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'mz-switch-rounded';
+    checkbox.id = 'mz-switch-rounded';
+    const switchLabel = document.createElement('label');
+    switchLabel.setAttribute('for', 'mz-switch-rounded');
+
+    switchContainer.appendChild(checkbox);
+    switchContainer.appendChild(switchLabel);
+    checkbox.addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        this.toggleContrastMode(isChecked ? 'grayscale' : 'default', e.target);
     });
+
+    container.appendChild(switchContainer);
 };
+
 YourInclusion.prototype.contrastModeActive = false;
 
 YourInclusion.prototype.addCustomColorControls = function (container) {
@@ -1197,7 +1546,7 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     bgLabel.textContent = language[CONFIG.LANGUAGE]['BACKGROUND'];
 
     const bgColorContainer = document.createElement('div');
-    bgColorContainer.className = 'color-picker-container';
+    bgColorContainer.className = 'syi-color-picker-container';
 
     predefinedColors.forEach((color) => {
         const colorButton = document.createElement('button');
@@ -1232,7 +1581,7 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     textLabel.textContent = language[CONFIG.LANGUAGE]['TEXT_COLOR'];
 
     const textColorContainer = document.createElement('div');
-    textColorContainer.className = 'color-picker-container';
+    textColorContainer.className = 'syi-color-picker-container';
 
     predefinedColors.forEach((color) => {
         const colorButton = document.createElement('button');
@@ -1273,8 +1622,7 @@ YourInclusion.prototype.applyBackgroundColor = function (color) {
         element.style.background = color;
         element.style.backgroundColor = color;
     });
-
-    console.log(`Background applied to all elements: ${color}`);
+    this.customBackgroundColor = color;
 };
 
 YourInclusion.prototype.applyCustomTextColor = function (color) {
@@ -1288,14 +1636,12 @@ YourInclusion.prototype.applyCustomTextColor = function (color) {
 
        
         const textElements = document.querySelectorAll(
-            'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, input, textarea'
+            'p, h1, h2, h3, h4, h5, h6, span, li, a,label, input, textarea'
         );
 
         textElements.forEach((element) => {
             if (excludeToolbarAndPopup(element)) {
                 element.style.color = color; 
-            } else {
-                console.log('Excluded element:', element); 
             }
         });
 
@@ -1319,27 +1665,18 @@ YourInclusion.prototype.resetContrast = function () {
     });
 
     this.updateContrastFlag(false);
-    console.log('Contrast settings reset to original.');
 };
 
 YourInclusion.prototype.toggleContrastMode = function (mode, button) {
     const isActive = document.body.classList.contains(mode);
-
-    // Remove all contrast modes
     document.body.classList.remove('bright-contrast', 'reverse-contrast', 'grayscale');
 
     if (!isActive) {
-        // Activate the selected mode
         document.body.classList.add(mode);
-        this.updateContrastFlag(true); // Set the contrast flag to active
-        console.log(`${mode} mode activated.`);
+        this.updateContrastFlag(true);
     } else {
-        // All contrast modes are deactivated
-        this.updateContrastFlag(false); // Set the contrast flag to inactive
-        console.log(`${mode} mode deactivated.`);
+        this.updateContrastFlag(false); 
     }
-
-    // Update the button states after the mode change
     this.updateContrastButtonStates(button, !isActive);
 };
 
@@ -1372,25 +1709,21 @@ YourInclusion.prototype.setContrastMode = function (savedState) {
 
     if (contrastMode) {
         document.body.classList.add(contrastMode);
-        console.log(`Restored contrast mode: ${contrastMode}`);
     }
 
     if (bgColor) {
         document.body.style.backgroundColor = bgColor;
-        console.log(`Restored background color: ${bgColor}`);
     }
 
     if (textColor) {
         const textElements = document.querySelectorAll(
-            'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea'
+            'p, h1, h2, h3, h4, h5, h6, span, li, a,label, button, input, textarea'
         );
         textElements.forEach((element) => {
             element.style.color = textColor;
         });
-        console.log(`Restored text color: ${textColor}`);
     }
 };
-
 
 
 // Save Function
@@ -1401,7 +1734,6 @@ YourInclusion.prototype.initSaveFeature = function () {
     if (saveButton) {
         saveButton.addEventListener('click', () => {
             this.saveToolbarState();
-            console.log('Settings saved.');
         });
     } else {
         console.error('Save button not found.');
@@ -1414,7 +1746,7 @@ YourInclusion.prototype.saveToolbarState = function () {
         isMuted: this.isMuted || false,
         currentFontSize: this.getCurrentFontSize(),
         originalFontSize: this.originalFontSize || this.getCurrentFontSize(),
-        fontSizeChangeCount: this.fontSizeChangeCount || 0,
+        fontSizeChange: this.fontSizeChange || 0,
         nightModeActive: document.body.classList.contains('night-mode') || false,
         zoomLevel: parseFloat(localStorage.getItem('zoomLevel')) || 1,
         textSpacingIndex: this.currentTextSpacingIndex || 0,
@@ -1423,14 +1755,14 @@ YourInclusion.prototype.saveToolbarState = function () {
         accessibleFont: document.body.classList.contains('accessible-font') || false,
         animationsDisabled: document.body.classList.contains('disable-animations') || false,
         contrastMode: this.getContrastMode(),
-        customBackgroundColor: this.customBackgroundColor || null,
+        customBackgroundColor: this.customBackgroundColor || null, 
         customTextColor: this.customTextColor || null,
         activeButtons: this.getActiveButtons(),
         highlightedLinks: document.querySelector('.highlight-links') !== null,
         highlightedHeaders: document.querySelector('.highlight-headers') !== null,
         selectedHeaderColor: localStorage.getItem('popupHeaderColor') || null,
-        popupLanguage: CONFIG.LANGUAGE || 'en',
-        popupColor: document.getElementById('color-picker')?.value || '#393636'
+        popupLanguage: CONFIG.LANGUAGE || 'en-US',
+        popupColor: document.getElementById('syi-color-picker')?.value || this.selectedHeaderColor
     };
 
     localStorage.setItem('toolbarState', JSON.stringify(state));
@@ -1470,11 +1802,21 @@ YourInclusion.prototype.loadToolbarState = function () {
     }
 
     // Restore Audio Mute State
-    if (savedState.isMuted) {
-        this.audioRemoval(); 
-        this.setActiveButton('remove-audio-btn', true);
-    }
+    const audioButton = document.getElementById('remove-audio-btn');
+if (audioButton) {
+    const soundElements = document.querySelectorAll('audio, video');
+    const isAlreadyMuted = Array.from(soundElements).every(el => el.muted);
 
+    // Check if the audio button is already active
+    const isAudioButtonActive = audioButton.classList.contains('active') || audioButton.dataset.active === 'true';
+
+    if (!isAudioButtonActive && isAlreadyMuted) {
+        console.log('Audio is already muted, and the button is not active. No action needed.');
+    } else if (!isAudioButtonActive) {
+        console.log('Audio is not muted. Simulating click to mute...');
+        audioButton.click(); // Simulate button click to mute
+    }
+}
   
      // Restore Highlight Links
      if (savedState.highlightedLinks) {
@@ -1541,26 +1883,14 @@ YourInclusion.prototype.loadToolbarState = function () {
         console.error('Blue Filter button is missing.');
     }
     
-       // Restore Font Size
-        // Restore Original Font Size
-    this.originalFontSize = parseFloat(savedState.originalFontSize) || this.getCurrentFontSize();
-    this.fontSizeChangeCount = parseInt(savedState.fontSizeChangeCount, 10) || 0;
 
-    // Calculate the current font size based on the original and change count
-    const currentFontSize = this.originalFontSize + this.fontSizeChangeCount;
+    // Restore Font Size Logic
 
-    // Apply the current font size
-    document.body.style.fontSize = `${currentFontSize}px`;
-    console.log(`Font size restored to: ${currentFontSize}px (Original: ${this.originalFontSize}px, Change Count: ${this.fontSizeChangeCount})`);
+    this.fontSizeChange = savedState.fontSizeChange || 0;
 
-    // Update the font size display
-    const fontSizeDisplay = document.querySelector('#font-size-display');
-    if (fontSizeDisplay) {
-        fontSizeDisplay.textContent = this.fontSizeChangeCount > 0
-            ? `+${this.fontSizeChangeCount}`
-            : `${this.fontSizeChangeCount}`;
+    if (this.fontSizeChange !== 0) {
+        this.simulateFontSizeAdjustment(this.fontSizeChange);
     }
-
 
     // Restore Animations
     if (savedState.animationsDisabled) {
@@ -1580,20 +1910,17 @@ YourInclusion.prototype.loadToolbarState = function () {
    // Restore Contrast Mode
    if (savedState.contrastMode) {
     document.body.classList.add(savedState.contrastMode);
-    console.log(`Restored contrast mode: ${savedState.contrastMode}`);
 }
 
-// Restore Custom Background Color
-if (savedState.customBackgroundColor) {
-    document.body.style.backgroundColor = savedState.customBackgroundColor;
-    console.log(`Restored custom background color: ${savedState.customBackgroundColor}`);
+   // Restore background color
+   if (savedState.customBackgroundColor) {
+    this.applyBackgroundColor(savedState.customBackgroundColor);
 }
 
     // Restore accessible font state
     if (savedState.accessibleFont) {
         document.body.classList.add('accessible-font');
         this.setActiveButton('accessible-font-btn', true);
-        console.log('Restored: Accessible font enabled.');
     }
 
 
@@ -1601,11 +1928,13 @@ if (savedState.customBackgroundColor) {
   // Restore Custom Text Color
   if (savedState.customTextColor) {
     const textElements = document.querySelectorAll(
-        'p, h1, h2, h3, h4, h5, h6, span, li, a, div, label, button, input, textarea'
+        'p, h1, h2, h3, h4, h5, h6, span, li, a, label, button, input, textarea:not(.syi-toolbox):not(.syi-toolbox *)'
     );
 
     textElements.forEach((element) => {
-        element.style.color = savedState.customTextColor; 
+        if (!element.closest('.syi-toolbox')) { 
+            element.style.color = savedState.customTextColor; 
+        }
     });
 }
 
@@ -1623,7 +1952,7 @@ if (savedState.customBackgroundColor) {
 
  // Restore Popup Color
  if (savedState.popupColor) {
-    const colorPicker = document.getElementById('color-picker');
+    const colorPicker = document.getElementById('syi-color-picker');
     if (colorPicker) {
         colorPicker.value = savedState.popupColor;
     }
@@ -1654,7 +1983,6 @@ if (savedState.customBackgroundColor) {
                     inner.setAttribute('stroke', savedState.popupColor);
                 });
             });
-            console.log('SVG icon colors updated.');
         } else {
             console.log('No SVG icons found to style.');
         }
@@ -1662,8 +1990,7 @@ if (savedState.customBackgroundColor) {
 
     // Check if icons exist; apply styles or wait for them to load
     if (document.querySelectorAll('.syi-toolbox-body svg').length === 0) {
-        console.log('SVG icons not found yet. Retrying...');
-        setTimeout(applyIconStyles, 500); // Retry after delay
+        setTimeout(applyIconStyles, 500); 
     } else {
         applyIconStyles();
     }
@@ -1675,6 +2002,93 @@ if (savedState.customBackgroundColor) {
 
 
 // Helper Functions
+YourInclusion.prototype.simulateFontSizeAdjustment = function (change) {
+    const waitForElement = (selector, timeout = 5000) => {
+        return new Promise((resolve, reject) => {
+            const startTime = Date.now();
+
+            const poll = () => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    resolve(element);
+                } else if (Date.now() - startTime > timeout) {
+                    reject(new Error(`Element with selector "${selector}" not found within timeout.`));
+                } else {
+                    setTimeout(poll, 100);
+                }
+            };
+
+            poll();
+        });
+    };
+
+    const performAdjustment = async () => {
+        try {
+            const toolbox = await waitForElement('.syi-toolbox');
+            const fontSizeButton = await waitForElement('.font-size-btn');
+            fontSizeButton.click();
+            const fontSizePopup = await waitForElement('.syi-font-size-popup');
+            if (fontSizePopup.style.display !== 'block') {
+                throw new Error('Font size popup is not visible.');
+            };
+            const steps = Math.abs(change);
+            const isIncrease = change > 0;
+
+            if (steps === 0) {
+                return;
+            }
+
+            const buttonSelector = isIncrease ? '#increase-font-btn' : '#decrease-font-btn';
+            const adjustmentButton = fontSizePopup.querySelector(buttonSelector);
+
+            if (!adjustmentButton) {
+                throw new Error(`Button "${buttonSelector}" not found in the popup.`);
+            }
+
+            for (let i = 0; i < steps; i++) {
+                adjustmentButton.click();
+                console.log(
+                    `Simulated ${isIncrease ? 'increase' : 'decrease'} font size button click (${i + 1}/${steps}).`
+                );
+            }
+            fontSizePopup.style.display = 'none';
+            this.isFontSizePopupActive = false;
+            console.log('Font size popup closed.');
+        } catch (error) {
+            console.error('Error in simulateFontSizeAdjustment:', error);
+        }
+    };
+
+    performAdjustment();
+};
+
+
+
+
+
+// Helper function to apply font size change
+YourInclusion.prototype.applyFontSizeChange = function (change) {
+    const allElements = document.body.querySelectorAll(
+        '*:not(.syi-toolbox):not(.syi-toolbox *):not(.font-size-popup):not(.syi-font-size-popup *)'
+    );
+
+    if (!this.originalFontSizes) {
+        console.error('Original font sizes not initialized.');
+        return;
+    }
+
+    allElements.forEach((element) => {
+        const originalSize = this.originalFontSizes.get(element);
+        if (originalSize) {
+            const newSize = originalSize + change;
+            const clampedSize = Math.min(Math.max(newSize, originalSize - 6), originalSize + 6);
+            element.style.fontSize = `${clampedSize}px`;
+        }
+    });
+};
+
+
+
 YourInclusion.prototype.getCurrentFontSize = function () {
     const allElements = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *)');
     let totalFontSize = 0;
@@ -1718,25 +2132,13 @@ YourInclusion.prototype.getHighlightedButtons = function () {
     return highlighted;
 };
 
-
-YourInclusion.prototype.initializeAccessibilityToolbox = function () {
-    this.createToolbox();
-    this.createSideButton();
-
-    const toolbox = document.getElementById('syi-toolbox');
-    const sideButton = document.getElementById('openToolboxButton');
-    sideButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        toolbox.classList.toggle('visible');
-    });
-    this.loadToolbarState();
-};
-
 YourInclusion.prototype.resetSettings = function () {
     localStorage.removeItem('toolbarState');
     this.resetToolbox();
     console.log('Toolbar state reset.');
 };
+
+
 
 // Setting button functions
 
@@ -1753,24 +2155,19 @@ YourInclusion.prototype.addSettingsButtonListener = function () {
 
 YourInclusion.prototype.createSettingsPopup = function () {
     this.closeAllPopups();
-
+    const stateManager = this.createStateManager('AppState');
     if (document.querySelector('.syi-settings-popup')) return;
 
     const popup = this.createPopupContainer();
-    const header = this.createPopupHeader(language[CONFIG.LANGUAGE]['SETTINGS']);
-    const languageSelector = this.createLanguageSelector();
-    const colorPicker = this.createColorPicker(header);
-    const resetButton = this.createPopupResetButton(header, colorPicker);
-    const closeButton = this.createPopupCloseButton(popup);
-
-    // Append sections to the popup
+    const header = this.createPopupHeader(language[CONFIG.LANGUAGE]['SETTINGS'], popup);
+    const colorPicker = this.createColorPicker(header);;
+    const body = this.createPopupBody(header, colorPicker);
     popup.appendChild(header);
-    popup.appendChild(languageSelector);
-    popup.appendChild(colorPicker);
-    popup.appendChild(resetButton);
-    popup.appendChild(closeButton);
+    popup.appendChild(body)
 
     document.body.appendChild(popup);
+
+    stateManager.updateState({ isSettingsPopupActive: true });
 
     const isToolboxOnLeft = this.determineToolboxPosition(popup);
     this.updatePopupPositions(isToolboxOnLeft);
@@ -1782,13 +2179,14 @@ YourInclusion.prototype.createPopupContainer = function () {
     return popup;
 };
 
-YourInclusion.prototype.createPopupHeader = function (titleText) {
+YourInclusion.prototype.createPopupHeader = function (titleText, popup) {
     const header = this.createDiv('syi-settings-popup-header');
     const headerTitle = this.createHeading(3, titleText, 'syi-settings-popup-title');
+    const closeButton = this.createSettingsPopupCloseButton(popup);
     header.appendChild(headerTitle);
+    header.appendChild(closeButton);
     return header;
 };
-
 YourInclusion.prototype.updateToolbarLanguage = function () {
     // Update header title
     const headerTitle = document.querySelector('.syi-toolbox-title');
@@ -1813,6 +2211,7 @@ YourInclusion.prototype.updateToolbarLanguage = function () {
         { id: 'cursor-size-btn', textKey: 'CURSOR_SIZE' },
         { id: 'accessible-font-btn', textKey: 'ACCESSIBLE_FONT' },
         { id: 'read-aloud-btn', textKey: 'READ_ALOUD' },
+        { id: 'keyboard-navigation-btn', textKey: 'KEYBOARD-NAVIGATION'},
         { id: 'reset-btn1', textKey: 'RESET' },
         { id: 'save-settings-btn', textKey: 'SAVE_SETTINGS' },
     ];
@@ -1826,8 +2225,9 @@ YourInclusion.prototype.updateToolbarLanguage = function () {
             }
         }
     });
+
     const settingsPopup = document.querySelector('.syi-settings-popup');
-    if (!settingsPopup) return; 
+    if (!settingsPopup) return;
 
     const popupTitle = settingsPopup.querySelector('.syi-settings-popup-title');
     if (popupTitle) {
@@ -1839,7 +2239,7 @@ YourInclusion.prototype.updateToolbarLanguage = function () {
         languageLabel.innerText = language[CONFIG.LANGUAGE]['SELECT_LANGUAGES'];
     }
 
-    const colorPickerLabel = settingsPopup.querySelector('.color-picker-label');
+    const colorPickerLabel = settingsPopup.querySelector('.syi-color-picker-label');
     if (colorPickerLabel) {
         colorPickerLabel.innerText = language[CONFIG.LANGUAGE]['PICK_COLOR'];
     }
@@ -1848,11 +2248,22 @@ YourInclusion.prototype.updateToolbarLanguage = function () {
     if (resetButton) {
         resetButton.innerText = language[CONFIG.LANGUAGE]['RESET'];
     }
+
     const fontSizePopup = document.querySelector('.syi-font-size-popup');
     if (fontSizePopup) {
         fontSizePopup.remove();
     }
-    
+
+    const readAloudToolbar = document.getElementById('read-aloud-toolbar');
+    if (readAloudToolbar) {
+        readAloudToolbar.remove();
+        this.createReadAloudToolbar(); 
+    }
+    const keyboardnavpopup = document.querySelector('#keyboard-navigation-popup');
+    if (keyboardnavpopup) {
+        keyboardnavpopup.remove();
+        this.showKeyboardNavigationPopup();
+    }
 };
 
 YourInclusion.prototype.createLanguageSelector = function () {
@@ -1862,14 +2273,13 @@ YourInclusion.prototype.createLanguageSelector = function () {
     const languageDropdown = this.createEle('select', { id: 'language-select' });
 
     languageDropdown.innerHTML = `
-        <option value="en" ${CONFIG.LANGUAGE === 'en' ? 'selected' : ''}>English</option>
-        <option value="de" ${CONFIG.LANGUAGE === 'de' ? 'selected' : ''}>German</option>
+        <option value="en-US" ${CONFIG.LANGUAGE === 'en-US' ? 'selected' : ''}>English</option>
+        <option value="de-DE" ${CONFIG.LANGUAGE === 'de-DE' ? 'selected' : ''}>German</option>
     `;
 
     languageDropdown.addEventListener('change', (event) => {
-        CONFIG.LANGUAGE = event.target.value; 
-        this.updateToolbarLanguage(); 
-        this.saveToolbarState();
+        CONFIG.LANGUAGE = event.target.value;
+        this.updateToolbarLanguage();
     });
 
     languageSelector.appendChild(languageLabel);
@@ -1881,19 +2291,12 @@ YourInclusion.prototype.createLanguageSelector = function () {
 YourInclusion.prototype.createColorPicker = function (header) {
     const colorPicker = this.createDiv('popup-section');
 
-    // Create label for color picker
-    const colorLabel = this.createEle('label', { class: 'color-picker-label' }, language[CONFIG.LANGUAGE]['PICK_COLOR']);
-    
-    // Create container for color picker and color code display
-    const colorPickerContainer = this.createDiv('color-picker-container');
+    const colorLabel = this.createEle('label', { class: 'syi-color-picker-label' }, language[CONFIG.LANGUAGE]['PICK_COLOR']);
 
-    // Retrieve the saved color from your storage or fallback to default
-    const savedColor = this.getSavedColor() || '#393636';
+    const colorPickerContainer = this.createDiv('syi-color-picker-container');
 
-    // Create color input (color picker)
-    const colorInput = this.createEle('input', { type: 'color', id: 'color-picker', value: savedColor });
-
-    // Create text input to display the hex code
+    const savedColor = this.getSavedColor() || "#393636";
+    const colorInput = this.createEle('input', { type: 'color', id: 'syi-color-picker', value: savedColor });
     const colorCodeInput = this.createEle('input', { 
         type: 'text', 
         id: 'color-code', 
@@ -1901,24 +2304,33 @@ YourInclusion.prototype.createColorPicker = function (header) {
         readonly: true, 
         class: 'color-code-input' 
     });
-
-    // Add event listener to update both the toolbox and the hex code display
     colorInput.addEventListener('input', (event) => {
         const selectedColor = event.target.value;
         this.updateToolboxColor(header, selectedColor); 
         colorCodeInput.value = selectedColor; 
-        this.saveColor(selectedColor); // Save the selected color
-    });
+        this.saveColor(selectedColor); 
+        var Color = selectedColor;
 
-    // Append color input and color code input to the container
+    });
     colorPickerContainer.appendChild(colorInput);
     colorPickerContainer.appendChild(colorCodeInput);
-
-    // Append the label and container to the colorPicker section
     colorPicker.appendChild(colorLabel);
     colorPicker.appendChild(colorPickerContainer);
 
     return colorPicker;
+};
+YourInclusion.prototype.createPopupBody = function (header, colorPicker) {
+    const body = this.createDiv('syi-settings-popup-body'); 
+
+    
+    const languageSelector = this.createLanguageSelector();
+    const ColorPicker = this.createColorPicker();
+    const resetbutton = this.createPopupResetButton(header, colorPicker);
+    body.appendChild(languageSelector);
+    body.appendChild(ColorPicker);
+    body.appendChild(resetbutton);
+
+    return body;
 };
 
 
@@ -1947,10 +2359,24 @@ YourInclusion.prototype.createPopupResetButton = function (header, colorPicker) 
 
 // Function to reset the popup settings
 YourInclusion.prototype.resetPopupSettings = function (header, colorPicker) {
-    const defaultSettings = { 
-        color: this.selectedHeaderColor, 
-        language: CONFIG.LANGUAGE 
-    };
+
+    const defaultSettings = (() => {
+        const storedConfig = localStorage.getItem('config');
+        if (storedConfig) {
+            const config = JSON.parse(storedConfig);
+            console.log("Retrieved config from local storage:", config);
+            return { 
+                color: config.colorCode || this.selectedHeaderColor, 
+                language: config.languageIsoCode || CONFIG.LANGUAGE 
+            };
+        } else {
+            console.warn("No config found in local storage. Using default settings.");
+            return { 
+                color: this.selectedHeaderColor, 
+                language: CONFIG.LANGUAGE 
+            };
+        }
+    })();
 
     // Reset the popup header color
     if (header) {
@@ -1959,7 +2385,7 @@ YourInclusion.prototype.resetPopupSettings = function (header, colorPicker) {
 
     // Reset the color picker value
     if (colorPicker) {
-        const colorPickerInput = colorPicker.querySelector('#color-picker');
+        const colorPickerInput = colorPicker.querySelector('#syi-color-picker');
         if (colorPickerInput) {
             colorPickerInput.value = defaultSettings.color;
         }
@@ -1997,54 +2423,74 @@ YourInclusion.prototype.resetPopupSettings = function (header, colorPicker) {
     if (languageSelect) {
         languageSelect.value = defaultSettings.language;
     }
+    const savedState = JSON.parse(localStorage.getItem('toolbarState')) || {};
+    savedState.popupColor = defaultSettings.color;
+    localStorage.setItem('toolbarState', JSON.stringify(savedState));
 
     // Reset the CSS variable
     document.documentElement.style.setProperty('--bg-color', defaultSettings.color, 'important');
 };
 
-YourInclusion.prototype.createPopupCloseButton = function (popup) {
-    const closeButton = this.createEle('button', { class: 'popup-close' }, 'X');
-    closeButton.addEventListener('click', () => popup.remove());
+YourInclusion.prototype.createSettingsPopupCloseButton = function (popup) {
+    const stateManager = this.createStateManager('AppState');
+    const closeButton = this.createEle('button', { class: 'popup-close' });
+    const icon = this.createEle('i', { class: 'fas fa-times' }); 
+    closeButton.appendChild(icon);
+    closeButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        popup.remove();
+        stateManager.updateState({ isSettingsPopupActive: false });
+
+        console.log('Settings popup closed. State updated to inactive.');
+    });
     return closeButton;
 };
 
+
 // Function to update toolbox and popup colors dynamically
 YourInclusion.prototype.updateToolboxColor = function (header, color) {
-    if (header) { 
-        header.style.backgroundColor = color;
+    const selectedColor = color || this.selectedHeaderColor || '#393636';
+
+    if (header) {
+        header.style.backgroundColor = selectedColor;
     }
 
     const toolboxHeaders = document.querySelectorAll('.syi-toolbox-header, .syi-settings-popup-header');
-    if (toolboxHeaders.length > 0) { 
-        toolboxHeaders.forEach(header => {
-            header.style.setProperty('background-color', color, 'important');
-        });
-    }
+    toolboxHeaders.forEach(header => {
+        header.style.setProperty('background-color', selectedColor, 'important');
+    });
 
     const toolboxIcons = document.querySelectorAll('.syi-toolbox-body svg');
-    if (toolboxIcons.length > 0) { 
-        toolboxIcons.forEach(svg => {
-            svg.style.fill = color;
-            svg.style.stroke = color;
+    toolboxIcons.forEach(svg => {
+        svg.style.removeProperty('fill');
+        svg.style.removeProperty('stroke');
+        svg.style.fill = selectedColor;
+        svg.style.stroke = selectedColor;
 
-            const innerElements = svg.querySelectorAll('*');
-            innerElements.forEach(inner => {
-                inner.style.fill = color;
-                inner.style.stroke = color;
-            });
+        const innerElements = svg.querySelectorAll('*');
+        innerElements.forEach(inner => {
+            inner.style.removeProperty('fill');
+            inner.style.removeProperty('stroke');
+            inner.style.fill = selectedColor;
+            inner.style.stroke = selectedColor;
         });
-    }
+    });
 
     const toolboxButtons = document.querySelectorAll('.syi-toolbox-body .syi-toolbox-btn, .syi-toolbox-button');
-    if (toolboxButtons.length > 0) { 
-        toolboxButtons.forEach(button => {
-            button.style.backgroundColor = color;
-            button.style.borderColor = color;
-        });
-    }
+    toolboxButtons.forEach(button => {
+        button.style.backgroundColor = selectedColor;
+        button.style.borderColor = selectedColor;
+    });
 
-    document.documentElement.style.setProperty('--bg-color', color, 'important');
+    const root = document.documentElement; // Update root CSS variable
+    root.style.setProperty('--bg-color', selectedColor, 'important');
+
+    this.selectedHeaderColor = selectedColor; // Update internal state
+    console.log(`Toolbox updated with color: ${selectedColor}`);
+
+   
 };
+
 
 
 // Function to determine toolbox position
@@ -2062,6 +2508,7 @@ YourInclusion.prototype.determineToolboxPosition = function (popup) {
 // Popup Close
 YourInclusion.prototype.closeAllPopups = function (excludeSelector) {
     const popupSelectors = ['.syi-settings-popup', '.syi-contrast-popup', '.syi-font-size-popup']; 
+    const stateManager = this.createStateManager('AppState');
     popupSelectors.forEach((selector) => {
         if (selector !== excludeSelector) {
             const popup = document.querySelector(selector);
@@ -2075,6 +2522,11 @@ YourInclusion.prototype.closeAllPopups = function (excludeSelector) {
                                 popup.style.display = 'none';
                             });
                             closeButton.click(); 
+                                stateManager.updateState({
+                                    isFontSizePopupActive: false,
+                                    isSettingsPopupActive: false,
+                                    isContrastPopupActive: false,
+                                });
                         }
                     } else {
                         popup.remove(); 
@@ -2094,17 +2546,31 @@ YourInclusion.prototype.initAudioRemoval = function () {
     if (audioRemovalButton) {
         audioRemovalButton.addEventListener('click', () => {
             this.audioRemoval(); 
-            this.setActiveButton('remove-audio-btn'); 
+            this.setActiveButton('remove-audio-btn', this.isMuted); 
+            this.saveToolbarState();
         });
-    }
-};
 
-YourInclusion.prototype.audioRemoval = function () {
+        // Restore state on initialization
+        const savedState = JSON.parse(localStorage.getItem('toolbarState')) || {};
+        if (savedState.isMuted) {
+            this.isMuted = savedState.isMuted;
+            this.audioRemoval(true); 
+            this.setActiveButton('remove-audio-btn', this.isMuted); 
+        }
+    }
+};;
+
+
+// Toggle Audio Mute/Unmute
+YourInclusion.prototype.audioRemoval = function (applyOnly = false) {
     const soundElements = document.querySelectorAll('audio, video');
-    this.isMuted = !this.isMuted; 
+    if (!applyOnly) {
+        this.isMuted = !this.isMuted; 
+    }
     soundElements.forEach(element => {
         element.muted = this.isMuted; 
     });
+    console.log(`Audio is now ${this.isMuted ? 'muted' : 'unmuted'}.`);
 };
 
 /***
@@ -2243,52 +2709,61 @@ YourInclusion.prototype.initialApp = function () {
  * Zoom
  */
 YourInclusion.prototype.initZoomToggleFeature = function () {
-    this.zoomStates = [1, 1.25, 1.5, 1.75]; 
+    this.zoomStates = [1, 1.1, 1.2, 1.3]; 
     this.zoomIndex = 0; 
 
-    
     const zoomToggleButton = document.getElementById('zoom-toggle-btn');
     if (zoomToggleButton) {
         zoomToggleButton.addEventListener('click', this.toggleZoom.bind(this));
     }
+    
 
     this.restoreZoomState();
 };
-
 
 // Toggle Zoom Function
 YourInclusion.prototype.toggleZoom = function () {
     this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; 
     const zoomLevel = this.zoomStates[this.zoomIndex];
+    this.applyZoom(zoomLevel);;
+    const stateManager = this.createStateManager('AppState');
+    const currentState = stateManager.getState();
+    let newZoomIncrement = currentState.zoomIncrement;
+    if (zoomLevel === 1) {
+        newZoomIncrement = 0; 
+    } else {
+        newZoomIncrement += 1; 
+    }
 
-    // Apply the selected zoom level
-    this.applyZoom(zoomLevel);
-
-    // Set the active button state explicitly
+    stateManager.updateState({
+        zoomLevel: zoomLevel,
+        zoomIncrement: newZoomIncrement
+    });
     const isActive = zoomLevel !== 1; 
+    
+    this.updateZoomButtonProgressBar('zoom-toggle-btn', this.zoomIndex);
+    
+
     this.setActiveButton('zoom-toggle-btn', isActive);
 
     console.log(`Zoom level toggled to: ${zoomLevel}`);
 };
 
-
-// Apply Zoom Function
+// Apply Zoom to Body Without Affecting Toolbox
 YourInclusion.prototype.applyZoom = function (zoomLevel) {
-    const elementsToZoom = document.querySelectorAll('body > *:not(#syi-toolbox):not(#openToolboxButton):not(img)');
-
-    elementsToZoom.forEach(element => {
-        element.style.transform = `scale(${zoomLevel})`;
-        element.style.transformOrigin = '0 0'; 
-        element.style.width = `${100 / zoomLevel}%`; 
+    const body = document.body;
+    body.style.transform = `scale(${zoomLevel})`;
+    body.style.transformOrigin = '0 0'; 
+    body.style.width = `${100 / zoomLevel}%`;
+    const excludedElements = document.querySelectorAll('#syi-toolbox, #openToolboxButton, #read-aloud-toolbar');
+    excludedElements.forEach(element => {
+        element.style.transform = 'none';
     });
 
-    // Save the zoom level to localStorage
-    this.saveZoomState(zoomLevel);
-
-    console.log(`Zoom level applied: ${zoomLevel}`);
+    console.log(`Zoom applied to body with level: ${zoomLevel}`);
 };
 
-
+// Restore Zoom State
 YourInclusion.prototype.restoreZoomState = function () {
     const savedZoomLevel = parseFloat(localStorage.getItem('zoomLevel')) || 1; 
     this.applyZoom(savedZoomLevel);
@@ -2296,14 +2771,17 @@ YourInclusion.prototype.restoreZoomState = function () {
     if (this.zoomIndex === -1) this.zoomIndex = 0; 
     const isActive = savedZoomLevel !== 1; 
     this.setActiveButton('zoom-toggle-btn', isActive);
+
+    console.log(`Zoom state restored to: ${savedZoomLevel}`);
 };
 
-
-// Save Zoom State on Change
+// Save Zoom State
 YourInclusion.prototype.saveZoomState = function (zoomLevel) {
     localStorage.setItem('zoomLevel', zoomLevel);
     console.log(`Zoom level saved: ${zoomLevel}`);
 };
+
+
 
 /***
  * Accessible Function
@@ -2373,11 +2851,16 @@ YourInclusion.prototype.toggleCursorSize = function (buttonId) {
             label: 'Large Black',
             icon: '<i class="fas fa-circle-notch"></i>',
         },
-    ]
-
+        
+    ];
+    
     if (this.currentCursorSizeIndex === undefined) this.currentCursorSizeIndex = 0;
     this.currentCursorSizeIndex = (this.currentCursorSizeIndex + 1) % cursorSizes.length;
     const selectedCursor = cursorSizes[this.currentCursorSizeIndex];
+
+    // Retrieve color from config stored in local storage
+    const storedConfig = JSON.parse(localStorage.getItem('config'));
+    const cursorColor = storedConfig?.BACKGROUND_COLOR || '#393636'; 
 
     // Apply the custom cursor globally
     document.documentElement.style.cursor = selectedCursor.cursor;
@@ -2387,7 +2870,6 @@ YourInclusion.prototype.toggleCursorSize = function (buttonId) {
     if (toolbox) {
         toolbox.style.cursor = 'auto';
 
-        // Update toolbox position with custom exclusion logic
         const rect = toolbox.getBoundingClientRect();
         const style = document.documentElement.style;
 
@@ -2396,8 +2878,6 @@ YourInclusion.prototype.toggleCursorSize = function (buttonId) {
         style.setProperty('--toolbox-width', `${rect.width}px`);
         style.setProperty('--toolbox-height', `${rect.height}px`);
     }
-
-    // Add CSS dynamically to exclude the toolbox area
     const cursorExcludeStyle = document.getElementById('cursor-exclude-style');
     if (!cursorExcludeStyle) {
         const style = document.createElement('style');
@@ -2411,20 +2891,52 @@ YourInclusion.prototype.toggleCursorSize = function (buttonId) {
             }
         `;
         document.head.appendChild(style);
+        
     }
 
-    // Update button text/icon
+    const stateManager = this.createStateManager('AppState');
+    const currentState = stateManager.getState();
+
+    let newCursorSizeIncrement = currentState.cursorSizeIncrement || 0;
+
+    // Reset the counter when 'normal' cursor size is selected
+    if (selectedCursor.size === 'normal') {
+        newCursorSizeIncrement = 0;
+    } else {
+        newCursorSizeIncrement += 1;
+    }
+
+    // Update the state with the new increment
+    stateManager.updateState({
+        cursorSizeIncrement: newCursorSizeIncrement
+    });
+    
+
+
     const button = document.getElementById(buttonId);
     if (button) {
-        // Retrieve the icon from the button creation logic
-        const iconClass = './assests/cursor 1.svg'; // Dynamically reference the iconClass value
-        const existingIcon = button.querySelector('img')?.outerHTML || `<img src="${iconClass}" alt="Cursor Icon" style="height: 20px; margin-right: 8px;">`;
-    
-        // Update button label while preserving the icon
-        button.innerHTML = `${existingIcon} ${selectedCursor.label}`;
-    }
+        const parser = new DOMParser();
+        const iconElement = parser.parseFromString(selectedCursor.icon, 'image/svg+xml').documentElement;
 
-    console.log(`Cursor size set to: ${selectedCursor.size}`);
+        // Apply color to the SVG
+        if (iconElement) {
+            iconElement.setAttribute('fill', cursorColor);
+            iconElement.setAttribute('stroke', cursorColor);
+
+            const innerElements = iconElement.querySelectorAll('*');
+            innerElements.forEach(inner => {
+                inner.setAttribute('fill', cursorColor);
+                inner.setAttribute('stroke', cursorColor);
+            });
+
+            const svgHTML = new XMLSerializer().serializeToString(iconElement);
+
+            button.innerHTML = `${svgHTML} ${selectedCursor.label}`;
+        }
+    }
+    this.updateCursorSizeProgressBar(buttonId, newCursorSizeIncrement);
+
+    console.log(`Cursor size set to: ${selectedCursor.size}, color: ${cursorColor}`);
 };
 // Read Aloud
 // Initialize Read Aloud Feature
@@ -2435,8 +2947,9 @@ YourInclusion.prototype.initReadAloud = function () {
             this.toggleReadAloud('read-aloud-btn');
         });
     }
-
-    // Check if Read Aloud was previously active (e.g., stored state)
+    this.currentSpeed = parseFloat(localStorage.getItem('readAloudSpeed')) || 1;
+    this.currentVolume = parseFloat(localStorage.getItem('readAloudVolume')) || 1;
+     this.readElementsCache = new WeakSet();
     const isReadAloudActive = localStorage.getItem('readAloudActive') === 'true';
     if (isReadAloudActive) {
         this.enableDefaultClickToRead();
@@ -2447,145 +2960,317 @@ YourInclusion.prototype.initReadAloud = function () {
 
 YourInclusion.prototype.toggleReadAloud = function (buttonId) {
     const toolbar = document.getElementById('read-aloud-toolbar');
-    const isActive = this.isReadAloudActive || false; 
+    const isActive = this.isReadAloudActive || false;
 
     if (isActive) {
-        // Deactivate Read Aloud
-        this.disableDefaultClickToRead();
-        this.stopReadAloud();
-        if (toolbar) toolbar.classList.add('hidden'); 
+  
+        this.disableDefaultClickToRead(); 
+        this.disableCursorReadAloud(); 
+        this.stopReadAloud(); 
+
+        const popup = document.getElementById('read-aloud-toolbar');
+        if (popup) {
+            popup.remove(); 
+            console.log('Read Aloud toolbar removed.');
+        }
+
         this.setActiveButton(buttonId, false); 
         this.isReadAloudActive = false; 
-        localStorage.setItem('readAloudActive', false);
+        this.isCursorReadAloudActive = false;
+        localStorage.setItem('readAloudActive', false); 
+
         console.log('Read Aloud deactivated.');
     } else {
-        // Activate Read Aloud
+        
         if (!toolbar) {
-            this.createReadAloudToolbar();
+            this.createReadAloudToolbar(); 
         } else {
             toolbar.classList.remove('hidden'); 
         }
+
         this.enableDefaultClickToRead();
+        this.disableCursorReadAloud();
         this.setActiveButton(buttonId, true); 
+
         this.isReadAloudActive = true; 
-        localStorage.setItem('readAloudActive', true);
+        this.isCursorReadAloudActive = false; 
+        localStorage.setItem('readAloudActive', true); 
+
         console.log('Read Aloud activated.');
     }
 };
 
-
 // Create the Read Aloud Toolbar
 YourInclusion.prototype.createReadAloudToolbar = function () {
-    const toolbar = this.createDiv('read-aloud-toolbar', 'read-aloud-toolbar');
+    const toolbox = document.getElementById('syi-toolbox');
+    if (!toolbox || !toolbox.classList.contains('visible')) {
+        console.log('Toolbox is not visible. Removing toolbar if it exists.');
+        const existingToolbar = document.getElementById('read-aloud-toolbar');
+        if (existingToolbar) {
+            existingToolbar.remove();
+            console.log('Removed existing Read Aloud Toolbar because the toolbox is not visible.');
+        }
+        return; 
+    }
+
+    // Check if the toolbar already exists
+    const existingToolbar = document.getElementById('read-aloud-toolbar');
+    if (existingToolbar) {
+        console.log('Toolbar already exists.');
+        return;
+    }
+
+    // Create toolbar wrapper
+    const toolbar = document.createElement('div');
+    toolbar.id = 'read-aloud-toolbar';
+    toolbar.className = 'read-aloud-toolbar';
 
     // Toolbar Header
-    const header = this.createDiv('toolbar-header');
-    const title = this.createHeading(2, 'Read Aloud Settings', 'toolbar-title');
-    const closeButton = this.createButton('close-toolbar', '✖');
+    const header = document.createElement('div');
+    header.className = 'toolbar-header';
+
+    const title = document.createElement('h5');
+    title.className = 'toolbar-title';
+    title.textContent = language[CONFIG.LANGUAGE]['READ-ALOUD'];
+
+    const closeButton = document.createElement('button');
+    closeButton.id = 'close-toolbar';
+    closeButton.textContent = '✖';
     closeButton.addEventListener('click', () => {
-        toolbar.remove();
-        this.disableDefaultClickToRead();
+        // toolbar.remove();
+        // this.disableDefaultClickToRead();
+        this.closeReadAloud();
     });
+
     header.appendChild(title);
     header.appendChild(closeButton);
     toolbar.appendChild(header);
 
     // Toolbar Controls
-    const controls = this.createDiv('toolbar-controls');
+    const controls = document.createElement('div');
+    controls.className = 'toolbar-controls';
 
-    // Cursor Read Aloud Button
-    const cursorButton = this.createButton('cursor-read-btn', 'Cursor Read Aloud');
-    cursorButton.innerHTML = `<i class="fas fa-mouse-pointer"></i> Cursor Read Aloud`;
-    cursorButton.addEventListener('click', this.enableCursorReadAloud.bind(this));
+    // Cursor Read Aloud Section
+    const cursorSection = document.createElement('div');
+    cursorSection.className = 'cursor-section';
 
-    // Previous Line Button
-     const previousButton = this.createButton('previous-line-btn', 'Previous Line');
-     previousButton.innerHTML = `<i class="fas fa-arrow-left"></i> `;
-     previousButton.addEventListener('click', this.readPreviousLine.bind(this));
+    const cursorLabel = document.createElement('span');
+    cursorLabel.className = 'cursor-label';
+    cursorLabel.textContent = language[CONFIG.LANGUAGE]['CURSOR-READ-ALOUD'];
 
-    // Play Button
-    const playButton = this.createButton('play-read-btn', '▶');
-    playButton.innerHTML = `<i class="fas fa-play"></i>`;
+    const cursorToggleWrapper = document.createElement('div');
+    cursorToggleWrapper.className = 'cursor-toggle-wrapper';
+
+    const cursorInput = document.createElement('input');
+    cursorInput.type = 'checkbox';
+    cursorInput.id = 'cursor-read-aloud';
+    cursorInput.className = 'hidden-toggle';
+    cursorInput.style.visibility = "hidden";
+    cursorInput.style.position = "absolute";
+
+    const cursorSwitch = document.createElement('label');
+    cursorSwitch.htmlFor = 'cursor-read-aloud';
+    cursorSwitch.className = 'switch';
+    cursorInput.addEventListener('change', (event) => {
+    const isChecked = event.target.checked; 
+    if (isChecked) {
+        console.log('Cursor Read Aloud activated.');
+        this.enableCursorReadAloud(); 
+        this.isCursorReadAloudActive = true; 
+    } else {
+        console.log('Cursor Read Aloud deactivated.');
+        this.disableCursorReadAloud();
+        this.isCursorReadAloudActive = false;
+    }
+});
+    
+
+    cursorToggleWrapper.appendChild(cursorInput);
+    cursorToggleWrapper.appendChild(cursorSwitch);
+    cursorSection.appendChild(cursorLabel);
+    cursorSection.appendChild(cursorToggleWrapper);
+    
+
+    // Website Read Aloud Section
+    const websiteSection = document.createElement('div');
+    websiteSection.className = 'website-section';
+
+    const websiteLabel = document.createElement('span');
+    websiteLabel.className = 'website-label';
+    websiteLabel.textContent = language[CONFIG.LANGUAGE]['WEBSITE-READ-ALOUD'];
+
+    const playbackControls = document.createElement('div');
+    playbackControls.className = 'playback-controls';
+
+    const previousButton = document.createElement('button');
+    previousButton.id = 'previous-line-btn';
+    previousButton.textContent = '⏮';
+    previousButton.addEventListener('click', this.readPreviousLine.bind(this));
+
+    const playButton = document.createElement('button');
+    playButton.id = 'play-read-btn';
+    playButton.textContent = '▶';
     playButton.addEventListener('click', this.playReadAloud.bind(this));
 
-    // Stop Button
-    const stopButton = this.createButton('stop-read-btn', '⏹');
-    stopButton.innerHTML = `<i class="fas fa-stop"></i>`;
-    stopButton.addEventListener('click', this.stopReadAloud.bind(this));
- 
-// Next Line Button
-const nextButton = this.createButton('next-line-btn', 'Next Line');
-nextButton.innerHTML = `<i class="fas fa-arrow-right"></i> `;
-nextButton.addEventListener('click', this.readNextLine.bind(this));
+    const stopButton = document.createElement('button');
+    stopButton.id = 'stop-read-btn';
+    stopButton.textContent = '⏹';
+    stopButton.addEventListener('click', this.stopAllReadAloud.bind(this));
 
-// Create Volume and Speed Container
-const slidersContainer = document.createElement('div');
-slidersContainer.className = 'sliders-container';
+    const nextButton = document.createElement('button');
+    nextButton.id = 'next-line-btn';
+    nextButton.textContent = '⏭';
+    nextButton.addEventListener('click', this.readNextLine.bind(this));
 
-// Create Volume Slider
-const volumeWrapper = document.createElement('div');
-volumeWrapper.className = 'slider-wrapper';
+    playbackControls.appendChild(previousButton);
+    playbackControls.appendChild(playButton);
+    playbackControls.appendChild(stopButton);
+    playbackControls.appendChild(nextButton);
 
-const volumeLabel = document.createElement('label');
-volumeLabel.setAttribute('for', 'volume-slider');
-volumeLabel.textContent = 'Volume:';
-volumeWrapper.appendChild(volumeLabel);
+    websiteSection.appendChild(websiteLabel);
+    websiteSection.appendChild(playbackControls);
 
-const volumeSlider = document.createElement('input');
-volumeSlider.type = 'range';
-volumeSlider.id = 'volume-slider';
-volumeSlider.min = '0';
-volumeSlider.max = '1';
-volumeSlider.step = '0.1';
-volumeSlider.value = this.currentVolume || 1;
+    // Speed Section
+    const speedSection = document.createElement('div');
+    speedSection.className = 'speed-section';
 
-volumeSlider.addEventListener('input', (e) => {
-this.currentVolume = parseFloat(e.target.value);
-console.log(`Volume updated to: ${this.currentVolume}`);
-});
-volumeWrapper.appendChild(volumeSlider);
+    const speedLabel = document.createElement('span');
+    speedLabel.className = 'speed-label';
+    speedLabel.textContent = language[CONFIG.LANGUAGE]['SPEED'];
 
-// Create Speed Slider
-const speedWrapper = document.createElement('div');
-speedWrapper.className = 'slider-wrapper';
+    const speedWrapper = document.createElement('div');
+    speedWrapper.className = 'speed-wrapper';
 
-const speedLabel = document.createElement('label');
-speedLabel.setAttribute('for', 'speed-slider');
-speedLabel.textContent = 'Speed:';
-speedWrapper.appendChild(speedLabel);
+    const minusButton = document.createElement('button');
+    minusButton.className = 'speed-minus';
 
-const speedSlider = document.createElement('input');
-speedSlider.type = 'range';
-speedSlider.id = 'speed-slider';
-speedSlider.min = '0.5';
-speedSlider.max = '2';
-speedSlider.step = '0.1';
-speedSlider.value = this.currentSpeed || 1;
+    const minusIcon = document.createElement('i');
+    minusIcon.className = 'fas fa-minus'; 
+    minusButton.appendChild(minusIcon);
 
-speedSlider.addEventListener('input', (e) => {
-this.currentSpeed = parseFloat(e.target.value);
-console.log(`Speed updated to: ${this.currentSpeed}`);
-});
-speedWrapper.appendChild(speedSlider);
+    minusButton.addEventListener('click', () => {
+        this.currentSpeed = Math.max(this.currentSpeed - 0.1, 0.5);
+        speedDisplay.textContent = this.currentSpeed.toFixed(1);
+    });
 
-// Add sliders to sliders container
-slidersContainer.appendChild(volumeWrapper);
-slidersContainer.appendChild(speedWrapper);
+    const speedDisplay = document.createElement('span');
+    speedDisplay.className = 'speed-display';
+    speedDisplay.textContent = (this.currentSpeed || 1).toFixed(1);
 
-speedWrapper.appendChild(speedSlider);
-    // Append Buttons and Controls
-    controls.appendChild(cursorButton);
-    controls.appendChild(previousButton);
-    controls.appendChild(playButton);
-    controls.appendChild(stopButton);
-    controls.appendChild(nextButton);
-    controls.appendChild(slidersContainer);
+    const plusButton = document.createElement('button');
+    plusButton.className = 'speed-plus';
+
+    const plusIcon = document.createElement('i');
+    plusIcon.className = 'fas fa-plus'; 
+    plusButton.appendChild(plusIcon);
+    
+    plusButton.addEventListener('click', () => {
+        this.currentSpeed = Math.min(this.currentSpeed + 0.1, 2);
+        speedDisplay.textContent = this.currentSpeed.toFixed(1);
+    });
+
+    speedWrapper.appendChild(minusButton);
+    speedWrapper.appendChild(speedDisplay);
+    speedWrapper.appendChild(plusButton);
+    speedSection.appendChild(speedLabel);
+    speedSection.appendChild(speedWrapper);
+
+    // Volume Section
+    const volumeSection = document.createElement('div');
+    volumeSection.className = 'volume-section';
+
+    const volumeLabel = document.createElement('span');
+    volumeLabel.className = 'volume-label';
+    volumeLabel.textContent = language[CONFIG.LANGUAGE]['VOLUME'];
+
+    const volumeWrapper = document.createElement('div');
+    volumeWrapper.className = 'volume-wrapper';
+
+    const volumeSlider = document.createElement('input');
+    volumeSlider.type = 'range';
+    volumeSlider.min = '0';
+    volumeSlider.max = '1';
+    volumeSlider.step = '0.1';
+    volumeSlider.value = this.currentVolume || 1;
+    volumeSlider.className = 'volume-slider';
+
+    const volumeDisplay = document.createElement('span');
+    volumeDisplay.className = 'volume-display';
+    volumeDisplay.textContent = `${Math.round((this.currentVolume || 1) * 100)}%`;
+
+    volumeSlider.addEventListener('input', (e) => {
+        this.currentVolume = parseFloat(e.target.value);
+        volumeDisplay.textContent = `${Math.round(this.currentVolume * 100)}%`;
+
+        const sliderPercentage = this.currentVolume * 100;
+        volumeSlider.style.background = `linear-gradient(to right, #0078d7 ${sliderPercentage}%, #ddd ${sliderPercentage}%)`;
+    });
+
+    volumeWrapper.appendChild(volumeSlider);
+    volumeWrapper.appendChild(volumeDisplay);
+    volumeSection.appendChild(volumeLabel);
+    volumeSection.appendChild(volumeWrapper);
+
+    const divider = () => {
+        const div = document.createElement('div');
+        div.className = 'vertical-divider';
+        return div;
+    };
+
+    controls.appendChild(cursorSection);
+    controls.appendChild(divider());
+    controls.appendChild(websiteSection);
+    controls.appendChild(divider());
+    controls.appendChild(speedSection);
+    controls.appendChild(divider());
+    controls.appendChild(volumeSection);
     toolbar.appendChild(controls);
-
-    // Add Toolbar to Document Body
     document.body.appendChild(toolbar);
 };
+YourInclusion.prototype.closeReadAloud = function () {
+    // Simulate clicking the Read Aloud button if it exists
+    const readAloudButton = document.getElementById('read-aloud-btn');
+    if (readAloudButton) {
+        console.log('Simulating click on the Read Aloud button.');
+        readAloudButton.click();
+    } else {
+        console.log('Read Aloud button not found.');
+    }
 
+    // Remove any highlights on the page
+    const highlightedElements = document.querySelectorAll('.highlighted');
+    highlightedElements.forEach(element => {
+        element.classList.remove('highlighted');
+    });
+
+    const toolbar = document.getElementById('read-aloud-toolbar');
+    if (toolbar) {
+        toolbar.remove()
+    }
+
+};
+
+
+YourInclusion.prototype.createSliderControl = function (labelText, id, min, max, step, value, onInput) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'slider-wrapper';
+    const label = document.createElement('label');
+    label.htmlFor = id;
+    label.className = 'slider-label';
+    label.textContent = labelText;
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.id = id;
+    input.min = min;
+    input.max = max;
+    input.step = step;
+    input.value = value;
+    input.addEventListener('input', onInput);
+    wrapper.appendChild(label);
+    wrapper.appendChild(input);
+
+    return wrapper;
+};
 // Helper Function to Highlight Text
 YourInclusion.prototype.highlightText = function (element, start, length) {
     const text = element.dataset.originalText || element.innerText || '';
@@ -2593,31 +3278,60 @@ YourInclusion.prototype.highlightText = function (element, start, length) {
     const highlight = text.slice(start, start + length);
     const after = text.slice(start + length);
 
+    if (!element.dataset.originalText) {
+        element.dataset.originalText = text; 
+    }
+
     element.innerHTML = `${before}<span style="background-color: yellow;">${highlight}</span>${after}`;
 };
+YourInclusion.prototype.highlightWord = function (element, start, length) {
+    const text = element.dataset.originalText;
+    const before = text.slice(0, start);
+    const highlight = text.slice(start, start + length);
+    const after = text.slice(start + length);
+    element.innerHTML = `${before}<span class="highlighted-word">${highlight}</span>${after}`;
+    const highlightSpan = element.querySelector('.highlighted-word');
+    if (highlightSpan) {
+        highlightSpan.style.backgroundColor = 'yellow'; 
+    }
+};
 
-
+YourInclusion.prototype.clearHighlight = function (element) {
+    if (element.dataset.originalText) {
+        element.innerHTML = element.dataset.originalText; 
+        delete element.dataset.originalText;
+    }
+};
 // Enable Default Click-to-Read
 YourInclusion.prototype.enableDefaultClickToRead = function () {
     this.readElementContentBound = this.readElementContent.bind(this);
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
-    elements.forEach(element => {
+    elements.forEach((element) => {
         element.addEventListener('click', this.readElementContentBound);
     });
+   
 };
-
 
 // Disable Default Click-to-Read
 YourInclusion.prototype.disableDefaultClickToRead = function () {
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
-    elements.forEach(element => {
+    elements.forEach((element) => {
         element.removeEventListener('click', this.readElementContentBound);
     });
+    
 };
 
 // Read Element Content with Highlighting
 YourInclusion.prototype.readElementContent = function (event) {
     const element = event.target;
+    if (element.closest('#read-aloud-toolbar') || element.tagName === 'BUTTON') {
+        return;
+    }
+    if (this.readElementsCache.has(element)) {
+        return;
+    }
+    this.readElementsCache.add(element);
+
     const text = element.innerText || element.value || '';
     const msg = new SpeechSynthesisUtterance(text);
     msg.volume = this.currentVolume || 1;
@@ -2636,149 +3350,265 @@ YourInclusion.prototype.readElementContent = function (event) {
     };
 
     msg.onend = () => {
-        this.clearHighlight(element); 
+        this.clearHighlight(element);
     };
 
     speechSynthesis.speak(msg);
 };
 
-YourInclusion.prototype.clearHighlight = function (element) {
-    if (element.dataset.originalText) {
-        element.innerHTML = element.dataset.originalText;
-    }
-};
 
 
 
 // Play Entire Page Read Aloud with Highlighting
 YourInclusion.prototype.playReadAloud = function () {
     if (!this.isReadAloudActive) {
-        console.log('Read Aloud is not active. Please enable it first.');
+        return;
+    }
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, img');
+    this.contentToRead = Array.from(elements).filter(el => el.innerText.trim());
+
+    if (!this.contentToRead.length) {
+        return;
+    }
+    this.currentContentIndex = parseInt(localStorage.getItem('currentContentIndex'), 10) || 0;
+    this.currentWordIndex = 0;  
+
+    console.log(this.currentContentIndex);
+    this.readCurrentContent();
+};
+
+YourInclusion.prototype.readCurrentContent = function () {
+    if (this.currentContentIndex >= this.contentToRead.length) {
         return;
     }
 
-    const paragraphs = document.querySelectorAll('p');
+    const currentElement = this.contentToRead[this.currentContentIndex];
+    const words = currentElement.innerText.trim().split(/\s+/); 
 
-    if (!paragraphs.length) {
-        console.log('No paragraphs found to read.');
+    if (this.currentWordIndex >= words.length) {
+        this.currentWordIndex = 0;
+        this.currentContentIndex++;
+        localStorage.setItem('currentContentIndex', this.currentContentIndex);
+        this.readCurrentContent(); 
         return;
     }
 
-    // Initialize paragraph index and start reading
-    this.currentParagraphIndex = 0;
-    this.readCurrentLine();
+    const currentWord = words[this.currentWordIndex];
+    const startIndex = currentElement.innerText.indexOf(currentWord);
+    const endIndex = startIndex + currentWord.length;
+    const highlightedWord = currentElement.innerText.substring(0, startIndex) + 
+        `<span class="highlighted">${currentWord}</span>` + 
+        currentElement.innerText.substring(endIndex);
+
+    currentElement.innerHTML = highlightedWord;
+    const utterance = new SpeechSynthesisUtterance(currentWord);
+    utterance.volume = this.currentVolume || 1;
+    utterance.rate = this.currentSpeed || 1.5; 
+    utterance.onend = () => {
+        currentElement.innerHTML = currentElement.innerText; 
+        this.currentWordIndex++;
+        this.readCurrentContent(); 
+    };
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
 };
 
 
 
+// You can style the highlighted element with CSS
+YourInclusion.prototype.addStylesForHighlight = function() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .highlighted {
+            background-color: yellow; /* Add any style you prefer */
+            transition: background-color 0.3s ease;
+        }
+    `;
+    document.head.appendChild(style);
+};
+
+
+
+// Cursor Read-Aloud Toggle
+YourInclusion.prototype.toggleCursorReadAloud = function (toggleState) {
+    if (toggleState) {
+        this.disableDefaultClickToRead(); 
+        this.enableCursorReadAloud();
+        this.isCursorReadAloudActive = true;
+    } else {
+        this.disableCursorReadAloud(); 
+        this.enableDefaultClickToRead(); 
+        this.isCursorReadAloudActive = false;
+    }
+};
 
 // Enable Cursor Read Aloud
 YourInclusion.prototype.enableCursorReadAloud = function () {
+    if (this.isCursorReadAloudActive) {
+        return;
+    }
+    if (!this.readElementsCache) {
+        this.readElementsCache = new Set();
+    }
+
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, a, button');
-    elements.forEach(element => {
-        let timeoutId;
-        element.addEventListener('mouseenter', () => {
-            timeoutId = setTimeout(() => {
-                const msg = new SpeechSynthesisUtterance(element.innerText || element.value || '');
-                msg.volume = this.currentVolume || 1;
-                msg.rate = this.currentSpeed || 1;
-                this.highlightText(element, 0, element.innerText.length); 
-                speechSynthesis.speak(msg);
-            }, 1000);
-        });
-        element.addEventListener('mouseleave', () => {
-            clearTimeout(timeoutId);
-            speechSynthesis.cancel();
-        });
+    this.cursorReadElements = elements;
+
+    elements.forEach((element) => {
+        const readHandler = (event) => this.readElementContent(event);
+
+        element.addEventListener('mouseenter', readHandler);
+        element.cursorReadAloudHandlers = { readHandler };
     });
+
+    this.isCursorReadAloudActive = true;
 };
+
+
+// Disable Cursor Read Aloud
+YourInclusion.prototype.disableCursorReadAloud = function () {
+    if (!this.isCursorReadAloudActive) {
+        return;
+    }
+
+    if (this.cursorReadElements) {
+        this.cursorReadElements.forEach((element) => {
+            const { readHandler } = element.cursorReadAloudHandlers || {};
+            if (readHandler) {
+                element.removeEventListener('mouseenter', readHandler);
+                delete element.cursorReadAloudHandlers;
+            }
+        });
+    }
+
+    this.isCursorReadAloudActive = false;
+};
+
 
 YourInclusion.prototype.readPreviousLine = function () {
-    if (this.currentParagraphIndex > 0) {
-        this.currentParagraphIndex--;
-        this.readCurrentLine();
-    } else {
-        console.log('Already at the first paragraph.');
-    }
-};
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span');
 
+    if (!elements.length) {
+        return;
+    }
+
+    if (this.currentParagraphIndex === undefined || this.currentParagraphIndex <= 0) {
+        return;
+    }
+    this.currentParagraphIndex--;
+
+    const currentElement = elements[this.currentParagraphIndex];
+    const text = currentElement.innerText.trim();
+
+    if (!text) {
+        this.readPreviousLine(); 
+        return;
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.volume = this.currentVolume || 1;
+    utterance.rate = this.currentSpeed || 1;
+    currentElement.style.backgroundColor = 'yellow'; 
+    utterance.onend = () => {
+        currentElement.style.backgroundColor = ''; 
+    };
+    utterance.onerror = (e) => {
+        currentElement.style.backgroundColor = ''; 
+    };
+    speechSynthesis.cancel(); 
+    speechSynthesis.speak(utterance);
+};
 
 
 YourInclusion.prototype.readNextLine = function () {
-    const paragraphs = document.querySelectorAll('p');
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span'); 
 
-    if (this.currentParagraphIndex === undefined) this.currentParagraphIndex = 0;
-
-    if (this.currentParagraphIndex < paragraphs.length - 1) {
-        this.currentParagraphIndex++;
-        this.readCurrentLine();
-    } else {
-        console.log('No more paragraphs to read.');
+    if (!elements.length) {
+        return;
     }
+    if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= elements.length) {
+        this.currentParagraphIndex = 0; 
+    }
+
+    const currentElement = elements[this.currentParagraphIndex];
+    const text = currentElement.innerText.trim();
+
+    if (!text) {
+        this.currentParagraphIndex++;
+        if (this.currentParagraphIndex < elements.length) {
+            this.readNextLine();
+        } 
+        return;
+    }
+
+   
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.volume = this.currentVolume || 1;
+    utterance.rate = this.currentSpeed || 1;
+    currentElement.style.backgroundColor = 'yellow'; 
+    utterance.onend = () => {
+        currentElement.style.backgroundColor = '';       
+    };
+    utterance.onerror = (e) => {
+        currentElement.style.backgroundColor = ''; 
+    };
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+    this.currentParagraphIndex++;
 };
 
 
+
+YourInclusion.prototype.readCurrentLine = function () {
+    const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span'); 
+
+    if (!elements.length) {
+        return;
+    }
+
+    if (
+        this.currentParagraphIndex === undefined ||
+        this.currentParagraphIndex >= elements.length
+    ) {
+        return;
+    }
+
+    const currentElement = elements[this.currentParagraphIndex];
+    this.speakText(currentElement);
+};
 
 YourInclusion.prototype.speakText = function (element) {
     const text = element.innerText || '';
     const msg = new SpeechSynthesisUtterance(text);
     msg.volume = this.currentVolume || 1;
     msg.rate = this.currentSpeed || 1;
-
-    // Save original text for restoration
-    if (!element.dataset.originalText) {
-        element.dataset.originalText = text;
-    }
-
-    // Highlight words as they are spoken
-    const words = text.split(' ');
-    let wordIndex = 0;
-
-    msg.onboundary = (event) => {
-        if (event.name === 'word') {
-            const wordStart = event.charIndex;
-            const wordLength = words[wordIndex]?.length || 0;
-            this.highlightText(element, wordStart, wordLength);
-            wordIndex++;
-        }
-    };
-
-    msg.onend = () => {
-        this.clearHighlight(element); 
-    };
-
-
     speechSynthesis.cancel();
     speechSynthesis.speak(msg);
 };
 
-
-
-YourInclusion.prototype.readCurrentLine = function () {
-    const paragraphs = document.querySelectorAll('h1,h2,h3,h4,h5,h6,p');
-
-    if (this.currentParagraphIndex === undefined || this.currentParagraphIndex >= paragraphs.length) {
-        console.log('No more paragraphs to read.');
-        return;
-    }
-
-    const currentParagraph = paragraphs[this.currentParagraphIndex];
-    this.speakText(currentParagraph);
-};
-
-
-
 // Stop Read Aloud
 YourInclusion.prototype.stopReadAloud = function () {
-    speechSynthesis.cancel(); 
-    this.currentParagraphIndex = undefined; 
-
-    // Clear highlights for all paragraphs
+    speechSynthesis.cancel();
+    this.currentParagraphIndex = this.currentWordIndex;
     document.querySelectorAll('[data-original-text]').forEach((element) => {
         this.clearHighlight(element);
     });
+    const popup = document.getElementById('read-aloud-toolbar');
+    if (popup) {
+        popup.remove();
+    }
+};
 
-    console.log('Read Aloud stopped, and all highlights cleared.');
+YourInclusion.prototype.stopAllReadAloud = function () {
+    
+    speechSynthesis.cancel();
+
+    this.currentParagraphIndex = this.currentWordIndex;
+    document.querySelectorAll('[data-original-text]').forEach((element) => {
+        this.clearHighlight(element);
+    });
+    this.isReadAloudActive = false;
+    localStorage.setItem('readAloudActive', false);
+    this.currentWordIndex = 0;
 };
 
 
@@ -2798,12 +3628,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+
 // Keyboard Navigation
 
 // Keyboard Navigation Initialization
 YourInclusion.prototype.initKeyboardNavigation = function () {
     const keyboardNavButton = document.getElementById('keyboard-navigation-btn');
+    
     if (keyboardNavButton) {
+        // Toggle on button click
         keyboardNavButton.addEventListener('click', () => {
             this.keyboardNavigationActive = !this.keyboardNavigationActive;
             this.setActiveButton('keyboard-navigation-btn', this.keyboardNavigationActive);
@@ -2814,22 +3647,40 @@ YourInclusion.prototype.initKeyboardNavigation = function () {
             } else {
                 this.disableKeyboardNavigation();
                 this.hideKeyboardNavigationPopup();
+                this.clearAllSelectionHighlight();
             }
         });
     }
+
+    // Listen for Alt to toggle keyboard navigation
+    document.addEventListener('keydown', (event) => {
+        if (event.altKey) {
+            event.preventDefault();
+            this.keyboardNavigationActive = !this.keyboardNavigationActive;
+            this.setActiveButton('keyboard-navigation-btn', this.keyboardNavigationActive);
+
+            if (this.keyboardNavigationActive) {
+                this.enableKeyboardNavigation();
+                this.showKeyboardNavigationPopup();
+            } else {
+                this.disableKeyboardNavigation();
+                this.hideKeyboardNavigationPopup();
+                this.clearAllSelectionHighlight();
+            }
+        }
+    });
 };
+
 
 
 // Enable Keyboard Navigation
 YourInclusion.prototype.enableKeyboardNavigation = function () {
-    console.log('Keyboard Navigation Enabled');
     document.addEventListener('keydown', this.handleKeyboardNavigation.bind(this));
     document.body.classList.add('keyboard-navigation-active');
 };
 
 // Disable Keyboard Navigation
 YourInclusion.prototype.disableKeyboardNavigation = function () {
-    console.log('Keyboard Navigation Disabled');
     document.removeEventListener('keydown', this.handleKeyboardNavigation.bind(this));
     document.body.classList.remove('keyboard-navigation-active');
     this.clearSelectionHighlight();
@@ -2857,6 +3708,14 @@ YourInclusion.prototype.handleKeyboardNavigation = function (event) {
             focusableElements[currentIndex].focus();
             this.highlightSelection(focusableElements[currentIndex]);
         },
+        ArrowLeft: () => {
+            event.preventDefault();
+           
+        },
+        ArrowRight: () => {
+            event.preventDefault();
+            
+        },
         Enter: () => {
             if (document.activeElement) {
                 document.activeElement.click();
@@ -2869,33 +3728,174 @@ YourInclusion.prototype.handleKeyboardNavigation = function (event) {
         },
         F2: () => this.showKeyboardNavigationPopup(),
         F3: () => this.toggleSpeechOutput(),
-        KeyW: () => document.getElementById('blue-filter-btn')?.click(),
-        KeyI: () => document.getElementById('remove-images-btn')?.click(),
-        KeyA: () => document.getElementById('remove-audio-btn')?.click(),
-        KeyR: () => document.getElementById('read-aloud-btn')?.click(),
-        KeyP: () => document.getElementById('increase-text-btn')?.click(),
-        KeyM: () => document.getElementById('decrease-text-btn')?.click(),
-        KeyH: () => this.navigateToNext('heading'),
-        KeyS: () => this.navigateToStart(),
-        KeyZ: () => document.getElementById('zoom-toggle-btn')?.click(),
-        KeyN: () => document.getElementById('night-mode-btn')?.click(),
-        KeyT: () => document.getElementById('text-spacing-btn')?.click(),
-        KeyL: () => this.navigateToNext('list'),
-        KeyC: () => document.getElementById('cursor-size-btn')?.click(),
-        KeyG: () => this.navigateToNext('image'),
-        KeyK: () => this.navigateToNext('link'),
-        KeyD: () => this.navigateToNext('jump-tag'),
-        KeyF: () => this.navigateToNext('form-field'),
-        KeyE: () => this.navigateToNext('input-field'),
-        KeyB: () => this.navigateToNext('button'),
+    
+        KeyB: () => {
+            if (event.shiftKey) {
+                console.log("Shift + B triggered");
+                document.getElementById('blue-filter-btn')?.click();
+            } else {
+                console.log("B triggered without Shift");
+                this.navigateToNextButton();
+            }
+        },
+    
+        KeyK: () => {
+            if (event.shiftKey) {
+                console.log("Shift + K triggered");
+                document.getElementById('accessible-font-btn')?.click();
+            } else {
+                console.log("K triggered without Shift");
+                this.navigateToNextLink();
+            }
+        },
+    
+        KeyI: () => {
+            if (event.shiftKey) {
+                document.getElementById('remove-images-btn')?.click();
+            } else {
+                console.log("Key I triggered without Shift");
+                remove-audio-btn
+            }
+        },
+        KeyA: () => {
+            if (event.shiftKey) {
+                document.getElementById('stop-animations-btn')?.click();
+            } else {
+                console.log("Key A triggered without Shift");
+                this.scrollPage('left');
+            }
+        },
+    
+        KeyR: () => {
+            if (event.shiftKey) {
+                document.getElementById('reset-btn1')?.click();
+            } else {
+                document.getElementById('read-aloud-btn')?.click();
+            }
+        },
+    
+        KeyP: () => {
+            if (event.shiftKey) {
+                document.getElementById('highlight-links-btn')?.click();
+            } else {
+                console.log("Key P triggered without Shift");
+                this.increaseFontSize();
+            }
+        },
+    
+        KeyM: () => {
+            if (event.shiftKey) {
+                document.getElementById('highlight-headers-btn')?.click();
+            } else {
+                this.decreaseFontSize();
+            }
+        },
+    
+        KeyC: () => {
+            if (event.shiftKey) {
+                document.getElementById('contrast-btn')?.click();
+            } else {
+                document.getElementById('cursor-size-btn')?.click();
+            }
+        },
+    
+        KeyU: () => this.navigateToStart(),
+    
+        KeyZ: () => {
+            if (event.shiftKey) {
+                document.getElementById('zoom-toggle-btn')?.click();
+            } else {
+                console.log("Key Z triggered without Shift");
+                document.getElementById('remove-audio-btn')?.click();
+            }
+        },
+    
+        KeyN: () => {
+            if (event.shiftKey) {
+                document.getElementById('night-mode-btn')?.click();
+            } else {
+                console.log("Key N triggered without Shift");
+            }
+        },
+    
+        KeyT: () => {
+            if (event.shiftKey) {
+                document.getElementById('text-spacing-btn')?.click();
+            } else {
+                console.log("Key T triggered without Shift");
+            }
+        },
+    
+        KeyL: () => {
+            if (event.shiftKey) {
+                document.getElementById('line-height-btn')?.click();
+            } else {
+                this.navigateToNextList();
+            }
+        },
+    
+        KeyS: () => {
+            if (event.shiftKey) {
+                document.getElementById('save-settings-btn')?.click();
+            } else {
+                console.log("Key S triggered without Shift");
+                this.scrollPage('down');
+            }
+        },
+        
+        KeyF: () => {
+            if (event.shiftKey) {
+                this.navigateToNextFormField();
+            } else {
+                console.log("Key F triggered without Shift");
+            }
+        },
+
+        KeyE: () => {
+            if (event.shiftKey) {
+                console.log("Key e triggered with Shift");
+            } else {
+                this.navigateToNextInputField();
+                console.log("Key F triggered without Shift");
+            }
+        },
+
+        KeyD: () => {
+            if (event.shiftKey) {
+                this.navigateToNextJumpTag();
+            } else {
+                this.scrollPage('right');
+            }
+        },
+
+        KeyW: () => {
+            if (event.shiftKey) {
+               
+            } else {
+                this.scrollPage("up");
+            }
+        },
+
+   
+        KeyG: () => this.navigateToNextImage(), 
+        KeyH: () => this.navigateToNextHeading(),
+        KeyJ: () => this.navigateToNextListEntry(),
+        KeyO: () => this.navigateToNextCombobox(),
+        KeyQ: () => this.navigateToNextEmbedded(),
+       
+        Digit1: () => this.navigateHeading1(),
+        Digit2: () => this.navigateHeading2(),
+        Digit3: () => this.navigateHeading3(),
+        Digit4: () => this.navigateHeading4(),
+        Digit5: () => this.navigateHeading5(),
+        Digit6: () => this.navigateHeading6(),
+
     };
 
     if (keyFunctionMap[event.code]) {
         keyFunctionMap[event.code]();
     }
 };
-
-
 
 // Focus on an Element
 YourInclusion.prototype.focusElement = function (element) {
@@ -2907,18 +3907,83 @@ YourInclusion.prototype.focusElement = function (element) {
 
 // Scroll the Page
 YourInclusion.prototype.scrollPage = function (direction) {
-    const scrollAmount = 70; // Amount to scroll per action
-    const scrollMap = {
-        up: () => window.scrollBy({ top: -scrollAmount, behavior: 'smooth' }),
-        down: () => window.scrollBy({ top: scrollAmount, behavior: 'smooth' }),
-        left: () => window.scrollBy({ left: -scrollAmount, behavior: 'smooth' }),
-        right: () => window.scrollBy({ left: scrollAmount, behavior: 'smooth' }),
+    const scrollAmount = 800; // Adjust the scrolling distance as needed
+    const scrollOptions = {
+        behavior: 'smooth',
+        left: 0,
+        top: 0,
     };
 
-    if (scrollMap[direction]) {
-        scrollMap[direction]();
+    // Function to find the scrollable container
+    const findScrollableContainer = () => {
+        // Common selectors for scrollable containers
+        const scrollableSelectors = [
+            'html',                     // Fallback to the root element
+            'body',                     // Fallback to the body
+            '.scroll-container',        // Custom-defined container
+            'router-outlet',            // Angular router outlet
+            '.mat-sidenav-content',     // Angular Material sidenav content
+            '[class*="content"]',       // General content containers
+        ];
+
+        // Try each selector to find a scrollable element
+        for (const selector of scrollableSelectors) {
+            const element = document.querySelector(selector);
+            if (element && (element.scrollHeight > element.clientHeight || element.scrollWidth > element.clientWidth)) {
+                return element; // Return the first valid scrollable element
+            }
+        }
+
+        // Default to `document.documentElement` or `document.body`
+        return document.documentElement || document.body;
+    };
+
+    // Detect the scroll container
+    const scrollContainer = findScrollableContainer();
+
+    if (!scrollContainer) {
+        console.error('No scrollable container found. Scrolling is not possible.');
+        return;
+    }
+
+    // Determine the scroll direction
+    switch (direction) {
+        case 'up':
+            scrollOptions.top = -scrollAmount;
+            break;
+        case 'down':
+            scrollOptions.top = scrollAmount;
+            break;
+        case 'left':
+            scrollOptions.left = -scrollAmount;
+            break;
+        case 'right':
+            scrollOptions.left = scrollAmount;
+            break;
+        default:
+            console.error('Invalid scroll direction:', direction);
+            return;
+    }
+
+    // Perform the scroll
+    try {
+        scrollContainer.scrollBy(scrollOptions);
+    } catch (error) {
+        console.warn('scrollBy not supported on the detected container. Falling back to window scrolling.');
+        // Fallback for older browsers or non-scrollable containers
+        window.scrollBy(scrollOptions);
     }
 };
+
+// Function to clear all highlights
+YourInclusion.prototype.clearAllSelectionHighlight = function () {
+    const highlightedElements = document.querySelectorAll('.highlighted'); 
+    highlightedElements.forEach(element => {
+        element.classList.remove('highlighted'); 
+        element.style.outline = ''; 
+        element.style.backgroundColor = ''; 
+    });
+}
 
 // Show Keyboard Shortcuts Popup
 YourInclusion.prototype.showKeyboardNavigationPopup = function () {
@@ -2931,35 +3996,56 @@ YourInclusion.prototype.showKeyboardNavigationPopup = function () {
 
     const header = document.createElement('div');
     header.className = 'popup-header';
-    header.innerHTML = '<h3>Instructions for the use of keyboard shortcuts</h3><button class="close-popup-btn">✖</button>';
-    header.querySelector('.close-popup-btn').addEventListener('click', () => popup.remove());
+    header.innerHTML = `<h3>${language[CONFIG.LANGUAGE]['INSTRUCTIONS FOR THE USE OF KEYBOARD SHORTCUTS']}</h3><button class="close-popup-btn">✖</button>`;
+    header.querySelector('.close-popup-btn').addEventListener('click', (event) => {
+        event.stopPropagation();
+        popup.remove(); 
+    });
     popup.appendChild(header);
 
     const shortcuts = [
-        { key: 'Esc', action: 'Exit web page navigation' },
-        { key: 'F2', action: 'Show this guide' },
-        { key: 'F3', action: 'Toggle speech output' },
-        { key: 'Tab', action: 'Select next item' },
-        { key: 'Shift + Tab', action: 'Select previous item' },
-        { key: 'S', action: 'Reset focus to start' },
-        { key: 'H', action: 'Next heading' },
-        { key: 'G', action: 'Next image/graphic' },
-        { key: 'K', action: 'Next link' },
-        { key: 'D', action: 'Next jump tag' },
-        { key: 'L', action: 'Next list' },
-        { key: 'F', action: 'Next form field' },
-        { key: 'E', action: 'Next input field' },
-        { key: 'W', action: 'Blue Filter' },
-        { key: 'I', action: 'Remove Images' },
-        { key: 'A', action: 'Remove Audio' },
-        { key: 'R', action: 'Read Aloud' },
-        { key: 'P', action: 'Increase Text Font Size' },
-        { key: 'M', action: 'Decrease Text Font Size' },
-        { key: 'Z', action: 'Zoom Toggle' },
-        { key: 'N', action: 'Night Mode' },
-        { key: 'T', action: 'Text Spacing' },
-        { key: 'C', action: 'Cursor Size ' },
-
+        { key: 'Esc', action: language[CONFIG.LANGUAGE]['EXIT_WEB_PAGE_NAVIGATION']},
+        { key: 'F2', action: language[CONFIG.LANGUAGE]['SHOW_THIS_GUIDE']},
+        { key: 'F3', action: language[CONFIG.LANGUAGE]['TOGGLE_SPEECH_OUTPUT']},
+        { key: 'Tab', action: language[CONFIG.LANGUAGE]['SELECT_NEXT_ITEM']},
+        { key: 'Shift + Tab', action: language[CONFIG.LANGUAGE]['SELECT_PREVIOUS_ITEM']},
+        { key: 'U', action: language[CONFIG.LANGUAGE]['RESET_FOCUS_TO_START'] },
+        { key: 'H', action: language[CONFIG.LANGUAGE]['NEXT_HEADING'] },
+        { key: 'G', action: language[CONFIG.LANGUAGE]['NEXT_IMAGE_GRAPHIC'] },
+        { key: 'K', action: language[CONFIG.LANGUAGE]['NEXT_LINK'] },
+        { key: 'L', action: language[CONFIG.LANGUAGE]['NEXT_LIST'] },
+        { key: 'E', action: language[CONFIG.LANGUAGE]['NEXT_INPUT_FIELD'] },
+        { key: 'J', action: language[CONFIG.LANGUAGE]['NEXT_LIST_ENTRY'] },
+        { key: 'O', action: language[CONFIG.LANGUAGE]['NEXT_COMBOBOX'] },
+        { key: 'Q', action: language[CONFIG.LANGUAGE]['NEXT_EMBEDDED_OBJECT'] },
+        { key: 'P', action: language[CONFIG.LANGUAGE]['INCREASE_FONT_SIZE'] },
+        { key: 'M', action: language[CONFIG.LANGUAGE]['DECREASE_FONT_SIZE'] },
+        { key: 'C', action: language[CONFIG.LANGUAGE]['CURSOR_SIZE'] },
+        { key: 'Z', action: language[CONFIG.LANGUAGE]['REMOVE_AUDIO'] },
+        { key: '1', action: language[CONFIG.LANGUAGE]['HEADING_1'] },
+        { key: '2', action: language[CONFIG.LANGUAGE]['HEADING_2'] },
+        { key: '3', action: language[CONFIG.LANGUAGE]['HEADING_3'] },
+        { key: '4', action: language[CONFIG.LANGUAGE]['HEADING_4'] },
+        { key: '5', action: language[CONFIG.LANGUAGE]['HEADING_5'] },
+        { key: '6', action: language[CONFIG.LANGUAGE]['HEADING_6'] },
+        { key: 'ALT', action: language[CONFIG.LANGUAGE]['START_KEYBOARD_NAVIGATION'] },
+        { key: 'Shift + D', action: language[CONFIG.LANGUAGE]['NEXT_JUMP_TAG'] },
+        { key: 'Shift + F', action: language[CONFIG.LANGUAGE]['NEXT_FORM_FIELD'] },
+        { key: 'Shift + B', action: language[CONFIG.LANGUAGE]['BLUE_FILTER'] },
+        { key: 'Shift + I', action: language[CONFIG.LANGUAGE]['REMOVE_IMAGES'] },
+        { key: 'Shift + R', action: language[CONFIG.LANGUAGE]['READ_ALOUD'] },
+        { key: 'Shift + P', action: language[CONFIG.LANGUAGE]['HIGHLIGHT_LINKS'] },
+        { key: 'Shift + M', action: language[CONFIG.LANGUAGE]['HIGHLIGHT_HEADERS'] },
+        { key: 'Shift + Z', action: language[CONFIG.LANGUAGE]['ZOOM_TOGGLE'] },
+        { key: 'Shift + N', action: language[CONFIG.LANGUAGE]['NIGHT_MODE'] },
+        { key: 'Shift + T', action: language[CONFIG.LANGUAGE]['TEXT_SPACING'] },
+        { key: 'Shift + L', action: language[CONFIG.LANGUAGE]['LINE_HEIGHT'] },
+        { key: 'Shift + A', action: language[CONFIG.LANGUAGE]['STOP_ANIMATIONS'] },
+        { key: 'Shift + K', action: language[CONFIG.LANGUAGE]['ACCESSIBLE_FONT'] },
+        { key: 'Shift + C', action: language[CONFIG.LANGUAGE]['CONTRAST'] },
+        { key: 'Shift + S', action: language[CONFIG.LANGUAGE]['SAVE'] },
+        { key: 'Shift + R', action: language[CONFIG.LANGUAGE]['RESET'] }
+            
     ];
 
     const body = document.createElement('div');
@@ -2983,42 +4069,142 @@ YourInclusion.prototype.hideKeyboardNavigationPopup = function () {
         popup.remove();
     }
 };
-
 // Highlight Selection
 YourInclusion.prototype.highlightSelection = function (element) {
-    this.clearSelectionHighlight();
+    if (this.currentHighlight) {
+        this.currentHighlight.classList.remove('keyboard-focus');
+    }
     if (element) {
         element.classList.add('keyboard-focus');
+        this.currentHighlight = element;
     }
 };
+
+// Clear Selection Highlight
 YourInclusion.prototype.clearSelectionHighlight = function () {
-    document.querySelectorAll('.keyboard-focus').forEach((el) => el.classList.remove('keyboard-focus'));
-};
-
-
-// Navigate to Specific Elements
-YourInclusion.prototype.navigateToNext = function (type) {
-    const selectors = {
-        heading: 'h1, h2, h3, h4, h5, h6',
-        list: 'ul, ol',
-        'list-entry': 'li',
-        'form-field': 'form',
-        'input-field': 'input, textarea, select',
-        button: 'button',
-        link: 'a',
-        image: 'img',
-        'jump-tag': '[id]',
-    };
-    const elements = document.querySelectorAll(selectors[type]);
-    const current = document.activeElement;
-    const currentIndex = Array.from(elements).indexOf(current);
-    const nextIndex = (currentIndex + 1) % elements.length;
-
-    if (elements[nextIndex]) {
-        elements[nextIndex].focus();
-        this.highlightSelection(elements[nextIndex]);
+    if (this.currentHighlight) {
+        this.currentHighlight.classList.remove('keyboard-focus');
+        this.currentHighlight = null;
     }
 };
+
+// Navigate to Next Element Helper
+YourInclusion.prototype.navigateToNextElement = function (type) {
+    const allElements = Array.from(document.querySelectorAll('*:not(.syi-toolbox):not(.syi-toolbox *):not(.font-size-popup):not(.syi-font-size-popup *):not(#keyboard-navigation-popup *)'));
+    const current = document.activeElement;
+    let currentIndex = allElements.indexOf(current);
+
+    let nextIndex = -1;
+    const types = Array.isArray(type) ? type : [type];
+    const matchesType = (element) => types.includes(element.tagName.toLowerCase());
+
+    // Check for Shift key press
+    const isShiftPressed = event.shiftKey;
+
+    // Find the next matching element
+    for (let i = currentIndex + 1; i < allElements.length; i++) {
+        if (matchesType(allElements[i])) {
+            nextIndex = i;
+            break;
+        }
+    }
+
+    if (nextIndex === -1) {
+        for (let i = 0; i <= currentIndex; i++) {
+            if (matchesType(allElements[i])) {
+                nextIndex = i;
+                break;
+            }
+        }
+    }
+
+    if (nextIndex !== -1) {
+        const targetElement = allElements[nextIndex];
+        const previouslyHighlighted = document.querySelector('.highlighted');
+        if (previouslyHighlighted) {
+            previouslyHighlighted.classList.remove('highlighted');
+        }
+        if (['input', 'textarea', 'select'].includes(targetElement.tagName.toLowerCase()) && isShiftPressed) {
+            targetElement.blur(); 
+
+            
+            setTimeout(() => {
+                targetElement.focus(); 
+                targetElement.classList.add('highlighted');
+            }, 1000); 
+        } else {
+        
+            if (!targetElement.hasAttribute('tabindex')) {
+                targetElement.setAttribute('tabindex', '-1');
+            }
+
+            targetElement.focus();
+            targetElement.classList.add('highlighted'); 
+        }
+    }
+};
+
+YourInclusion.prototype.navigateHeading1 = function () {
+    this.navigateToNextElement('h1');
+};
+YourInclusion.prototype.navigateHeading2 = function () {
+    this.navigateToNextElement('h2');
+};
+YourInclusion.prototype.navigateHeading2 = function () {
+    this.navigateToNextElement('h3');
+};
+YourInclusion.prototype.navigateHeading4 = function () {
+    this.navigateToNextElement('h4');
+};
+YourInclusion.prototype.navigateHeading5 = function () {
+    this.navigateToNextElement('h5');
+};
+YourInclusion.prototype.navigateHeading6 = function () {
+    this.navigateToNextElement('h6');
+};
+
+YourInclusion.prototype.navigateToNextHeading = function () {
+    this.navigateToNextElement(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+};
+
+YourInclusion.prototype.navigateToNextJumpTag = function () {
+    this.navigateToNextElement('[id]');
+};
+
+YourInclusion.prototype.navigateToNextFormField = function () {
+    this.navigateToNextElement('form'); 
+};
+
+YourInclusion.prototype.navigateToNextListEntry = function () {
+    this.navigateToNextElement(['ul', 'li', 'ol', 'li']);
+};
+
+YourInclusion.prototype.navigateToNextCombobox = function () {
+    this.navigateToNextElement('select');
+};
+
+YourInclusion.prototype.navigateToNextEmbedded = function () {
+    this.navigateToNextElement(['embed', 'object', 'iframe']);
+};
+
+YourInclusion.prototype.navigateToNextButton = function () {
+    this.navigateToNextElement('button');
+};
+
+YourInclusion.prototype.navigateToNextLink = function () {
+    this.navigateToNextElement('a');
+};
+
+YourInclusion.prototype.navigateToNextImage = function () {
+    this.navigateToNextElement('img');
+};
+YourInclusion.prototype.navigateToNextList = function () {
+    this.navigateToNextElement(['ul', 'ol']);
+};
+YourInclusion.prototype.navigateToNextInputField = function () {
+    this.navigateToNextElement(['input', 'textarea', 'select']);
+};
+
 
 // Navigate to Start
 YourInclusion.prototype.navigateToStart = function () {
@@ -3029,14 +4215,216 @@ YourInclusion.prototype.navigateToStart = function () {
     }
 };
 
+YourInclusion.prototype.increaseFontSize = function () {
+    const fontSizeButton = document.getElementById('font-size-btn');
+    if (fontSizeButton) {
+        fontSizeButton.click(); 
+        setTimeout(() => {
+            const increaseButton = document.getElementById('increase-font-btn');
+            if (increaseButton) {
+                increaseButton.click(); 
+            }
+        }, 100); 
+    }
+};
 
+YourInclusion.prototype.decreaseFontSize = function () {
+    const fontSizeButton = document.getElementById('font-size-btn');
+    if (fontSizeButton) {
+        fontSizeButton.click(); 
+        setTimeout(() => {
+            const decreaseButton = document.getElementById('decrease-font-btn');
+            if (decreaseButton) {
+                decreaseButton.click(); 
+            }
+        }, 100);
+    }
+};
 
+// Initialize on Page Load and Validation
+YourInclusion.prototype.fetchAndValidateLicense = async function () {
+    const url = CONFIG.URLS.API_Endpoint;
+    const licenseMetaTag = document.querySelector('meta[name="license"]');
+    console.log("Lisence",licenseMetaTag.content);
 
+    const payload = {
+        websiteUrl: "https://youtube.com",
+    };
+    // const payload = {
+    //     websiteUrl: window.location.href,
+    //         license: licenseMetaTag.content,
+    // };
+    
+    console.log("Payload:", payload);
 
-// Initialize on Page Load
-document.addEventListener('DOMContentLoaded', () => {
-    new YourInclusion();
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+           
+            throw new Error(`HTTP error! Status: ${response.status}`);
+            
+        }
+
+        const data = await response.json();
+        this.apiJson = data;
+        console.log("API Response:", this.apiJson);
+        return this.apiJson;
+    } catch (error) {
+        console.error("Error fetching license:", error);
+        throw error;
+    }
+};
+
+YourInclusion.prototype.startPlugin = async function () {
+    console.log("Initializing the plugin...");
+    this.initializeAccessibilityToolbox();
     loadScript();
+    const readAloudToolbar = document.getElementById('read-aloud-toolbar');
+    const instance = new YourInclusion();
+};
+
+YourInclusion.prototype.validateAndStartPlugin = async function () {
+    this.startPlugin();
+   
+    let isLicenseValid = false;
+
+    try {
+        let apiJson;
+        const storedLicense = sessionStorage.getItem('pluginLicense');
+        if (storedLicense) {
+            apiJson = JSON.parse(storedLicense);
+            console.log("License loaded from session storage:", apiJson);
+            if (new Date(apiJson.expireDate) <= new Date()) {
+                console.log("License is expired. Fetching a new license...");
+                sessionStorage.removeItem('pluginLicense');
+                apiJson = await this.fetchAndValidateLicense(); 
+            }
+        } else {
+            apiJson = await this.fetchAndValidateLicense();
+        }
+        if (apiJson.isValid && new Date(apiJson.expireDate) > new Date()) {
+            sessionStorage.setItem('pluginLicense', JSON.stringify(apiJson));
+            console.log("Valid license stored in session storage.");
+        }
+        const storedConfig = localStorage.getItem('config');
+        if (!storedConfig) {
+            const config = {
+                languageIsoCode: apiJson.pluginDetails.languageIsoCode,
+                colorCode: apiJson.pluginDetails.colorCode,
+            };
+            localStorage.setItem('config', JSON.stringify(config));
+            console.log("Config data stored in local storage:", config);
+        } else {
+            console.log("Config data already exists in local storage:", JSON.parse(storedConfig));
+        }
+        if (apiJson.isValid && new Date(apiJson.expireDate) > new Date()) {
+            isLicenseValid = true;
+            console.log("License is valid and not expired.");
+        } else {
+            console.error("License is invalid or expired.");
+        }
+if (isLicenseValid) {
+    this.startPlugin();
+    const savedState = JSON.parse(localStorage.getItem('toolbarState')) || {};
+    this.selectedHeaderColor = savedState.popupColor || localStorage.getItem('popupHeaderColor') || apiJson.pluginDetails.colorCode || '#393636';
+    this.resetSelectedColor = this.selectedHeaderColor;
+    this.defaultLanguage = savedState.popupLanguage || localStorage.getItem('popupLanguage') || apiJson.pluginDetails.languageIsoCode || 'en-US';
+    document.documentElement.style.setProperty('--bg-color', this.selectedHeaderColor);
+
+    console.log("Selected Header Color:", this.selectedHeaderColor);
+    console.log("Default Language:", this.defaultLanguage);
+    let config = localStorage.getItem('config');
+    if (config) {
+        config = JSON.parse(config);
+    } else {
+        config = {
+            BACKGROUND_COLOR: this.selectedHeaderColor,
+            LANGUAGE: this.defaultLanguage
+        };
+    }
+    CONFIG.LANGUAGE = this.defaultLanguage;
+    config.BACKGROUND_COLOR = this.selectedHeaderColor;
+    config.LANGUAGE = this.defaultLanguage;
+    this.updateToolbarLanguage();
+    localStorage.setItem('config', JSON.stringify(config));
+    console.log("Updated config stored in local storage:", config);
+
+} else {
+    console.log("Plugin will not start as the license is invalid.");
+}
+
+        
+        
+    } catch (error) {
+        console.error("Error during license validation:", error);
+        // alert("Failed to fetch license details. The plugin will not function.");
+    }
+
+    return isLicenseValid;
+};
+YourInclusion.prototype.validateAndStartPluginReset = async function () {
+    try {
+        const apiJson = await this.fetchAndValidateLicense();
+        sessionStorage.setItem('pluginLicense', JSON.stringify(apiJson));
+        console.log("Valid license stored in session storage:", apiJson);
+        const config = {
+            languageIsoCode: apiJson.pluginDetails.languageIsoCode || 'en-US',
+            colorCode: apiJson.pluginDetails.colorCode || '#393636',
+        };
+        localStorage.setItem('config', JSON.stringify(config));
+        console.log("Config data stored in local storage:", config);
+        this.selectedHeaderColor = config.colorCode;
+        this.defaultLanguage = config.languageIsoCode;
+        document.documentElement.style.setProperty('--bg-color', this.selectedHeaderColor);
+        console.log("Selected Header Color:", this.selectedHeaderColor);
+        console.log("Default Language:", this.defaultLanguage);
+        this.updateToolbarLanguage();
+
+        console.log("Configuration and appearance updated successfully.");
+    } catch (error) {
+        console.error("Error during license validation and configuration:", error);
+    }
+};
+
+
+
+YourInclusion.prototype.updateLanguageInConfig = function (apiLanguage) {
+    let config = localStorage.getItem('config');
+    
+    if (config) {
+        config = JSON.parse(config);
+        console.log("Original config:", config);
+        config.LANGUAGE = apiLanguage;
+        localStorage.setItem('config', JSON.stringify(config));
+        console.log("Updated config with new language:", config);
+    } else {
+        console.warn("Config file not found in local storage.");
+    }
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const plugin = new YourInclusion();
+    const isLicenseValid = await plugin.validateAndStartPlugin();
+    
+
+    if (!isLicenseValid) {
+        console.log("Plugin will not function due to invalid license.");
+        
+    }
+    
 });
 
 export default YourInclusion;
+// Initialize on Page Load
+// document.addEventListener('DOMContentLoaded', () => {
+//     new YourInclusion();
+//     loadScript();
+//     this.startPlugin();
+// });
