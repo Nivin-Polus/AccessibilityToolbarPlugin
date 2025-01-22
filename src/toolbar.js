@@ -2716,7 +2716,6 @@ YourInclusion.prototype.initZoomToggleFeature = function () {
     if (zoomToggleButton) {
         zoomToggleButton.addEventListener('click', this.toggleZoom.bind(this));
     }
-    
 
     this.restoreZoomState();
 };
@@ -2725,7 +2724,7 @@ YourInclusion.prototype.initZoomToggleFeature = function () {
 YourInclusion.prototype.toggleZoom = function () {
     this.zoomIndex = (this.zoomIndex + 1) % this.zoomStates.length; 
     const zoomLevel = this.zoomStates[this.zoomIndex];
-    this.applyZoom(zoomLevel);;
+    this.applyZoom(zoomLevel);
     const stateManager = this.createStateManager('AppState');
     const currentState = stateManager.getState();
     let newZoomIncrement = currentState.zoomIncrement;
@@ -2739,25 +2738,21 @@ YourInclusion.prototype.toggleZoom = function () {
         zoomLevel: zoomLevel,
         zoomIncrement: newZoomIncrement
     });
-    const isActive = zoomLevel !== 1; 
-    
+
     this.updateZoomButtonProgressBar('zoom-toggle-btn', this.zoomIndex);
-    
+    const isActive = zoomLevel !== 1; 
 
     this.setActiveButton('zoom-toggle-btn', isActive);
-
     console.log(`Zoom level toggled to: ${zoomLevel}`);
 };
 
-// Apply Zoom to Body Without Affecting Toolbox
 YourInclusion.prototype.applyZoom = function (zoomLevel) {
     const body = document.body;
-    body.style.transform = `scale(${zoomLevel})`;
-    body.style.transformOrigin = '0 0'; 
-    body.style.width = `${100 / zoomLevel}%`;
+    body.style.zoom = zoomLevel;
     const excludedElements = document.querySelectorAll('#syi-toolbox, #openToolboxButton, #read-aloud-toolbar');
     excludedElements.forEach(element => {
-        element.style.transform = 'none';
+        
+        element.style.zoom = 'none';
     });
 
     console.log(`Zoom applied to body with level: ${zoomLevel}`);
