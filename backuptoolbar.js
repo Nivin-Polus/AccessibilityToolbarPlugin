@@ -1,6 +1,7 @@
 // 'use strict';
-import CONFIG from "../config";
-import language  from '../languages.json';
+
+import CONFIG from "./config";
+import language  from './languages.json';
 
 
 function YourInclusion(init) {
@@ -9,15 +10,13 @@ function YourInclusion(init) {
     this.imagesHidden = false;
     this.isMuted = false;
     
-    this.initBlueFilter();
+    
     this.initRemoveImages();
-    this.addFontSizePopup();
     this.initNightModeFeature();
     this.initTextSpacingFeature();
     this.initLineHeightFeature();
     this.initResetFeature();
     this.initContrastFeature();
-    this.addSettingsButtonListener();
     this.initAudioRemoval();
     this.initHighlightButtons();
     this.initStopAnimationsButton();
@@ -25,9 +24,13 @@ function YourInclusion(init) {
     this.initAccessibleFontToggle();
     this.initCursorSizeAdjustment();
     this.initKeyboardNavigation();
-    this.initSaveFeature(); 
     this.initReadAloud();
     this.addStylesForHighlight();
+    this.initBlueFilter();
+    this.initSaveFeature(); 
+    this.addSettingsButtonListener(); 
+    this.addFontSizePopup();
+   
 
 }
 
@@ -143,13 +146,10 @@ YourInclusion.prototype.createProgressBar = function (filledDashes, totalDashes)
 YourInclusion.prototype.updateZoomButtonProgressBar = function (id) {
     const zoomButton = document.getElementById(id);
     if (zoomButton) {
-        // Remove the existing progress bar if it exists
         const existingProgressBar = zoomButton.querySelector('.syi-progress-bar-container');
         if (existingProgressBar) {
             existingProgressBar.remove();
         }
-
-        // Get the updated progress bar data
         const { filledDashes, totalDashes } = this.getDashesForButton(id);
         const progressBar = this.createProgressBar(Math.min(filledDashes, totalDashes), totalDashes);
         zoomButton.appendChild(progressBar);
@@ -203,8 +203,6 @@ YourInclusion.prototype.updateCursorSizeProgressBar = function (buttonId, increm
 YourInclusion.prototype.createCheckmarkFromLocal = function (svgPath) {
     const wrapper = document.createElement('div');
     wrapper.className = 'syi-checkmark-wrapper';
-
-    // Style the wrapper to make it a circle
     wrapper.style.position = 'absolute';
     wrapper.style.top = '5px';
     wrapper.style.right = '5px';
@@ -215,10 +213,6 @@ YourInclusion.prototype.createCheckmarkFromLocal = function (svgPath) {
     wrapper.style.display = 'none'; 
     wrapper.style.alignItems = 'center';
     wrapper.style.justifyContent = 'center';
-    
-    
-
-    // Fetch and append the SVG inside the circle
     this.fetchAndAppendSVG(svgPath, wrapper);
 
     return wrapper;
@@ -239,12 +233,9 @@ YourInclusion.prototype.createIconWrapper = function (iconUrl, altText) {
 
     const iconWrapper = document.createElement('div');
     iconWrapper.className = 'icon-wrapper';
-
-    // Check if the icon is an SVG and fetch it
     if (iconUrl.endsWith('.svg')) {
         this.fetchAndAppendSVG(iconUrl, iconWrapper);
     } else if (iconUrl.endsWith('.png') || iconUrl.endsWith('.jpg') || iconUrl.endsWith('.jpeg')) {
-        // Handle non-SVG images
         const imgIcon = this.createImageIcon(iconUrl, altText);
         iconWrapper.appendChild(imgIcon);
     }
@@ -252,8 +243,6 @@ YourInclusion.prototype.createIconWrapper = function (iconUrl, altText) {
     return iconWrapper;
 };
 
-
-// Function to fetch and append SVG
 YourInclusion.prototype.fetchAndAppendSVG = function (icon, wrapper) {
     fetch(icon)
         .then(response => response.text())
@@ -348,16 +337,14 @@ YourInclusion.prototype.createToolbox = function () {
 
     
     const header = this.createToolboxHeader(); 
-    const body = this.createToolboxBody();     
+    const body = this.createToolboxBody();   
+    // const extra = this.createExtralargeButton();  
 
    
     toolbox.appendChild(header);
+    // toolbox.appendChild(extra);
     toolbox.appendChild(body);
-
-    
     document.body.appendChild(toolbox);
-
-
     this.resetButtonStates();
 };
 
@@ -408,8 +395,9 @@ YourInclusion.prototype.createHeaderRightSection = function () {
      
     const infoButton = this.createButtonWithIcon('info-btn', 'fas fa-info-circle');
     infoButton.style.fontSize = '14px'
+    infoButton.addEventListener('click', () => this.createInfoPopup());
     headerRight.appendChild(infoButton);
-
+    
    
     const closeButton = this.createButtonWithIcon('close-btn', 'fas fa-times');
     closeButton.style.fontSize = '14px';
@@ -418,10 +406,100 @@ YourInclusion.prototype.createHeaderRightSection = function () {
 
     return headerRight;
 };
+YourInclusion.prototype.createInfoPopup = function () {
+    this.closeAllPopups();
+    if (document.querySelector('.syi-info-popup')) return;
+    const popup = this.createDiv('syi-info-popup');
+    const header = this.createDiv('syi-info-popup-header');
+    header.innerHTML = `
+        <span class="info-popup-title">${language[CONFIG.LANGUAGE]['INFO']}</span>
+        <button id="close-info-popup" class="close-popup-btn">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    `;
+    const body = this.createDiv('syi-info-popup-body');
+    body.innerHTML = `<p>${language[CONFIG.LANGUAGE]['INFO_TEXT']}</p>`;
+    popup.appendChild(header);
+    popup.appendChild(body);
+    document.body.appendChild(popup);
+    const closeButton = header.querySelector('#close-info-popup');
+    closeButton.addEventListener('click', () => {
+        popup.remove();
+    });
+};
+
+YourInclusion.prototype.createExtralargeButton = function () {
+    const button = document.createElement('div');
+    button.classList.add('syi-extralargebutton');
+
+    const icon = document.createElement('i');
+    icon.classList.add('fa-2x', 'fa-magnifying-glass-plus', 'fa-solid');
+    icon.setAttribute('aria-hidden', 'true');
+
+    button.appendChild(icon);
+    button.addEventListener('click', () => {
+        event.stopPropagation();
+        this.toggleExtralargeToolbox();
+    });
+
+    return button; 
+};
+
+
+YourInclusion.prototype.toggleExtralargeToolbox = function () {
+    const toolboxBody = document.querySelector('.syi-toolbox-body');
+    if (toolboxBody) {
+        toolboxBody.classList.toggle('Large-mode');
+    }
+
+    const toggleClassForElements = (selector, className) => {
+        document.querySelectorAll(selector).forEach(element => {
+            element.classList.toggle(className);
+        });
+    };
+
+    toggleClassForElements('.syi-toolbox-button span', 'Large-mode');
+    toggleClassForElements('.syi-toolbox-button', 'Large-mode');
+    toggleClassForElements('.syi-toolbox-title', 'Large-mode');
+    toggleClassForElements('.syi-font-size-popup', 'Large-mode');
+    toggleClassForElements('.syi-font-popup-header', 'Large-mode');
+    toggleClassForElements('.syi-font-popup-btn', 'Large-mode');
+    toggleClassForElements('.syi-font-popup-display', 'Large-mode');
+    toggleClassForElements('.reset-popup-btn', 'Large-mode');
+    toggleClassForElements('.syi-contrast-popup-title', 'Large-mode');
+    toggleClassForElements('.syi-contrast-custom-colors label', 'Large-mode');
+    toggleClassForElements('.syi-contrast-reset-button', 'Large-mode');
+    toggleClassForElements('.switch-container p', 'Large-mode');
+    toggleClassForElements('.syi-settings-popup h3', 'Large-mode');
+    toggleClassForElements('.syi-settings-popup-body label', 'Large-mode');
+    toggleClassForElements('.popup-reset', 'Large-mode');
+    toggleClassForElements('.corner-svg-icon', 'Large-mode');
+    toggleClassForElements('.syi-toolbox-button svg', 'Large-mode');
+    toggleClassForElements('.read-aloud-toolbar', 'Large-mode');
+    toggleClassForElements('.cursor-label', 'Large-mode');
+    toggleClassForElements('.website-label', 'Large-mode');
+    toggleClassForElements('.speed-label', 'Large-mode');
+    toggleClassForElements('.volume-label', 'Large-mode');
+    toggleClassForElements('.keyboard-popup', 'Large-mode');
+    toggleClassForElements('.keyboard-popup-body', 'Large-mode');
+    toggleClassForElements('.keyboard-popup-header h3', 'Large-mode');
+
+    const isLargeMode = toolboxBody.classList.contains('Large-mode');
+    
+    // Store the state in AppState
+    const stateManager = this.createStateManager('AppState');
+    stateManager.updateState({ isExtraLargeToolboxActive: isLargeMode });
+};
+  
+
+
+  
 YourInclusion.prototype.closeToolboxFromButton = function () {
     const toolbox = document.querySelector('.syi-toolbox');
+    const extra = document.querySelector('.syi-extralargebutton');
     if (toolbox) {
         toolbox.classList.remove('visible'); 
+        extra.style.visibility = 'hidden';
         this.closeAllPopups();
     }
     const popup = document.getElementById('read-aloud-toolbar');
@@ -461,15 +539,15 @@ YourInclusion.prototype.createToolboxBody = function (selectedLanguage = CONFIG.
         { id: 'remove-images-btn', textKey: 'REMOVE_IMAGES', iconClass: `${CONFIG.URLS.BASE_URL}/assets/image-off.svg` },
         { id: 'font-size-btn', textKey: 'FONT_SIZE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/fontsize.svg` },
         { id: 'night-mode-btn', textKey: 'NIGHT_MODE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/mode-night.svg` },
+        { id: 'accessible-font-btn', textKey: 'ACCESSIBLE_FONT', iconClass: `${CONFIG.URLS.BASE_URL}/assets/font-1.svg` },
         { id: 'text-spacing-btn', textKey: 'TEXT_SPACING', iconClass: `${CONFIG.URLS.BASE_URL}/assets/ri_text-spacing-2.svg` },
         { id: 'line-height-btn', textKey: 'LINE_HEIGHT', iconClass: `${CONFIG.URLS.BASE_URL}/assets/ri_line-height-1.svg` },
         { id: 'remove-audio-btn', textKey: 'REMOVE_AUDIO', iconClass: `${CONFIG.URLS.BASE_URL}/assets/mdi_mute-1.svg` },
         { id: 'highlight-links-btn', textKey: 'HIGHLIGHT_LINKS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/link-1.svg` },
         { id: 'highlight-headers-btn', textKey: 'HIGHLIGHT_HEADERS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/cil_header-1.svg` },
-        { id: 'stop-animations-btn', textKey: 'STOP_ANIMATIONS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/stop-1.svg` },
         { id: 'zoom-toggle-btn', textKey: 'ZOOM_TOGGLE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/zoom-1.svg` },
+        { id: 'stop-animations-btn', textKey: 'STOP_ANIMATIONS', iconClass: `${CONFIG.URLS.BASE_URL}/assets/stop-1.svg` },
         { id: 'cursor-size-btn', textKey: 'CURSOR_SIZE', iconClass: `${CONFIG.URLS.BASE_URL}/assets/cursor-1.svg` },
-        { id: 'accessible-font-btn', textKey: 'ACCESSIBLE_FONT', iconClass: `${CONFIG.URLS.BASE_URL}/assets/font-1.svg` },
         { id: 'read-aloud-btn', textKey: 'READ_ALOUD', iconClass: `${CONFIG.URLS.BASE_URL}/assets/read-aloud.svg` },
         { id: 'keyboard-navigation-btn', textKey: 'KEYBOARD-NAVIGATION', iconClass: `${CONFIG.URLS.BASE_URL}/assets/keyboard.svg` },
         { id: 'reset-btn1', textKey: 'RESET', iconClass: `${CONFIG.URLS.BASE_URL}/assets/reset-1.svg` },
@@ -516,24 +594,34 @@ YourInclusion.prototype.initializeAccessibilityToolbox = function () {
     const toolboxdiv2 = this.createDiv('syi-toolboxdiv2');
     const toolbox = document.getElementById('syi-toolbox');
     const sideButton = document.getElementById('openToolboxButton');
+    const extra = this.createExtralargeButton(); 
     let visibilityCounter = 0; 
     sideButton.addEventListener('click', (event) => {
         event.stopPropagation();
         const isVisible = toolbox.classList.toggle('visible'); 
         if (isVisible) {
+            extra.style.visibility = 'visible';
+            extra.style.opacity = '1';
+        } else {
+            extra.style.visibility = 'hidden';
+            extra.style.opacity = '0';
+        }
             visibilityCounter++;
             if (visibilityCounter === 1) {
                 this.updateToolboxColor();
-            }
+            
         }
     });
     document.addEventListener('click', (event) => {
+        event.stopPropagation();
         const isToolboxActive = toolbox.classList.contains('visible');
         const popupsInactive = this.areAllPopupsInactive();
 
         if (isToolboxActive && popupsInactive) {
             if (!toolbox.contains(event.target) && !sideButton.contains(event.target)) {
                 toolbox.classList.remove('visible');
+                extra.classList.remove('visible');
+                extra.style.visibility = 'hidden';
             }
         } else if (!popupsInactive) {
         }
@@ -542,11 +630,13 @@ YourInclusion.prototype.initializeAccessibilityToolbox = function () {
     toolboxdiv.appendChild(sideButton)
     toolboxdiv1.appendChild(toolboxdiv);
     toolboxdiv2.appendChild(toolboxdiv1);
+    toolboxdiv.appendChild(extra);
     document.body.appendChild(toolboxdiv2);
     this.loadToolbarState();
     this.initializeProperties();
     this.createStateManager();
     this.listenForControlOne(sideButton);
+
 };
 YourInclusion.prototype.listenForControlOne = function (sideButton) {
     document.addEventListener('keydown', (event) => {
@@ -581,8 +671,11 @@ YourInclusion.prototype.listenForControlOne = function (sideButton) {
         updateState(updates) {
             const currentState = this.getState();
             const updatedState = { ...currentState, ...updates };
+            
             this.saveState(updatedState);
         },
+
+        
         clearState() {
             localStorage.removeItem(this.storageKey);
         }
@@ -635,7 +728,6 @@ YourInclusion.prototype.updateSideButtonState = function () {
     const sideButton = document.getElementById('openToolboxButton');
 
     if (!sideButton) {
-        console.error('Side button not found.');
         return;
     }
     const isActive = Array.from(document.querySelectorAll('.syi-toolbox-button'))
@@ -712,22 +804,39 @@ YourInclusion.prototype.updateToolboxPosition = function (x, y, sideButton) {
     const toolbox = document.getElementById('syi-toolbox');
     if (!toolbox) return;
 
-    let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
-    let toolboxTop = y - toolbox.offsetHeight - 60;
-
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     const scrollY = window.scrollY;
+    let toolboxLeft = x + sideButton.offsetWidth / 2 - toolbox.offsetWidth / 2;
+    let toolboxTop = y - toolbox.offsetHeight - 60;
     toolboxLeft = Math.max(10, Math.min(toolboxLeft, windowWidth - toolbox.offsetWidth - 10));
     toolboxTop = Math.max(scrollY + 10, Math.min(toolboxTop, scrollY + windowHeight - toolbox.offsetHeight - 10));
+    const isToolboxOnLeft = toolboxLeft + toolbox.offsetWidth / 2 < windowWidth / 2;
+    if (toolboxLeft + toolbox.offsetWidth / 2 < windowWidth / 2) {
+        toolbox.style.left = '10px';
+        toolbox.style.right = 'auto';
+    } else {
+        toolbox.style.right = '10px';
+        toolbox.style.left = 'auto';
+    }
 
-    toolbox.style.left = `${toolboxLeft}px`;
     toolbox.style.top = `${toolboxTop}px`;
     const sideButtonTop = toolboxTop + toolbox.offsetHeight + 10;
     sideButton.style.top = `${Math.min(sideButtonTop, scrollY + windowHeight - sideButton.offsetHeight - 10)}px`;
-    const isToolboxOnLeft = toolboxLeft < windowWidth / 2;
+    
+    const extralargeButton = document.querySelector('.syi-extralargebutton');
+    if (extralargeButton) {
+        if (isToolboxOnLeft) {
+            extralargeButton.classList.add('toolbar-left');
+        } else {
+            extralargeButton.classList.remove('toolbar-left');
+        }
+    }
+
+    // Update popup positions
     this.updatePopupPositions(isToolboxOnLeft);
 };
+
 
 
 
@@ -740,7 +849,7 @@ YourInclusion.prototype.updatePopupPositions = function (isToolboxOnLeft) {
 
     const popupConfigs = [
         { selector: '.syi-font-size-popup', left: isToolboxOnLeft ? '25%' : '72%' },
-        { selector: '.syi-settings-popup', left: isToolboxOnLeft ? '28%' : '72%' },
+        { selector: '.syi-settings-popup', left: isToolboxOnLeft ? '42%' : '72%' },
         { selector: '.syi-contrast-popup', left: isToolboxOnLeft ? '30%' : '69%' },
     ];
 
@@ -773,7 +882,7 @@ YourInclusion.prototype.initBlueFilter = function () {
             }
         });
     } else {
-        console.error('Blue Filter button is missing.');
+       
     }
 };
 
@@ -789,24 +898,15 @@ YourInclusion.prototype.initRemoveImages = function () {
 };
 
 YourInclusion.prototype.toggleImages = function () {
-    
     const images = document.querySelectorAll('img:not(.syi-toolbox-image):not(.syi-side-button-image):not(.syi-toolbox-logo)');
-
-    
-    if (this.imagesHidden) {
-    
-        images.forEach(img => {
-            img.classList.remove('hidden-image');
-        });
+    const isAnyImageHidden = Array.from(images).some(img => img.classList.contains('hidden-image'));
+    if (isAnyImageHidden) {
+        images.forEach(img => img.classList.remove('hidden-image'));
+        this.imagesHidden = false;
     } else {
-      
-        images.forEach(img => {
-            img.classList.add('hidden-image');
-        });
+        images.forEach(img => img.classList.add('hidden-image'));
+        this.imagesHidden = true; 
     }
-
-    
-    this.imagesHidden = !this.imagesHidden;
 };
 
 
@@ -832,7 +932,7 @@ YourInclusion.prototype.addFontSizePopup = function () {
     const toolbox = document.querySelector('.syi-toolbox-body');
 
     if (!fontSizeDiv || !toolbox) {
-        console.error('Font Size button or toolbox not found.');
+        
         return;
     }
 
@@ -854,9 +954,9 @@ YourInclusion.prototype.addFontSizePopup = function () {
                     <button id="close-font-popup" class="close-popup-btn">✖</button>
                 </div>
                 <div class="syi-font-popup-content">
-                    <button id="decrease-font-btn" class="syi-font-popup-btn">-</button>
+                    <button id="decrease-font-btn" class="syi-font-popup-btn"><i class="fa-solid fa-minus"></i></button>
                     <span id="font-size-display" class="syi-font-popup-display">${this.fontSizeChange}</span>
-                    <button id="increase-font-btn" class="syi-font-popup-btn">+</button>
+                    <button id="increase-font-btn" class="syi-font-popup-btn"><i class="fa-solid fa-plus"></i></button>
                 </div>
                 <div class="syi-popup-reset" style="padding: 10px;">
                     <button id="reset-font-btn" class="reset-popup-btn">${language[CONFIG.LANGUAGE]['RESET']}</button>
@@ -939,6 +1039,22 @@ if (fontSizePopup.style.display === 'block') {
     fontSizePopup.style.display = 'block';
     stateManager.updateState({ isFontSizePopupActive: true }); 
 }
+const isExtraLargeToolboxActive = stateManager.getState().isExtraLargeToolboxActive;
+
+// If active, apply the Large-mode class to elements
+if (isExtraLargeToolboxActive) {
+    const toggleClassForElements = (selector, className) => {
+        document.querySelectorAll(selector).forEach(element => {
+            element.classList.add(className);
+        });
+    };
+
+    toggleClassForElements('.syi-font-size-popup', 'Large-mode');
+    toggleClassForElements('.syi-font-popup-header', 'Large-mode');
+    toggleClassForElements('.syi-font-popup-btn', 'Large-mode');
+    toggleClassForElements('.syi-font-popup-display', 'Large-mode');
+    toggleClassForElements('.reset-popup-btn', 'Large-mode');
+}
 });
 };
 
@@ -990,7 +1106,7 @@ YourInclusion.prototype.initTextSpacingFeature = function () {
 };
 
 YourInclusion.prototype.toggleTextSpacing = function (buttonId) {
-    const elementsToAdjust = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *):not(.syi-checkmark-wrapper):not(.syi-checkmark-wrapper *');
+    const elementsToAdjust = document.querySelectorAll('body *:not(.syi-toolbox):not(.syi-toolbox *):not(.syi-checkmark-wrapper):not(.syi-checkmark-wrapper *):not(#keyboard-navigation-popup)');
     const spacingStates = ['normal', '0.1em', '0.2em', '0.3em'];
 
     if (this.currentTextSpacingIndex === undefined) {
@@ -1036,7 +1152,7 @@ YourInclusion.prototype.initLineHeightFeature = function () {
 YourInclusion.prototype.toggleLineHeight = function (buttonId) {
     const elementsToAdjust = Array.from(document.querySelectorAll('body *'))
     .filter(element => {
-        const isExcluded = element.closest('#syi-toolbox, .syi-popup, .syi-header, .syi-button, .syi-checkmark');
+        const isExcluded = element.closest('#syi-toolbox, .syi-popup, .syi-header, .syi-button, .syi-checkmark, #keyboard-navigation-popup ');
         const hasTextContent = Array.from(element.childNodes).some(node => node.nodeType === Node.TEXT_NODE);
         return !isExcluded && hasTextContent;
     });
@@ -1155,6 +1271,7 @@ YourInclusion.prototype.resetToolbox = function () {
     this.resetReadAloud();
     this.validateAndStartPluginReset();
     this.progressBarReset();
+    this.clearAllSelectionHighlight();
 };
 
 
@@ -1382,7 +1499,6 @@ YourInclusion.prototype.updateSideButtonState = function () {
     const sideButton = document.getElementById('openToolboxButton');
 
     if (!sideButton) {
-        console.error('Side button not found.');
         return;
     }
 
@@ -1412,13 +1528,23 @@ YourInclusion.prototype.updateSideButtonState = function () {
 
 YourInclusion.prototype.initContrastFeature = function () {
     const contrastButton = document.getElementById('contrast-btn');
+     const stateManager = this.createStateManager('AppState');
+    
     if (contrastButton) {
         contrastButton.addEventListener('click', () => {
-            this.createContrastPopup();
-           
+            const existingPopup = document.querySelector('.syi-contrast-popup');
+
+            if (existingPopup) {
+                existingPopup.remove(); 
+                this.resetContrast();
+                stateManager.updateState({ isContrastPopupActive: false });     
+            } else {
+                this.createContrastPopup(); 
+            }
         });
     }
 };
+
 
 YourInclusion.prototype.createContrastPopup = function () {
     this.closeAllPopups(); 
@@ -1458,7 +1584,7 @@ YourInclusion.prototype.createContrastPopup = function () {
 
      const closeButton = document.createElement('button');
     closeButton.className = 'syi-contrast-close-button';
-    closeButton.textContent = 'X';
+    closeButton.innerHTML = '<i class="fa-solid fa-xmark"></i>'; 
     closeButton.addEventListener('click', () => { 
         event.stopPropagation(); 
         popup.remove();
@@ -1487,6 +1613,20 @@ YourInclusion.prototype.createContrastPopup = function () {
     document.body.appendChild(popup);
 
     stateManager.updateState({ isContrastPopupActive: true });
+    const isExtraLargeToolboxActive = stateManager.getState().isExtraLargeToolboxActive;
+
+    if (isExtraLargeToolboxActive) {
+        const toggleClassForElements = (selector, className) => {
+            document.querySelectorAll(selector).forEach(element => {
+                element.classList.add(className);
+            });
+        };
+
+        toggleClassForElements('.syi-contrast-popup-title', 'Large-mode');
+        toggleClassForElements('.syi-contrast-custom-colors label', 'Large-mode');
+        toggleClassForElements('.syi-contrast-reset-button', 'Large-mode');
+        toggleClassForElements('.switch-container p', 'Large-mode');
+    }
 };
 
 
@@ -1608,9 +1748,9 @@ YourInclusion.prototype.addCustomColorControls = function (container) {
     container.appendChild(customColorsSection);
 };
 
-YourInclusion.prototype.applyBackgroundColor = function (color) {
+YourInclusion.prototype.applyBackgroundColor = function (color) { 
     const elements = document.querySelectorAll(
-        '*:not(button):not(input):not(.syi-toolbox):not(.syi-toolbox *):not(.syi-contrast-popup):not(.syi-contrast-popup *):not(.syi-blue-overlay)'
+        'body *:not(button):not(input):not(.syi-toolbox, .syi-toolbox *):not(.syi-contrast-popup, .syi-contrast-popup *):not(.syi-blue-overlay):not(.syi-extralargebutton):not(img):not(svg):not(video):not(.fa-2x):not(.fa-magnifying-glass-plus):not(.fa-solid)'
     );
 
     elements.forEach((element) => {
@@ -1618,6 +1758,8 @@ YourInclusion.prototype.applyBackgroundColor = function (color) {
         element.style.backgroundColor = color;
     });
     this.customBackgroundColor = color;
+    
+
 };
 
 YourInclusion.prototype.applyCustomTextColor = function (color) {
@@ -1660,6 +1802,10 @@ YourInclusion.prototype.resetContrast = function () {
     });
 
     this.updateContrastFlag(false);
+    const checkbox = document.getElementById('mz-switch-rounded');
+    if (checkbox) {
+        checkbox.checked = false;
+    }
 };
 
 YourInclusion.prototype.toggleContrastMode = function (mode, button) {
@@ -1731,10 +1877,12 @@ YourInclusion.prototype.initSaveFeature = function () {
             this.saveToolbarState();
         });
     } else {
-        console.error('Save button not found.');
+       
     }
 };
-YourInclusion.prototype.saveToolbarState = function () {
+YourInclusion.prototype.saveToolbarState = function () { 
+    const stateManager = this.createStateManager('AppState');
+    const isExtraLargeToolboxActive = stateManager.getState().isExtraLargeToolboxActive || false;
     const state = {
         blueFilterActive: document.querySelector('.syi-blue-overlay')?.classList.contains('active') || false,
         imagesHidden: this.imagesHidden || false,
@@ -1757,11 +1905,11 @@ YourInclusion.prototype.saveToolbarState = function () {
         highlightedHeaders: document.querySelector('.highlight-headers') !== null,
         selectedHeaderColor: localStorage.getItem('popupHeaderColor') || null,
         popupLanguage: CONFIG.LANGUAGE || 'en-US',
-        popupColor: document.getElementById('syi-color-picker')?.value || this.selectedHeaderColor
+        popupColor: document.getElementById('syi-color-picker')?.value || this.selectedHeaderColor,
+        isExtraLargeToolboxActive: isExtraLargeToolboxActive
     };
 
     localStorage.setItem('toolbarState', JSON.stringify(state));
-    console.log('Toolbar state saved:', state);
 };
 
 // Load Toolbar State
@@ -1769,11 +1917,11 @@ YourInclusion.prototype.loadToolbarState = function () {
     const savedState = JSON.parse(localStorage.getItem('toolbarState')) || null;
 
     if (!savedState) {
-        console.log('No saved state found. Using default settings.');
+        
         return;
     }
 
-    console.log('Restoring toolbar state:', savedState);
+ 
     
 
     // Restore Blue Filter
@@ -1789,6 +1937,15 @@ YourInclusion.prototype.loadToolbarState = function () {
         }
     } else {
         console.error('Blue Filter button is missing.');
+    }
+
+     // Restore Extra Large Toolbox Mode
+     if (savedState.isExtraLargeToolboxActive) {
+        this.toggleExtralargeToolbox(); 
+        const extraLargeCheckbox = document.getElementById('extra-large-toolbox-checkbox');
+        if (extraLargeCheckbox) {
+            extraLargeCheckbox.checked = true;
+        }
     }
     // Restore Image Visibility
     if (savedState.imagesHidden) {
@@ -1828,10 +1985,10 @@ if (audioButton) {
         setTimeout(() => {
             const nightModeButton = document.getElementById('night-mode-btn');
             if (nightModeButton) {
-                console.log('Simulating night mode button click after 2 seconds...');
+               
                 nightModeButton.click();
             } else {
-                console.error('Night mode button not found.');
+                
             }
         }, 2000); 
     }
@@ -1983,11 +2140,9 @@ if (audioButton) {
                     inner.setAttribute('stroke', savedState.popupColor);
                 });
             });
-        } else {
-            console.log('No SVG icons found to style.');
-        }
+        } 
     };
-
+    
     // Check if icons exist; apply styles or wait for them to load
     if (document.querySelectorAll('.syi-toolbox-body svg').length === 0) {
         setTimeout(applyIconStyles, 500); 
@@ -2047,13 +2202,11 @@ YourInclusion.prototype.simulateFontSizeAdjustment = function (change) {
 
             for (let i = 0; i < steps; i++) {
                 adjustmentButton.click();
-                console.log(
-                    `Simulated ${isIncrease ? 'increase' : 'decrease'} font size button click (${i + 1}/${steps}).`
-                );
+                
             }
             fontSizePopup.style.display = 'none';
             this.isFontSizePopupActive = false;
-            console.log('Font size popup closed.');
+            
         } catch (error) {
             console.error('Error in simulateFontSizeAdjustment:', error);
         }
@@ -2061,9 +2214,6 @@ YourInclusion.prototype.simulateFontSizeAdjustment = function (change) {
 
     performAdjustment();
 };
-
-
-
 
 
 // Helper function to apply font size change
@@ -2105,7 +2255,7 @@ YourInclusion.prototype.getCurrentFontSize = function () {
     });
 
     const averageFontSize = count > 0 ? totalFontSize / count : 16;
-    console.log(`Calculated average font size: ${averageFontSize}px`);
+
     return averageFontSize;
 };
 
@@ -2135,7 +2285,6 @@ YourInclusion.prototype.getHighlightedButtons = function () {
 YourInclusion.prototype.resetSettings = function () {
     localStorage.removeItem('toolbarState');
     this.resetToolbox();
-    console.log('Toolbar state reset.');
 };
 
 
@@ -2149,7 +2298,7 @@ YourInclusion.prototype.addSettingsButtonListener = function () {
             this.createSettingsPopup();
         });
     } else {
-        console.error('Settings button not found');
+        
     }
 };
 
@@ -2171,6 +2320,19 @@ YourInclusion.prototype.createSettingsPopup = function () {
 
     const isToolboxOnLeft = this.determineToolboxPosition(popup);
     this.updatePopupPositions(isToolboxOnLeft);
+    const isExtraLargeToolboxActive = stateManager.getState().isExtraLargeToolboxActive;
+
+    if (isExtraLargeToolboxActive) {
+        const toggleClassForElements = (selector, className) => {
+            document.querySelectorAll(selector).forEach(element => {
+                element.classList.add(className);
+            });
+        };
+
+        toggleClassForElements('.syi-settings-popup h3', 'Large-mode');
+        toggleClassForElements('.syi-settings-popup-body label', 'Large-mode');
+        toggleClassForElements('.popup-reset', 'Large-mode');
+    }
 };
 YourInclusion.prototype.createPopupContainer = function () {
     const popup = this.createDiv('syi-settings-popup');
@@ -2225,7 +2387,10 @@ YourInclusion.prototype.updateToolbarLanguage = function () {
             }
         }
     });
-
+    const superSizedTitle = document.querySelector('.syi-extralarge-title');
+    if (superSizedTitle) {
+        superSizedTitle.innerText = language[CONFIG.LANGUAGE]['SUPER_SIZED_WIDGET'] || 'Super Sized Widget';
+    }
     const settingsPopup = document.querySelector('.syi-settings-popup');
     if (!settingsPopup) return;
 
@@ -2364,7 +2529,6 @@ YourInclusion.prototype.resetPopupSettings = function (header, colorPicker) {
         const storedConfig = localStorage.getItem('config');
         if (storedConfig) {
             const config = JSON.parse(storedConfig);
-            console.log("Retrieved config from local storage:", config);
             return { 
                 color: config.colorCode || this.selectedHeaderColor, 
                 language: config.languageIsoCode || CONFIG.LANGUAGE 
@@ -2440,8 +2604,6 @@ YourInclusion.prototype.createSettingsPopupCloseButton = function (popup) {
         event.stopPropagation();
         popup.remove();
         stateManager.updateState({ isSettingsPopupActive: false });
-
-        console.log('Settings popup closed. State updated to inactive.');
     });
     return closeButton;
 };
@@ -2482,16 +2644,11 @@ YourInclusion.prototype.updateToolboxColor = function (header, color) {
         button.style.borderColor = selectedColor;
     });
 
-    const root = document.documentElement; // Update root CSS variable
+    const root = document.documentElement; 
     root.style.setProperty('--bg-color', selectedColor, 'important');
 
-    this.selectedHeaderColor = selectedColor; // Update internal state
-    console.log(`Toolbox updated with color: ${selectedColor}`);
-
-   
+    this.selectedHeaderColor = selectedColor; 
 };
-
-
 
 // Function to determine toolbox position
 YourInclusion.prototype.determineToolboxPosition = function (popup) {
@@ -2668,10 +2825,8 @@ YourInclusion.prototype.stopAnimations = function () {
     const isDisabled = document.body.classList.toggle('disable-animations'); 
     localStorage.setItem('animationsDisabled', isDisabled);
     if (isDisabled) {
-        console.log('Animations and transitions disabled.');
         this.setActiveButton('stop-animations-btn', true);  
     } else {
-        console.log('Animations and transitions re-enabled.');
         this.setActiveButton('stop-animations-btn', false); 
     }
 };;
@@ -2685,10 +2840,8 @@ YourInclusion.prototype.stopAnimations = function () {
 
     // Toggle the active button state using setActiveButton
     if (isDisabled) {
-        console.log('Animations and transitions disabled.');
         this.setActiveButton('stop-animations-btn', true);  // Activate button
-    } else {
-        console.log('Animations and transitions re-enabled.');
+    } else {;
         this.setActiveButton('stop-animations-btn', false); 
     }
 };
@@ -2704,7 +2857,6 @@ YourInclusion.prototype.initStopAnimationsButton = function () {
 // Initialize the app and restore state
 YourInclusion.prototype.initialApp = function () {
     this.restoreAnimationState();
-    console.log('Accessibility toolbox initialized.');
 };
 
 /***
@@ -2787,9 +2939,7 @@ YourInclusion.prototype.initAccessibleFontToggle = function () {
             this.toggleAccessibleFont('accessible-font-btn');
             
         });
-    } else {
-        console.error('Font toggle button not found.');
-    }
+    } 
 };
 
 YourInclusion.prototype.toggleAccessibleFont = function (buttonId) {
@@ -2969,7 +3119,6 @@ YourInclusion.prototype.toggleReadAloud = function (buttonId) {
         this.isCursorReadAloudActive = false;
         localStorage.setItem('readAloudActive', false); 
 
-        console.log('Read Aloud deactivated.');
     } else {
         
         if (!toolbar) {
@@ -2986,13 +3135,13 @@ YourInclusion.prototype.toggleReadAloud = function (buttonId) {
         this.isCursorReadAloudActive = false; 
         localStorage.setItem('readAloudActive', true); 
 
-        console.log('Read Aloud activated.');
     }
 };
 
 // Create the Read Aloud Toolbar
 YourInclusion.prototype.createReadAloudToolbar = function () {
     const toolbox = document.getElementById('syi-toolbox');
+    const stateManager = this.createStateManager('AppState');
     if (!toolbox || !toolbox.classList.contains('visible')) {
         const existingToolbar = document.getElementById('read-aloud-toolbar');
         if (existingToolbar) {
@@ -3024,9 +3173,8 @@ YourInclusion.prototype.createReadAloudToolbar = function () {
     closeButton.id = 'close-toolbar';
     closeButton.textContent = '✖';
     closeButton.addEventListener('click', () => {
-        // toolbar.remove();
-        // this.disableDefaultClickToRead();
         this.closeReadAloud();
+        this.setActiveButton('read-aloud-btn', false);
     });
 
     header.appendChild(title);
@@ -3095,7 +3243,16 @@ YourInclusion.prototype.createReadAloudToolbar = function () {
     const playButton = document.createElement('button');
     playButton.id = 'play-read-btn';
     playButton.textContent = '▶';
-    playButton.addEventListener('click', this.playReadAloud.bind(this));
+    playButton.addEventListener('click', () => {
+        if (this.isReadAloudActive) {
+            this.stopAllReadAloud();
+            playButton.textContent = '▶';  
+        } else {
+            this.playReadAloud();
+            playButton.textContent = '⏸️';  
+            playButton.style.setProperty('color', 'black', 'important');
+        }
+    });
 
     const stopButton = document.createElement('button');
     stopButton.id = 'stop-read-btn';
@@ -3211,6 +3368,21 @@ YourInclusion.prototype.createReadAloudToolbar = function () {
     controls.appendChild(volumeSection);
     toolbar.appendChild(controls);
     document.body.appendChild(toolbar);
+    const isExtraLargeToolboxActive = stateManager.getState().isExtraLargeToolboxActive;
+
+    if (isExtraLargeToolboxActive) {
+        const toggleClassForElements = (selector, className) => {
+            document.querySelectorAll(selector).forEach(element => {
+                element.classList.add(className);
+            });
+        };
+        toggleClassForElements('.read-aloud-toolbar', 'Large-mode');
+    toggleClassForElements('.cursor-label', 'Large-mode');
+    toggleClassForElements('.website-label', 'Large-mode');
+    toggleClassForElements('.speed-label', 'Large-mode');
+    toggleClassForElements('.volume-label', 'Large-mode');
+}
+
 };
 YourInclusion.prototype.closeReadAloud = function () {
     // Simulate clicking the Read Aloud button if it exists
@@ -3229,6 +3401,7 @@ YourInclusion.prototype.closeReadAloud = function () {
     if (toolbar) {
         toolbar.remove()
     }
+    this.stopReadAloud();
 
 };
 
@@ -3338,14 +3511,14 @@ YourInclusion.prototype.readElementContent = function (event) {
     speechSynthesis.speak(msg);
 };
 
-
-
-
 // Play Entire Page Read Aloud with Highlighting
 YourInclusion.prototype.playReadAloud = function () {
     if (!this.isReadAloudActive) {
-        return;
+        this.isReadAloudActive = true;
+    
+
     }
+    speechSynthesis.speak;
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, img');
     this.contentToRead = Array.from(elements).filter(el => el.innerText.trim());
 
@@ -3355,6 +3528,10 @@ YourInclusion.prototype.playReadAloud = function () {
     this.currentContentIndex = parseInt(localStorage.getItem('currentContentIndex'), 10) || 0;
     this.currentWordIndex = 0;  
     this.readCurrentContent();
+};
+YourInclusion.prototype.pauseReadAloud = function () {
+    speechSynthesis.pause();  // Pause the speech
+    this.isReadAloudActive = false;
 };
 
 YourInclusion.prototype.readCurrentContent = function () {
@@ -3392,9 +3569,6 @@ YourInclusion.prototype.readCurrentContent = function () {
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
 };
-
-
-
 // You can style the highlighted element with CSS
 YourInclusion.prototype.addStylesForHighlight = function() {
     const style = document.createElement('style');
@@ -3406,9 +3580,6 @@ YourInclusion.prototype.addStylesForHighlight = function() {
     `;
     document.head.appendChild(style);
 };
-
-
-
 // Cursor Read-Aloud Toggle
 YourInclusion.prototype.toggleCursorReadAloud = function (toggleState) {
     if (toggleState) {
@@ -3443,8 +3614,6 @@ YourInclusion.prototype.enableCursorReadAloud = function () {
 
     this.isCursorReadAloudActive = true;
 };
-
-
 // Disable Cursor Read Aloud
 YourInclusion.prototype.disableCursorReadAloud = function () {
     if (!this.isCursorReadAloudActive) {
@@ -3463,8 +3632,6 @@ YourInclusion.prototype.disableCursorReadAloud = function () {
 
     this.isCursorReadAloudActive = false;
 };
-
-
 YourInclusion.prototype.readPreviousLine = function () {
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span');
 
@@ -3497,8 +3664,6 @@ YourInclusion.prototype.readPreviousLine = function () {
     speechSynthesis.cancel(); 
     speechSynthesis.speak(utterance);
 };
-
-
 YourInclusion.prototype.readNextLine = function () {
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span'); 
 
@@ -3535,9 +3700,6 @@ YourInclusion.prototype.readNextLine = function () {
     speechSynthesis.speak(utterance);
     this.currentParagraphIndex++;
 };
-
-
-
 YourInclusion.prototype.readCurrentLine = function () {
     const elements = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span'); 
 
@@ -3568,6 +3730,8 @@ YourInclusion.prototype.speakText = function (element) {
 // Stop Read Aloud
 YourInclusion.prototype.stopReadAloud = function () {
     speechSynthesis.cancel();
+    this.stopAllReadAloud();
+    this.disableDefaultClickToRead();
     this.currentParagraphIndex = this.currentWordIndex;
     document.querySelectorAll('[data-original-text]').forEach((element) => {
         this.clearHighlight(element);
@@ -3581,7 +3745,7 @@ YourInclusion.prototype.stopReadAloud = function () {
 YourInclusion.prototype.stopAllReadAloud = function () {
     
     speechSynthesis.cancel();
-
+    this.disableDefaultClickToRead();
     this.currentParagraphIndex = this.currentWordIndex;
     document.querySelectorAll('[data-original-text]').forEach((element) => {
         this.clearHighlight(element);
@@ -3948,6 +4112,9 @@ YourInclusion.prototype.clearAllSelectionHighlight = function () {
 // Show Keyboard Shortcuts Popup
 YourInclusion.prototype.showKeyboardNavigationPopup = function () {
     const existingPopup = document.getElementById('keyboard-navigation-popup');
+    const stateManager = this.createStateManager('AppState');
+
+   
     if (existingPopup) return;
 
     const popup = document.createElement('div');
@@ -3955,7 +4122,7 @@ YourInclusion.prototype.showKeyboardNavigationPopup = function () {
     popup.className = 'keyboard-popup';
 
     const header = document.createElement('div');
-    header.className = 'popup-header';
+    header.className = 'keyboard-popup-header';
     header.innerHTML = `<h3>${language[CONFIG.LANGUAGE]['INSTRUCTIONS FOR THE USE OF KEYBOARD SHORTCUTS']}</h3><button class="close-popup-btn">✖</button>`;
     header.querySelector('.close-popup-btn').addEventListener('click', (event) => {
         event.stopPropagation();
@@ -4003,13 +4170,13 @@ YourInclusion.prototype.showKeyboardNavigationPopup = function () {
         { key: 'Shift + A', action: language[CONFIG.LANGUAGE]['STOP_ANIMATIONS'] },
         { key: 'Shift + K', action: language[CONFIG.LANGUAGE]['ACCESSIBLE_FONT'] },
         { key: 'Shift + C', action: language[CONFIG.LANGUAGE]['CONTRAST'] },
-        { key: 'Shift + S', action: language[CONFIG.LANGUAGE]['SAVE'] },
+        { key: 'Shift + S', action: language[CONFIG.LANGUAGE]['SAVE_SETTINGS'] },
         { key: 'Shift + R', action: language[CONFIG.LANGUAGE]['RESET'] }
             
     ];
 
     const body = document.createElement('div');
-    body.className = 'popup-body';
+    body.className = 'keyboard-popup-body';
 
     shortcuts.forEach(({ key, action }) => {
         const item = document.createElement('div');
@@ -4020,6 +4187,18 @@ YourInclusion.prototype.showKeyboardNavigationPopup = function () {
 
     popup.appendChild(body);
     document.body.appendChild(popup);
+    const isExtraLargeToolboxActive = stateManager.getState().isExtraLargeToolboxActive;
+
+    if (isExtraLargeToolboxActive) {
+        const toggleClassForElements = (selector, className) => {
+            document.querySelectorAll(selector).forEach(element => {
+                element.classList.add(className);
+            });
+        };
+    toggleClassForElements('.keyboard-popup', 'Large-mode');
+    toggleClassForElements('.keyboard-popup-body', 'Large-mode');
+    toggleClassForElements('.keyboard-popup-header h3', 'Large-mode'); 
+}
 };
 
 // Hide Keyboard Shortcuts Popup
@@ -4201,22 +4380,55 @@ YourInclusion.prototype.decreaseFontSize = function () {
     }
 };
 
+YourInclusion.prototype.checkToolbarState = function () {
+    const toolbarState = JSON.parse(localStorage.getItem('toolbarState'));
+    
+    if (!toolbarState) {
+      localStorage.removeItem('syi-nightMode');
+      localStorage.removeItem('readAloudActive');
+      const appState = JSON.parse(localStorage.getItem('appState')) || {}; 
+      appState.zoomIncrement = 0;
+      appState.lineHeightIncrement = 0;
+      appState.cursorSizeIncrement = 0;
+
+      const stateManager = this.createStateManager('AppState');
+      const currentState = stateManager.getState() || {};
+      currentState.isExtraLargeToolboxActive = "False";
+      delete currentState.isExtraLargeToolboxActive; 
+      
+      localStorage.setItem('Appstate', JSON.stringify(currentState));
+      
+      
+
+      localStorage.setItem('appState', JSON.stringify(appState));
+      return;
+    }
+
+    const { activeButtons } = toolbarState;
+  
+    const isNightModeActive = activeButtons.includes("night-mode-btn");
+    const isReadAloudActive = activeButtons.includes('read-aloud-btn');
+    if (!isNightModeActive) {
+      localStorage.removeItem('syi-nightMode');
+    }
+    if (!isReadAloudActive) {
+      localStorage.removeItem('readAloudActive');
+    }
+    
+};
+
+  
+  
+
 // Initialize on Page Load and Validation
 YourInclusion.prototype.fetchAndValidateLicense = async function () {
     const url = CONFIG.URLS.API_Endpoint;
-    const licenseMetaTag = document.querySelector('meta[name="license"]');
-    console.log("Lisence",licenseMetaTag.content);
-
-    const payload = {
-        websiteUrl: "http://google.com/",
-    };
     // const payload = {
-    //     websiteUrl: window.location.href,
-    //         license: licenseMetaTag.content,
+    //     websiteUrl: "http://google.com",
     // };
-    
-    console.log("Payload:", payload);
-
+    const payload = {
+        websiteUrl: window.location.origin, 
+    };
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -4234,7 +4446,6 @@ YourInclusion.prototype.fetchAndValidateLicense = async function () {
 
         const data = await response.json();
         this.apiJson = data;
-        console.log("API Response:", this.apiJson);
         return this.apiJson;
     } catch (error) {
         console.error("Error fetching license:", error);
@@ -4243,14 +4454,14 @@ YourInclusion.prototype.fetchAndValidateLicense = async function () {
 };
 
 YourInclusion.prototype.startPlugin = async function () {
-    console.log("Initializing the plugin...");
     this.initializeAccessibilityToolbox();
     loadScript();
+    this.checkToolbarState();
     const readAloudToolbar = document.getElementById('read-aloud-toolbar');
     const instance = new YourInclusion();
 };
 
-YourInclusion.prototype.validateAndStartPlugin = async function () {  this.startPlugin(); return; 
+YourInclusion.prototype.validateAndStartPlugin = async function () {   
   
     let isLicenseValid = false;
 
@@ -4259,9 +4470,7 @@ YourInclusion.prototype.validateAndStartPlugin = async function () {  this.start
         const storedLicense = sessionStorage.getItem('pluginLicense');
         if (storedLicense) {
             apiJson = JSON.parse(storedLicense);
-            console.log("License loaded from session storage:", apiJson);
             if (new Date(apiJson.expireDate) <= new Date()) {
-                console.log("License is expired. Fetching a new license...");
                 sessionStorage.removeItem('pluginLicense');
                 apiJson = await this.fetchAndValidateLicense(); 
             }
@@ -4270,7 +4479,6 @@ YourInclusion.prototype.validateAndStartPlugin = async function () {  this.start
         }
         if (apiJson.isValid && new Date(apiJson.expireDate) > new Date()) {
             sessionStorage.setItem('pluginLicense', JSON.stringify(apiJson));
-            console.log("Valid license stored in session storage.");
         }
         const storedConfig = localStorage.getItem('config');
         if (!storedConfig) {
@@ -4279,16 +4487,10 @@ YourInclusion.prototype.validateAndStartPlugin = async function () {  this.start
                 colorCode: apiJson.pluginDetails.colorCode,
             };
             localStorage.setItem('config', JSON.stringify(config));
-            console.log("Config data stored in local storage:", config);
-        } else {
-            console.log("Config data already exists in local storage:", JSON.parse(storedConfig));
-        }
+        } 
         if (apiJson.isValid && new Date(apiJson.expireDate) > new Date()) {
             isLicenseValid = true;
-            console.log("License is valid and not expired.");
-        } else {
-            console.error("License is invalid or expired.");
-        }
+        } 
 if (isLicenseValid) {
     this.startPlugin();
     const savedState = JSON.parse(localStorage.getItem('toolbarState')) || {};
@@ -4313,15 +4515,11 @@ if (isLicenseValid) {
     localStorage.setItem('config', JSON.stringify(config));
 
 
-} else {
-    console.log("Plugin will not start as the license is invalid.");
 }
-
         
         
     } catch (error) {
         console.error("Error during license validation:", error);
-        // alert("Failed to fetch license details. The plugin will not function.");
     }
 
     return isLicenseValid;
@@ -4329,6 +4527,14 @@ if (isLicenseValid) {
 YourInclusion.prototype.validateAndStartPluginReset = async function () {
     try {
         const apiJson = await this.fetchAndValidateLicense();
+        if (!apiJson || !apiJson.pluginDetails || apiJson.pluginDetails.invalidLicense) {
+            const toolbox = document.querySelector('.syi-toolbox');
+            if (toolbox) {
+                toolbox.remove();
+            }
+            const sideButtons = document.querySelectorAll('.syi-side-button'); 
+            sideButtons.forEach(button => button.remove());
+        }
         sessionStorage.setItem('pluginLicense', JSON.stringify(apiJson));
         const config = {
             languageIsoCode: apiJson.pluginDetails.languageIsoCode || 'en-US',
@@ -4354,7 +4560,6 @@ YourInclusion.prototype.updateLanguageInConfig = function (apiLanguage) {
         config = JSON.parse(config);
         config.LANGUAGE = apiLanguage;
         localStorage.setItem('config', JSON.stringify(config));
-        console.log("Updated config with new language:", config);
     } else {
         console.warn("Config file not found in local storage.");
     }
